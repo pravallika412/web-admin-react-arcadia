@@ -1,22 +1,11 @@
-import { useContext } from 'react';
-import Scrollbar from 'src/components/Scrollbar';
-import { SidebarContext } from 'src/contexts/SidebarContext';
+import { useContext } from "react";
+import Scrollbar from "../../../shared/components/Scrollbar";
+import { SidebarContext } from "../../../shared/contexts/SidebarContext";
 
-import {
-  Box,
-  Drawer,
-  alpha,
-  styled,
-  Divider,
-  useTheme,
-  Button,
-  lighten,
-  darken,
-  Tooltip
-} from '@mui/material';
+import { Box, Drawer, alpha, styled, Divider, useTheme, Button, lighten, darken, Tooltip } from "@mui/material";
 
-import SidebarMenu from './SidebarMenu';
-import Logo from 'src/components/LogoSign';
+import SidebarMenu from "./SidebarMenu";
+import Logo from "../../../shared/components/LogoSign";
 
 const SidebarWrapper = styled(Box)(
   ({ theme }) => `
@@ -40,18 +29,14 @@ function Sidebar() {
       <SidebarWrapper
         sx={{
           display: {
-            xs: 'none',
-            lg: 'inline-block'
+            xs: "none",
+            lg: "inline-block",
           },
-          position: 'fixed',
+          position: "fixed",
           left: 0,
           top: 0,
-          background:
-            theme.palette.mode === 'dark'
-              ? alpha(lighten(theme.header.background, 0.1), 0.5)
-              : darken(theme.colors.alpha.black[100], 0.5),
-          boxShadow:
-            theme.palette.mode === 'dark' ? theme.sidebar.boxShadow : 'none'
+          background: theme.palette.mode === "dark" ? alpha(lighten(theme.header.background, 0.1), 0.5) : darken(theme.colors.alpha.black[100], 0.5),
+          boxShadow: theme.palette.mode === "dark" ? theme.sidebar.boxShadow : "none",
         }}
       >
         <Scrollbar>
@@ -59,7 +44,7 @@ function Sidebar() {
             <Box
               mx={2}
               sx={{
-                width: 52
+                width: 52,
               }}
             >
               <Logo />
@@ -69,7 +54,7 @@ function Sidebar() {
             sx={{
               mt: theme.spacing(3),
               mx: theme.spacing(2),
-              background: theme.colors.alpha.trueWhite[10]
+              background: theme.colors.alpha.trueWhite[10],
             }}
           />
           <SidebarMenu />
@@ -77,9 +62,9 @@ function Sidebar() {
       </SidebarWrapper>
       <Drawer
         sx={{
-          boxShadow: `${theme.sidebar.boxShadow}`
+          boxShadow: `${theme.sidebar.boxShadow}`,
         }}
-        anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+        anchor={theme.direction === "rtl" ? "right" : "left"}
         open={sidebarToggle}
         onClose={closeSidebar}
         variant="temporary"
@@ -87,10 +72,7 @@ function Sidebar() {
       >
         <SidebarWrapper
           sx={{
-            background:
-              theme.palette.mode === 'dark'
-                ? theme.colors.alpha.white[100]
-                : darken(theme.colors.alpha.black[100], 0.5)
+            background: theme.palette.mode === "dark" ? theme.colors.alpha.white[100] : darken(theme.colors.alpha.black[100], 0.5),
           }}
         >
           <Scrollbar>
@@ -98,7 +80,7 @@ function Sidebar() {
               <Box
                 mx={2}
                 sx={{
-                  width: 52
+                  width: 52,
                 }}
               >
                 <Logo />
@@ -108,7 +90,7 @@ function Sidebar() {
               sx={{
                 mt: theme.spacing(3),
                 mx: theme.spacing(2),
-                background: theme.colors.alpha.trueWhite[10]
+                background: theme.colors.alpha.trueWhite[10],
               }}
             />
             <SidebarMenu />

@@ -1,36 +1,28 @@
-import { useContext } from 'react';
+import { useContext } from "react";
 
-import {
-  ListSubheader,
-  alpha,
-  Box,
-  List,
-  styled,
-  Button,
-  ListItem
-} from '@mui/material';
-import { NavLink as RouterLink } from 'react-router-dom';
-import { SidebarContext } from 'src/contexts/SidebarContext';
+import { ListSubheader, alpha, Box, List, styled, Button, ListItem } from "@mui/material";
+import { NavLink as RouterLink } from "react-router-dom";
+import { SidebarContext } from "../../../../shared/contexts/SidebarContext";
 
-import DesignServicesTwoToneIcon from '@mui/icons-material/DesignServicesTwoTone';
-import BrightnessLowTwoToneIcon from '@mui/icons-material/BrightnessLowTwoTone';
-import MmsTwoToneIcon from '@mui/icons-material/MmsTwoTone';
-import TableChartTwoToneIcon from '@mui/icons-material/TableChartTwoTone';
-import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
-import BallotTwoToneIcon from '@mui/icons-material/BallotTwoTone';
-import BeachAccessTwoToneIcon from '@mui/icons-material/BeachAccessTwoTone';
-import EmojiEventsTwoToneIcon from '@mui/icons-material/EmojiEventsTwoTone';
-import FilterVintageTwoToneIcon from '@mui/icons-material/FilterVintageTwoTone';
-import HowToVoteTwoToneIcon from '@mui/icons-material/HowToVoteTwoTone';
-import LocalPharmacyTwoToneIcon from '@mui/icons-material/LocalPharmacyTwoTone';
-import RedeemTwoToneIcon from '@mui/icons-material/RedeemTwoTone';
-import SettingsTwoToneIcon from '@mui/icons-material/SettingsTwoTone';
-import TrafficTwoToneIcon from '@mui/icons-material/TrafficTwoTone';
-import CheckBoxTwoToneIcon from '@mui/icons-material/CheckBoxTwoTone';
-import ChromeReaderModeTwoToneIcon from '@mui/icons-material/ChromeReaderModeTwoTone';
-import WorkspacePremiumTwoToneIcon from '@mui/icons-material/WorkspacePremiumTwoTone';
-import CameraFrontTwoToneIcon from '@mui/icons-material/CameraFrontTwoTone';
-import DisplaySettingsTwoToneIcon from '@mui/icons-material/DisplaySettingsTwoTone';
+import DesignServicesTwoToneIcon from "@mui/icons-material/DesignServicesTwoTone";
+import BrightnessLowTwoToneIcon from "@mui/icons-material/BrightnessLowTwoTone";
+import MmsTwoToneIcon from "@mui/icons-material/MmsTwoTone";
+import TableChartTwoToneIcon from "@mui/icons-material/TableChartTwoTone";
+import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
+import BallotTwoToneIcon from "@mui/icons-material/BallotTwoTone";
+import BeachAccessTwoToneIcon from "@mui/icons-material/BeachAccessTwoTone";
+import EmojiEventsTwoToneIcon from "@mui/icons-material/EmojiEventsTwoTone";
+import FilterVintageTwoToneIcon from "@mui/icons-material/FilterVintageTwoTone";
+import HowToVoteTwoToneIcon from "@mui/icons-material/HowToVoteTwoTone";
+import LocalPharmacyTwoToneIcon from "@mui/icons-material/LocalPharmacyTwoTone";
+import RedeemTwoToneIcon from "@mui/icons-material/RedeemTwoTone";
+import SettingsTwoToneIcon from "@mui/icons-material/SettingsTwoTone";
+import TrafficTwoToneIcon from "@mui/icons-material/TrafficTwoTone";
+import CheckBoxTwoToneIcon from "@mui/icons-material/CheckBoxTwoTone";
+import ChromeReaderModeTwoToneIcon from "@mui/icons-material/ChromeReaderModeTwoTone";
+import WorkspacePremiumTwoToneIcon from "@mui/icons-material/WorkspacePremiumTwoTone";
+import CameraFrontTwoToneIcon from "@mui/icons-material/CameraFrontTwoTone";
+import DisplaySettingsTwoToneIcon from "@mui/icons-material/DisplaySettingsTwoTone";
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -83,7 +75,7 @@ const SubMenuWrapper = styled(Box)(
 
           .MuiButton-startIcon,
           .MuiButton-endIcon {
-            transition: ${theme.transitions.create(['color'])};
+            transition: ${theme.transitions.create(["color"])};
 
             .MuiSvgIcon-root {
               font-size: inherit;
@@ -146,10 +138,7 @@ const SubMenuWrapper = styled(Box)(
                 content: ' ';
                 background: ${theme.colors.alpha.trueWhite[100]};
                 opacity: 0;
-                transition: ${theme.transitions.create([
-                  'transform',
-                  'opacity'
-                ])};
+                transition: ${theme.transitions.create(["transform", "opacity"])};
                 width: 6px;
                 height: 6px;
                 transform: scale(0);
@@ -184,13 +173,7 @@ function SidebarMenu() {
           <SubMenuWrapper>
             <List component="div">
               <ListItem component="div">
-                <Button
-                  disableRipple
-                  component={RouterLink}
-                  onClick={closeSidebar}
-                  to="/dashboards/overview"
-                  startIcon={<DesignServicesTwoToneIcon />}
-                >
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dashboards/overview" startIcon={<DesignServicesTwoToneIcon />}>
                   Overview
                 </Button>
               </ListItem>
@@ -201,13 +184,7 @@ function SidebarMenu() {
           <SubMenuWrapper>
             <List component="div">
               <ListItem component="div">
-                <Button
-                  disableRipple
-                  component={RouterLink}
-                  onClick={closeSidebar}
-                  to="/status/404"
-                  startIcon={<CheckBoxTwoToneIcon />}
-                >
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/status/404" startIcon={<CheckBoxTwoToneIcon />}>
                   Error 404
                 </Button>
               </ListItem>

@@ -1,6 +1,6 @@
-import { Box, styled, useTheme } from '@mui/material';
-import { Link } from 'react-router-dom';
-import Logoo from '../../assets/images/logo.jpeg';
+import { Box, styled, useTheme } from "@mui/material";
+import { Link } from "react-router-dom";
+import Logoo from "../../../assets/images/logo.jpeg";
 
 const LogoWrapper = styled(Link)(
   ({ theme }) => `
@@ -23,7 +23,7 @@ function Logo() {
           component="img"
           sx={{
             maxHeight: { xs: 50, md: 50 },
-            maxWidth: { xs: 50, md: 50 }
+            maxWidth: { xs: 50, md: 50 },
           }}
           alt="logo"
           src={Logoo}
