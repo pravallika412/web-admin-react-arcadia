@@ -1,11 +1,11 @@
-import { Suspense, lazy } from 'react';
-import { Navigate } from 'react-router-dom';
-import { RouteObject } from 'react-router';
+import { Suspense, lazy } from "react";
+import { Navigate } from "react-router-dom";
+import { RouteObject } from "react-router";
 
-import SidebarLayout from 'src/layouts/SidebarLayout';
-import BaseLayout from 'src/layouts/BaseLayout';
+import SidebarLayout from "./layouts/SidebarLayout";
+import BaseLayout from "./layouts/BaseLayout";
 
-import SuspenseLoader from 'src/components/SuspenseLoader';
+import SuspenseLoader from "./shared/components/SuspenseLoader";
 
 const Loader = (Component) => (props) =>
   (
@@ -16,68 +16,66 @@ const Loader = (Component) => (props) =>
 
 // Pages
 
-const Login = Loader(lazy(() => import('src/content/Login')));
+const Login = Loader(lazy(() => import("./modules/Login")));
 
-const Overview = Loader(lazy(() => import('src/content/overview')));
+const Overview = Loader(lazy(() => import("./modules/overview")));
 
 // Status
 
-const Status404 = Loader(
-  lazy(() => import('src/content/pages/Status/Status404'))
-);
+const Status404 = Loader(lazy(() => import("./modules/pages/Status/Status404")));
 
 const routes: RouteObject[] = [
   {
-    path: '',
+    path: "",
     element: <BaseLayout />,
     children: [
       {
-        path: '/',
-        element: <Login />
+        path: "/",
+        element: <Login />,
       },
       {
-        path: 'status',
+        path: "status",
         children: [
           {
-            path: '',
-            element: <Navigate to="404" replace />
+            path: "",
+            element: <Navigate to="404" replace />,
           },
           {
-            path: '404',
-            element: <Status404 />
-          }
-        ]
+            path: "404",
+            element: <Status404 />,
+          },
+        ],
       },
       {
-        path: '*',
-        element: <Status404 />
-      }
-    ]
+        path: "*",
+        element: <Status404 />,
+      },
+    ],
   },
   {
-    path: 'dashboards',
+    path: "dashboards",
     element: <SidebarLayout />,
     children: [
       {
-        path: '',
-        element: <Navigate to="crypto" replace />
+        path: "",
+        element: <Navigate to="crypto" replace />,
       },
       {
-        path: 'overview',
-        element: <Overview />
-      }
-    ]
+        path: "overview",
+        element: <Overview />,
+      },
+    ],
   },
   {
-    path: 'management',
+    path: "management",
     element: <SidebarLayout />,
     children: [
       {
-        path: '',
-        element: <Navigate to="transactions" replace />
-      }
-    ]
-  }
+        path: "",
+        element: <Navigate to="transactions" replace />,
+      },
+    ],
+  },
 ];
 
 export default routes;
