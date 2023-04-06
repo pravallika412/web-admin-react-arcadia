@@ -9,6 +9,7 @@
   },
   "private": false,
   "dependencies": {
+    "@apollo/client": "^3.7.11",
     "@babel/plugin-proposal-decorators": "^7.21.0",
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
@@ -25,6 +26,7 @@
     "apexcharts": "3.35.3",
     "clsx": "1.1.1",
     "date-fns": "2.28.0",
+    "graphql": "^16.6.0",
     "history": "5.3.0",
     "nprogress": "0.2.0",
     "numeral": "2.0.6",

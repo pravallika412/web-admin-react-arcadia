@@ -14,6 +14,10 @@ import Container from "@mui/material/Container";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "@hookform/error-message";
+import { LOGIN_ADMIN } from "../../shared/graphQL/queries";
+import { useMutation } from "@apollo/client";
+import { useState } from "react";
+import SuspenseLoader from "../../shared/components/SuspenseLoader";
 
 interface IFormInput {
   email: string;
@@ -28,11 +32,21 @@ export default function SignIn() {
   } = useForm();
 
   const navigate = useNavigate();
+  const [loginUser, { loading, error, data }] = useMutation(LOGIN_ADMIN);
+
+  if (loading) return <SuspenseLoader />;
+
+  if (error) {
+    return <h1>{error.message}</h1>;
+  }
+
+  if (data) {
+    window.localStorage.setItem("token", data.signIn.jwtToken);
+    navigate("/dashboards/overview");
+  }
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
-    if (formResponse) {
-      navigate("/dashboards/overview");
-    }
+    loginUser({ variables: { input: formResponse } });
   };
 
   return (
@@ -99,23 +113,9 @@ export default function SignIn() {
             autoComplete="current-password"
           />
           <ErrorMessage errors={errors} name="password" render={({ message }) => <p>{message}</p>} />
-
-          <FormControlLabel {...register("remember")} control={<Checkbox value="remember" color="primary" />} label="Remember me" />
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             Sign In
           </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
         </Box>
       </Box>
     </Container>
