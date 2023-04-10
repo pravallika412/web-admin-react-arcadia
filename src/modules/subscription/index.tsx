@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { FormControlLabel, MenuItem, Radio, RadioGroup, Select, TextField, Button, Box, Container, Input } from "@mui/material";
 import { useMutation } from "@apollo/client";
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 const Subscription = () => {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -109,7 +110,7 @@ const Subscription = () => {
             {...register("description", {
               required: {
                 value: true,
-                message: "Name is required",
+                message: "Description is required",
               },
               pattern: {
                 value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
@@ -121,20 +122,25 @@ const Subscription = () => {
         </div>
 
         <div>
-          <RadioGroup row name="recurring" {...register("recurring", { required: true })}>
-            <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-            <FormControlLabel value="no" control={<Radio />} label="No" />
-          </RadioGroup>
+          <Controller
+            control={control}
+            name="recurring"
+            defaultValue=""
+            rules={{ required: true }}
+            render={({ field }) => (
+              <RadioGroup {...field}>
+                <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                <FormControlLabel value="no" control={<Radio />} label="No" />
+              </RadioGroup>
+            )}
+          />
           {errors.recurring && <span>This field is required</span>}
         </div>
-
         <div>
           <Button variant="contained" component="label">
             Upload
             <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
           </Button>
-          {/* <Input type="file" fullWidth name="subscriptionImage" onChange={handleFileChange} {...register("subscriptionImage", { required: true })} /> */}
-          {/* {errors.subscriptionImage && <span>This field is required</span>} */}
         </div>
 
         <div>
