@@ -19,6 +19,7 @@ const Loader = (Component) => (props) =>
 const Login = Loader(lazy(() => import("./modules/Login")));
 
 const Overview = Loader(lazy(() => import("./modules/overview")));
+const Subscription = Loader(lazy(() => import("./modules/subscription")));
 
 // Status
 
@@ -63,6 +64,10 @@ const routes: RouteObject[] = [
       {
         path: "overview",
         element: <Overview />,
+      },
+      {
+        path: "subscription",
+        element: <Subscription />,
       },
     ],
   },
