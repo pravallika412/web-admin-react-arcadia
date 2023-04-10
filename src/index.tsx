@@ -9,6 +9,7 @@ import * as serviceWorker from "./serviceWorker";
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider, useQuery, gql } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
+const baseURL = process.env.REACT_APP_API_BASE_URL;
 const httpLink = createHttpLink({
   uri: "https://api-wdf.dev.rapidinnovation.tech/graphql",
 });

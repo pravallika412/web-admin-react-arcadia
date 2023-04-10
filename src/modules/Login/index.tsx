@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "@hookform/error-message";
 import { LOGIN_ADMIN } from "../../shared/graphQL/queries";
 import { useMutation } from "@apollo/client";
-import { useState } from "react";
+import { useEffect } from "react";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 
 interface IFormInput {
@@ -34,16 +34,18 @@ export default function SignIn() {
   const navigate = useNavigate();
   const [loginUser, { loading, error, data }] = useMutation(LOGIN_ADMIN);
 
-  if (loading) return <SuspenseLoader />;
+  // if (loading) return <SuspenseLoader />;
 
-  if (error) {
-    return <h1>{error.message}</h1>;
-  }
+  // if (error) {
+  //   return <h1>{error.message}</h1>;
+  // }
 
-  if (data) {
-    window.localStorage.setItem("token", data.signIn.jwtToken);
-    navigate("/dashboards/overview");
-  }
+  useEffect(() => {
+    if (data) {
+      window.localStorage.setItem("token", data.signIn.jwtToken);
+      navigate("/dashboards/overview");
+    }
+  }, [navigate, data]);
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
     loginUser({ variables: { input: formResponse } });
@@ -87,7 +89,7 @@ export default function SignIn() {
             autoComplete="email"
             autoFocus
           />
-          <ErrorMessage errors={errors} name="email" render={({ message }) => <p>{message}</p>} />
+          <ErrorMessage errors={errors} name="email" render={({ message }) => <span>{message}</span>} />
           <TextField
             {...register("password", {
               required: {
@@ -112,7 +114,7 @@ export default function SignIn() {
             id="password"
             autoComplete="current-password"
           />
-          <ErrorMessage errors={errors} name="password" render={({ message }) => <p>{message}</p>} />
+          <ErrorMessage errors={errors} name="password" render={({ message }) => <span>{message}</span>} />
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             Sign In
           </Button>
