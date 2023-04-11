@@ -9,7 +9,7 @@ import * as serviceWorker from "./serviceWorker";
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider, useQuery, gql } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
-const baseURL = process.env.REACT_APP_API_BASE_URL;
+const baseURL = process.env.API_BASE_URL;
 console.log(baseURL);
 const httpLink = createHttpLink({
   uri: baseURL,
