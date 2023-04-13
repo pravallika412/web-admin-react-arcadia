@@ -12,7 +12,7 @@ import { setContext } from "@apollo/client/link/context";
 const baseURL = process.env.API_BASE_URL;
 console.log(baseURL);
 const httpLink = createHttpLink({
-  uri: baseURL,
+  uri: "https://api-wdf.dev.rapidinnovation.tech/graphql",
 });
 
 const authLink = setContext((_, { headers }) => {
