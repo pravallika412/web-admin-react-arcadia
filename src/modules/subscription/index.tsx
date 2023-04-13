@@ -53,6 +53,12 @@ const columns = [
   { id: "action", label: "Action" },
 ];
 
+const renewalPeriodOptions = [
+  { value: "day", label: "Day" },
+  { value: "month", label: "Month" },
+  { value: "week", label: "Week" },
+];
+
 const Subscription = () => {
   const classes = useStyles();
   const [file, setFile] = useState([]);
@@ -140,6 +146,7 @@ const Subscription = () => {
       renewalNumber: Number(data.renewalNumber),
       supportableProductCount: Number(data.supportableProductCount),
     };
+    console.log("Add/Update Payload:", payload);
     createSubscription({ variables: { input: payload } });
     setOpen(false);
   };
@@ -318,12 +325,27 @@ const Subscription = () => {
             </div>
 
             <div>
-              <Select label="Renewal Period" name="renewalPeriod" defaultValue="" fullWidth {...register("renewalPeriod", { required: true })}>
+              {/* <Select label="Renewal Period" name="renewalPeriod" defaultValue="" fullWidth {...register("renewalPeriod", { required: true })}>
                 <MenuItem value="week">Week</MenuItem>
                 <MenuItem value="day">Day</MenuItem>
                 <MenuItem value="month">Month</MenuItem>
               </Select>
-              {errors.renewalPeriod && <span>This field is required</span>}
+              {errors.renewalPeriod && <span>This field is required</span>} */}
+              <Controller
+                name="renewalPeriod"
+                control={control}
+                defaultValue=""
+                rules={{ required: "Renewal period is required" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField {...field} select label="Renewal Period" error={Boolean(error)} helperText={error?.message} fullWidth>
+                    {renewalPeriodOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
             </div>
 
             <div>
