@@ -20,8 +20,5 @@ module.exports = {
     new webpack.ProvidePlugin({
       React: "react",
     }),
-    new Dotenv({
-      path: `.env`,
-    }),
   ],
 };

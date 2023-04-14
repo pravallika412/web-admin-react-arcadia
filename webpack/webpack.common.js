@@ -84,7 +84,9 @@ module.exports = {
       process: "process/browser",
     }),
     new webpack.DefinePlugin({
-      API_URL: JSON.stringify(process.env.API_URL),
+      "process.env": {
+        API_BASE_URL: JSON.stringify(process.env.API_BASE_URL),
+      },
     }),
   ],
   stats: "errors-only",
