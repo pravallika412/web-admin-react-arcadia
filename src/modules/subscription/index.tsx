@@ -24,7 +24,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { useMutation } from "@apollo/client";
-import { CREATE_SUBSCRIPTION, GENERATE_PRESIGNED_URL, GET_PLAN, GET_PLANS } from "../../shared/graphQL/queries";
+import { CREATE_SUBSCRIPTION, GENERATE_PRESIGNED_URL, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/queries";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { useEffect, useState } from "react";
 import Dialog, { DialogProps } from "@mui/material/Dialog";
@@ -70,14 +70,16 @@ const Subscription = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [createSubscription, { data: createSub }] = useMutation(CREATE_SUBSCRIPTION);
+  const [updateSubscription, { data: updateSub }] = useMutation(UPDATE_PLAN);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
-  const [getPlans, { data: getAllPlans }] = useLazyQuery(GET_PLANS);
+  const [getPlans, { loading, error, data: getAllPlans, refetch }] = useLazyQuery(GET_PLANS);
   const [getPlan, { data: getPlanById }] = useLazyQuery(GET_PLAN);
 
   const {
     control,
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm();
@@ -85,6 +87,7 @@ const Subscription = () => {
   useEffect(() => {
     if (createPresignedUrl) {
       setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
+      setValue("planImage", createPresignedUrl.GeneratePresignedUrl.presignedUrl);
     }
   }, [createPresignedUrl]);
 
@@ -96,33 +99,48 @@ const Subscription = () => {
 
   useEffect(() => {
     getPlans();
+  }, []);
+
+  useEffect(() => {
     if (getAllPlans) {
+      console.log(getAllPlans);
       setProducts(getAllPlans.GetPlans);
     }
     if (selectedData) {
       getPlan({ variables: { input: selectedData } });
     }
+  }, [getAllPlans, selectedData]);
+
+  useEffect(() => {
     if (getPlanById) {
       let data = getPlanById.GetPlan;
       let initial_values = {
         name: data.name,
         description: data.description,
         recurring: data.default_price.recurring ? "yes" : "no",
-        renewal_period: data.default_price.renewal_period,
+        renewalPeriod: data.default_price.renewal_period,
         planImage: data.plan_image,
         price: data.default_price.price,
         renewalNumber: data.default_price.renewal_number,
         supportableProductCount: data.default_price.supportable_product_count,
       };
+      console.log(initial_values);
       reset(initial_values);
     }
-  }, [getAllPlans, selectedData, getPlanById, reset]);
+  }, [getPlanById, reset]);
 
   useEffect(() => {
     if (createSub) {
-      getPlans();
+      refetch();
     }
   }, [createSub]);
+
+  useEffect(() => {
+    if (updateSub) {
+      console.log(updateSub);
+      refetch();
+    }
+  }, [updateSub]);
 
   const uploadImageFn = async (url, data) => {
     await fetch(url, {
@@ -135,19 +153,32 @@ const Subscription = () => {
   };
 
   const onSubmit = (data) => {
+    console.log(data);
     setUploadFile(data.planImage);
     let payload = {
       name: data.name,
       description: data.description,
       recurring: data.recurring === "yes" ? true : false,
-      planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
+      planImage: data.planImage,
       renewalPeriod: data.renewalPeriod,
       price: Number(data.price),
       renewalNumber: Number(data.renewalNumber),
       supportableProductCount: Number(data.supportableProductCount),
     };
+
     console.log("Add/Update Payload:", payload);
-    createSubscription({ variables: { input: payload } });
+    if (isEditing) {
+      let updatePayload = {
+        planId: selectedData.planId,
+        name: data.name,
+        price: Number(data.price),
+        supportableProductCount: Number(data.supportableProductCount),
+      };
+      updateSubscription({ variables: { input: updatePayload } });
+    } else {
+      createSubscription({ variables: { input: payload } });
+    }
+
     setOpen(false);
   };
 
@@ -301,51 +332,50 @@ const Subscription = () => {
             </div>
 
             <div>
-              <Controller
-                control={control}
-                name="recurring"
-                defaultValue=""
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <RadioGroup {...field}>
-                    <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio />} label="No" />
-                  </RadioGroup>
-                )}
-              />
+              {!isEditing && (
+                <Controller
+                  control={control}
+                  name="recurring"
+                  defaultValue=""
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <RadioGroup {...field}>
+                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                      <FormControlLabel value="no" control={<Radio />} label="No" />
+                    </RadioGroup>
+                  )}
+                />
+              )}
               {errors.recurring && <span>This field is required</span>}
             </div>
             <div>
               {/* {uploadFile?.split("?")[0] ? <img src={uploadFile?.split("?")[0]} alt="Plan Image" className={classes.image} /> : ""} */}
-              <Button variant="contained" component="label" sx={{ margin: 1 }} {...register("planImage", { required: true })}>
+              {!isEditing && <input type="file" {...(register("planImage"), { required: true })} onChange={handleFileChange} />}
+              {/* <Button variant="contained" component="label" sx={{ margin: 1 }} {...register("planImage", { required: true })}>
                 Upload
                 <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
-              </Button>
+              </Button> */}
               {errors.planImage && <span>This field is required</span>}
             </div>
 
             <div>
-              {/* <Select label="Renewal Period" name="renewalPeriod" defaultValue="" fullWidth {...register("renewalPeriod", { required: true })}>
-                <MenuItem value="week">Week</MenuItem>
-                <MenuItem value="day">Day</MenuItem>
-                <MenuItem value="month">Month</MenuItem>
-              </Select>
-              {errors.renewalPeriod && <span>This field is required</span>} */}
-              <Controller
-                name="renewalPeriod"
-                control={control}
-                defaultValue=""
-                rules={{ required: "Renewal period is required" }}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField {...field} select label="Renewal Period" error={Boolean(error)} helperText={error?.message} fullWidth>
-                    {renewalPeriodOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
+              {!isEditing && (
+                <Controller
+                  name="renewalPeriod"
+                  control={control}
+                  defaultValue=""
+                  rules={{ required: "Renewal period is required" }}
+                  render={({ field, fieldState: { error } }) => (
+                    <TextField {...field} select label="Renewal Period" error={Boolean(error)} helperText={error?.message} fullWidth>
+                      {renewalPeriodOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              )}
             </div>
 
             <div>
@@ -354,7 +384,7 @@ const Subscription = () => {
             </div>
 
             <div>
-              <TextField label="Renewal Number" name="renewalNumber" margin="normal" required fullWidth {...register("renewalNumber", { required: true })} type="number" />
+              {!isEditing && <TextField label="Renewal Number" name="renewalNumber" margin="normal" required fullWidth {...register("renewalNumber", { required: true })} type="number" />}
               {errors.renewalNumber && <span>This field is required</span>}
             </div>
 
