@@ -14,11 +14,11 @@ import Container from "@mui/material/Container";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "@hookform/error-message";
-import { LOGIN_ADMIN } from "../../shared/graphQL/queries";
 import { useMutation } from "@apollo/client";
 import { useEffect } from "react";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { Alert, Snackbar } from "@mui/material";
+import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
 
 interface IFormInput {
   email: string;

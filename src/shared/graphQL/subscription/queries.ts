@@ -1,13 +1,5 @@
 import gql from "graphql-tag";
 
-const LOGIN_ADMIN = gql`
-  mutation signIn($input: LoginDto!) {
-    signIn(loginDto: $input) {
-      jwtToken
-    }
-  }
-`;
-
 const CREATE_SUBSCRIPTION = gql`
   mutation CreatePlan($input: CreatePlanDto!) {
     CreatePlan(createPlanInput: $input) {
@@ -26,14 +18,6 @@ const CREATE_SUBSCRIPTION = gql`
         supportable_product_count
         stripe_price_id
       }
-    }
-  }
-`;
-
-const GENERATE_PRESIGNED_URL = gql`
-  mutation GeneratePresignedUrl($input: SignedUrlDto!) {
-    GeneratePresignedUrl(signedUrlDto: $input) {
-      presignedUrl
     }
   }
 `;
@@ -90,4 +74,4 @@ const UPDATE_PLAN = gql`
     }
   }
 `;
-export { LOGIN_ADMIN, CREATE_SUBSCRIPTION, GENERATE_PRESIGNED_URL, GET_PLANS, GET_PLAN, UPDATE_PLAN };
+export { CREATE_SUBSCRIPTION, GET_PLANS, GET_PLAN, UPDATE_PLAN };

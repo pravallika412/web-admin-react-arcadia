@@ -10,8 +10,6 @@ import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider, useQuery, 
 import { setContext } from "@apollo/client/link/context";
 
 const baseURL = process.env.API_BASE_URL;
-console.log(process);
-console.log(baseURL);
 const httpLink = createHttpLink({
   uri: baseURL,
 });

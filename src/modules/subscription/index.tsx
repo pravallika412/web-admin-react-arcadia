@@ -24,13 +24,14 @@ import {
   IconButton,
 } from "@mui/material";
 import { useMutation } from "@apollo/client";
-import { CREATE_SUBSCRIPTION, GENERATE_PRESIGNED_URL, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/queries";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { useEffect, useState } from "react";
 import Dialog, { DialogProps } from "@mui/material/Dialog";
 import { useLazyQuery } from "@apollo/client";
 import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
+import { CREATE_SUBSCRIPTION, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
+import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 
 const useStyles = makeStyles({
   root: {
@@ -103,7 +104,6 @@ const Subscription = () => {
 
   useEffect(() => {
     if (getAllPlans) {
-      console.log(getAllPlans);
       setProducts(getAllPlans.GetPlans);
     }
     if (selectedData) {
@@ -124,7 +124,6 @@ const Subscription = () => {
         renewalNumber: data.default_price.renewal_number,
         supportableProductCount: data.default_price.supportable_product_count,
       };
-      console.log(initial_values);
       reset(initial_values);
     }
   }, [getPlanById, reset]);
@@ -137,7 +136,6 @@ const Subscription = () => {
 
   useEffect(() => {
     if (updateSub) {
-      console.log(updateSub);
       refetch();
     }
   }, [updateSub]);
@@ -153,7 +151,6 @@ const Subscription = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
     setUploadFile(data.planImage);
     let payload = {
       name: data.name,
@@ -165,8 +162,6 @@ const Subscription = () => {
       renewalNumber: Number(data.renewalNumber),
       supportableProductCount: Number(data.supportableProductCount),
     };
-
-    console.log("Add/Update Payload:", payload);
     if (isEditing) {
       let updatePayload = {
         planId: selectedData.planId,
@@ -379,13 +374,49 @@ const Subscription = () => {
             </div>
 
             <div>
-              <TextField label="Price" name="price" margin="normal" required fullWidth {...register("price", { required: true })} type="number" />
-              {errors.price && <span>This field is required</span>}
+              <TextField
+                label="Price"
+                name="price"
+                margin="normal"
+                required
+                fullWidth
+                {...register("price", {
+                  required: {
+                    value: true,
+                    message: "This is required",
+                  },
+                  pattern: {
+                    value: /^[0-9]*\.?[0-9]+$/,
+                    message: "Please enter a positive number",
+                  },
+                })}
+                type="number"
+              />
+              <ErrorMessage errors={errors} name="price" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
-              {!isEditing && <TextField label="Renewal Number" name="renewalNumber" margin="normal" required fullWidth {...register("renewalNumber", { required: true })} type="number" />}
-              {errors.renewalNumber && <span>This field is required</span>}
+              {!isEditing && (
+                <TextField
+                  label="Renewal Number"
+                  name="renewalNumber"
+                  margin="normal"
+                  required
+                  fullWidth
+                  {...register("renewalNumber", {
+                    required: {
+                      value: true,
+                      message: "This is required",
+                    },
+                    pattern: {
+                      value: /^[0-9]*\.?[0-9]+$/,
+                      message: "Please enter a positive number",
+                    },
+                  })}
+                  type="number"
+                />
+              )}
+              <ErrorMessage errors={errors} name="renewalNumber" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
@@ -395,10 +426,19 @@ const Subscription = () => {
                 margin="normal"
                 required
                 fullWidth
-                {...register("supportableProductCount", { required: true })}
+                {...register("supportableProductCount", {
+                  required: {
+                    value: true,
+                    message: "This is required",
+                  },
+                  pattern: {
+                    value: /^[0-9]*\.?[0-9]+$/,
+                    message: "Please enter a positive number",
+                  },
+                })}
                 type="number"
               />
-              {errors.supportableProductCount && <span>This field is required</span>}
+              <ErrorMessage errors={errors} name="supportableProductCount" render={({ message }) => <p>{message}</p>} />
             </div>
           </DialogContent>
           <DialogActions>
