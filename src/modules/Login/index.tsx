@@ -18,6 +18,7 @@ import { LOGIN_ADMIN } from "../../shared/graphQL/queries";
 import { useMutation } from "@apollo/client";
 import { useEffect } from "react";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import { Alert, Snackbar } from "@mui/material";
 
 interface IFormInput {
   email: string;
@@ -31,26 +32,23 @@ export default function SignIn() {
     formState: { errors },
   } = useForm();
 
+  const [isError, setIsError] = React.useState(false);
   const navigate = useNavigate();
   const [loginUser, { loading, error, data }] = useMutation(LOGIN_ADMIN);
-
-  // if (loading) return <SuspenseLoader />;
-
-  // if (error) {
-  //   return <h1>{error.message}</h1>;
-  // }
 
   useEffect(() => {
     if (data) {
       window.localStorage.setItem("token", data.signIn.jwtToken);
       navigate("/dashboards/overview");
     }
-  }, [navigate, data]);
+    if (error) {
+      setIsError(true);
+    }
+  }, [navigate, data, error]);
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
     loginUser({ variables: { input: formResponse } });
   };
-
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -120,6 +118,11 @@ export default function SignIn() {
           </Button>
         </Box>
       </Box>
+      <Snackbar open={isError} autoHideDuration={6000}>
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {error?.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
