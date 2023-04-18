@@ -22,6 +22,7 @@ import {
   TableBody,
   TablePagination,
   IconButton,
+  DialogContentText,
 } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
@@ -30,7 +31,7 @@ import Dialog, { DialogProps } from "@mui/material/Dialog";
 import { useLazyQuery } from "@apollo/client";
 import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
-import { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER } from "../../shared/graphQL/handler/queries";
+import { CREATE_HANDLER, GET_HANDLERS, SUSPEND_HANDLER, UPDATE_HANDLER } from "../../shared/graphQL/handler/queries";
 
 const useStyles = makeStyles({
   root: {
@@ -53,40 +54,29 @@ const columns = [
   { id: "action", label: "Action" },
 ];
 
-const renewalPeriodOptions = [
-  { value: "day", label: "Day" },
-  { value: "month", label: "Month" },
-  { value: "week", label: "Week" },
-];
-
 const Handler = () => {
   const classes = useStyles();
-  const [file, setFile] = useState([]);
   const [open, setOpen] = useState(false);
+  const [openSuspend, setOpenSuspend] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [suspendId, setSuspendId] = useState(null);
   const [createHandler, { data: createHandlerData }] = useMutation(CREATE_HANDLER);
-  const [updateSubscription, { data: updateSub }] = useMutation(UPDATE_HANDLER);
+  const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_HANDLER);
+  const [suspendHandler, { data: suspendHandlerData }] = useMutation(SUSPEND_HANDLER);
   const [getHandlers, { loading, error, data: getAllHandlers, refetch }] = useLazyQuery(GET_HANDLERS);
 
   const {
     control,
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors },
   } = useForm();
-
-  useEffect(() => {
-    if (uploadFile) {
-      uploadImageFn(uploadFile, file);
-    }
-  }, [uploadFile]);
 
   useEffect(() => {
     getHandlers();
@@ -105,44 +95,26 @@ const Handler = () => {
   }, [createHandlerData]);
 
   useEffect(() => {
-    if (updateSub) {
+    if (updateHandlerData) {
       refetch();
     }
-  }, [updateSub]);
+  }, [updateHandlerData]);
 
-  const uploadImageFn = async (url, data) => {
-    await fetch(url, {
-      method: "PUT",
-      body: data,
-      headers: {
-        "Content-Type": data.type,
-      },
-    });
-  };
+  useEffect(() => {
+    if (suspendHandlerData) {
+      refetch();
+    }
+  }, [suspendHandlerData]);
 
   const onSubmit = (data) => {
-    console.log(data);
-    setUploadFile(data.planImage);
     let payload = {
-      name: data.name,
-      description: data.description,
-      recurring: data.recurring === "yes" ? true : false,
-      planImage: data.planImage,
-      renewalPeriod: data.renewalPeriod,
-      price: Number(data.price),
-      renewalNumber: Number(data.renewalNumber),
-      supportableProductCount: Number(data.supportableProductCount),
+      email: data.email,
+      official_email: data.officialEmail,
+      password: data.password,
     };
 
-    console.log("Add/Update Payload:", payload);
     if (isEditing) {
-      let updatePayload = {
-        planId: selectedData.planId,
-        name: data.name,
-        price: Number(data.price),
-        supportableProductCount: Number(data.supportableProductCount),
-      };
-      updateSubscription({ variables: { input: updatePayload } });
+      updateHandler({ variables: { id: { id: selectedData }, input: payload } });
     } else {
       createHandler({ variables: { input: payload } });
     }
@@ -151,13 +123,25 @@ const Handler = () => {
   };
 
   const handleEditClick = (row) => {
-    // Handle edit click for the selected row
-    let payload = {
-      planId: row._id,
+    let editData = getAllHandlers.listHandlers.handlers.filter((e) => e.id === row.id)[0];
+    let updatepayload = {
+      email: editData.email,
+      officialEmail: editData.official_email,
     };
+    reset(updatepayload);
     setIsEditing(true);
-    setSelectedData(payload);
+    setSelectedData(row.id);
     setOpen(true);
+  };
+
+  const handleSuspend = () => {
+    suspendHandler({ variables: { id: { id: suspendId } } });
+    setOpenSuspend(false);
+  };
+
+  const handleSuspendClick = (row) => {
+    setSuspendId(row.id);
+    setOpenSuspend(true);
   };
 
   const handleOpen = () => {
@@ -168,6 +152,7 @@ const Handler = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setOpenSuspend(false);
     setSelectedData(null);
     reset();
   };
@@ -213,9 +198,14 @@ const Handler = () => {
                       return (
                         <TableCell key={column.id}>
                           {column.id === "action" ? (
-                            <IconButton onClick={() => handleEditClick(product)}>
-                              <EditIcon />
-                            </IconButton>
+                            <>
+                              <IconButton onClick={() => handleEditClick(product)}>
+                                <EditIcon />
+                              </IconButton>
+                              <Button variant="outlined" onClick={() => handleSuspendClick(product)} disabled={product["status"] == "suspended"} color="error">
+                                Suspend
+                              </Button>
+                            </>
                           ) : (
                             value
                           )}
@@ -319,6 +309,18 @@ const Handler = () => {
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
+      </Dialog>
+      <Dialog open={openSuspend} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">Suspend</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">Are you sure you want to Suspend this handler?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>No</Button>
+          <Button onClick={handleSuspend} autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );

@@ -27,11 +27,21 @@ const GET_HANDLERS = gql`
 `;
 
 const UPDATE_HANDLER = gql`
-  mutation UpdatePlan($input: UpdatePlanDto!) {
-    UpdatePlan(updatePlanDto: $input) {
-      status
+  mutation updateHandler($id: IdDto!, $input: UpdateHandlerDto!) {
+    updateHandler(handlerId: $id, updateHandlerDto: $input) {
+      success
       message
     }
   }
 `;
-export { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER };
+
+const SUSPEND_HANDLER = gql`
+  mutation suspendHandler($id: SuspendHandlerDto!) {
+    suspendHandler(suspendHandlerDto: $id) {
+      success
+      message
+    }
+  }
+`;
+
+export { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, SUSPEND_HANDLER };
