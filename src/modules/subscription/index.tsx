@@ -22,6 +22,8 @@ import {
   TableBody,
   TablePagination,
   IconButton,
+  FormHelperText,
+  FormLabel,
 } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
@@ -73,14 +75,13 @@ const Subscription = () => {
   const [createSubscription, { data: createSub }] = useMutation(CREATE_SUBSCRIPTION);
   const [updateSubscription, { data: updateSub }] = useMutation(UPDATE_PLAN);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
-  const [getPlans, { loading, error, data: getAllPlans, refetch }] = useLazyQuery(GET_PLANS);
+  const [getPlans, { data: getAllPlans, refetch }] = useLazyQuery(GET_PLANS);
   const [getPlan, { data: getPlanById }] = useLazyQuery(GET_PLAN);
 
   const {
     control,
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors },
   } = useForm();
@@ -88,7 +89,6 @@ const Subscription = () => {
   useEffect(() => {
     if (createPresignedUrl) {
       setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
-      setValue("planImage", createPresignedUrl.GeneratePresignedUrl.presignedUrl);
     }
   }, [createPresignedUrl]);
 
@@ -151,26 +151,26 @@ const Subscription = () => {
   };
 
   const onSubmit = (data) => {
-    setUploadFile(data.planImage);
-    let payload = {
-      name: data.name,
-      description: data.description,
-      recurring: data.recurring === "yes" ? true : false,
-      planImage: data.planImage,
-      renewalPeriod: data.renewalPeriod,
-      price: Number(data.price),
-      renewalNumber: Number(data.renewalNumber),
-      supportableProductCount: Number(data.supportableProductCount),
-    };
     if (isEditing) {
       let updatePayload = {
         planId: selectedData.planId,
         name: data.name,
+        description: data.description,
         price: Number(data.price),
         supportableProductCount: Number(data.supportableProductCount),
       };
       updateSubscription({ variables: { input: updatePayload } });
     } else {
+      let payload = {
+        name: data.name,
+        description: data.description,
+        recurring: data.recurring === "yes" ? true : false,
+        planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
+        renewalPeriod: data.renewalPeriod,
+        price: Number(data.price),
+        renewalNumber: Number(data.renewalNumber),
+        supportableProductCount: Number(data.supportableProductCount),
+      };
       createSubscription({ variables: { input: payload } });
     }
 
@@ -178,7 +178,6 @@ const Subscription = () => {
   };
 
   const handleEditClick = (row) => {
-    // Handle edit click for the selected row
     let payload = {
       planId: row._id,
     };
@@ -218,12 +217,6 @@ const Subscription = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  // if (loading) return <SuspenseLoader />;
-
-  // if (error) {
-  //   return <h1>{error.message}</h1>;
-  // }
 
   return (
     <Container component="main">
@@ -285,72 +278,86 @@ const Subscription = () => {
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: 500 }}>
           <DialogContent>
             <div>
-              <TextField
-                label="Name"
+              <Controller
                 name="name"
-                margin="normal"
-                required
-                fullWidth
-                {...register("name", {
-                  required: {
-                    value: true,
-                    message: "Name is required",
-                  },
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "Name is required",
                   pattern: {
                     value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                    message: "Please enter valid name",
+                    message: "Please enter a valid name",
                   },
-                })}
+                  maxLength: {
+                    value: 15,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => <TextField {...field} label="Name" margin="normal" fullWidth error={!!errors.name} helperText={errors?.name?.message} />}
               />
-              <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
-              <TextField
-                label="Description"
-                name="desciption"
-                margin="normal"
-                required
-                fullWidth
-                {...register("description", {
-                  required: {
-                    value: true,
-                    message: "Description is required",
-                  },
+              <Controller
+                name="description"
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "Description is required",
                   pattern: {
                     value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                    message: "Please enter valid description",
+                    message: "Please enter a valid Description",
                   },
-                })}
+                  maxLength: {
+                    value: 50,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => <TextField {...field} label="Description" margin="normal" fullWidth error={!!errors.description} helperText={errors?.description?.message} />}
               />
-              <ErrorMessage errors={errors} name="description" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
               {!isEditing && (
-                <Controller
-                  control={control}
-                  name="recurring"
-                  defaultValue=""
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <RadioGroup {...field}>
-                      <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio />} label="No" />
-                    </RadioGroup>
-                  )}
-                />
+                <>
+                  <FormLabel id="demo-controlled-radio-buttons-group">Recurring</FormLabel>
+                  <Controller
+                    name="recurring"
+                    control={control}
+                    defaultValue=""
+                    rules={{ required: "Recurring is required" }}
+                    render={({ field }) => (
+                      <RadioGroup {...field}>
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    )}
+                  />
+                </>
               )}
-              {errors.recurring && <span>This field is required</span>}
+              <FormHelperText error>{errors?.recurring?.message}</FormHelperText>
             </div>
             <div>
-              {/* {uploadFile?.split("?")[0] ? <img src={uploadFile?.split("?")[0]} alt="Plan Image" className={classes.image} /> : ""} */}
-              {!isEditing && <input type="file" {...(register("planImage"), { required: true })} onChange={handleFileChange} />}
-              {/* <Button variant="contained" component="label" sx={{ margin: 1 }} {...register("planImage", { required: true })}>
-                Upload
-                <input hidden accept="image/*" multiple type="file" onChange={handleFileChange} />
-              </Button> */}
-              {errors.planImage && <span>This field is required</span>}
+              {!isEditing && (
+                <TextField
+                  label="Plan Image"
+                  name="planImage"
+                  margin="normal"
+                  required
+                  fullWidth
+                  {...register("planImage", {
+                    onChange: (e) => handleFileChange(e),
+                    required: {
+                      value: true,
+                      message: "This is required",
+                    },
+                  })}
+                  type="file"
+                  InputLabelProps={{ shrink: true }}
+                  error={!!errors.planImage}
+                  helperText={errors?.planImage?.message}
+                />
+              )}
             </div>
 
             <div>
@@ -374,71 +381,65 @@ const Subscription = () => {
             </div>
 
             <div>
-              <TextField
-                label="Price"
+              <Controller
                 name="price"
-                margin="normal"
-                required
-                fullWidth
-                {...register("price", {
-                  required: {
-                    value: true,
-                    message: "This is required",
-                  },
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "Price is required",
                   pattern: {
-                    value: /^[0-9]*\.?[0-9]+$/,
+                    value: /^[1-9][0-9]*\.?[0-9]*$/,
                     message: "Please enter a positive number",
                   },
-                })}
-                type="number"
+                }}
+                render={({ field }) => <TextField {...field} type="number" label="Price" margin="normal" fullWidth error={!!errors.price} helperText={errors?.price?.message} />}
               />
-              <ErrorMessage errors={errors} name="price" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
               {!isEditing && (
-                <TextField
-                  label="Renewal Number"
+                <Controller
                   name="renewalNumber"
-                  margin="normal"
-                  required
-                  fullWidth
-                  {...register("renewalNumber", {
-                    required: {
-                      value: true,
-                      message: "This is required",
-                    },
+                  control={control}
+                  defaultValue=""
+                  rules={{
+                    required: "Renewal Number is required",
                     pattern: {
-                      value: /^[0-9]*\.?[0-9]+$/,
+                      value: /^[1-9][0-9]*\.?[0-9]*$/,
                       message: "Please enter a positive number",
                     },
-                  })}
-                  type="number"
+                  }}
+                  render={({ field }) => (
+                    <TextField {...field} type="number" label="Renewal Number" margin="normal" fullWidth error={!!errors.renewalNumber} helperText={errors?.renewalNumber?.message} />
+                  )}
                 />
               )}
-              <ErrorMessage errors={errors} name="renewalNumber" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
-              <TextField
-                label="Supportable Product Count"
+              <Controller
                 name="supportableProductCount"
-                margin="normal"
-                required
-                fullWidth
-                {...register("supportableProductCount", {
-                  required: {
-                    value: true,
-                    message: "This is required",
-                  },
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "Supportable Product Count is required",
                   pattern: {
-                    value: /^[0-9]*\.?[0-9]+$/,
+                    value: /^[1-9][0-9]*\.?[0-9]*$/,
                     message: "Please enter a positive number",
                   },
-                })}
-                type="number"
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="number"
+                    label="Supportable Product Count"
+                    margin="normal"
+                    fullWidth
+                    error={!!errors.supportableProductCount}
+                    helperText={errors?.supportableProductCount?.message}
+                  />
+                )}
               />
-              <ErrorMessage errors={errors} name="supportableProductCount" render={({ message }) => <p>{message}</p>} />
             </div>
           </DialogContent>
           <DialogActions>
