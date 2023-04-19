@@ -119,7 +119,6 @@ export default function SignIn() {
           </Button>
         </Box>
       </Box>
-      <SnackbarComponent open={isError} duration={4000} type="error" message={error?.message} />
     </Container>
   );
 }

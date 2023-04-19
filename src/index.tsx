@@ -10,19 +10,18 @@ import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider, from } fro
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 import SnackbarComponent from "./shared/components/Snackbar";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const baseURL = process.env.API_BASE_URL;
 const httpLink = createHttpLink({
   uri: baseURL,
 });
 
-const errorHandler = (message) => {
-  console.log("message", message);
-};
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
-      errorHandler(message);
+      toast(message);
     });
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
@@ -48,6 +47,7 @@ ReactDOM.render(
       <ApolloProvider client={client}>
         <BrowserRouter>
           <App />
+          <ToastContainer />
         </BrowserRouter>
       </ApolloProvider>
     </SidebarProvider>
