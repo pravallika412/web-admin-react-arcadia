@@ -10,8 +10,8 @@ const CREATE_HANDLER = gql`
 `;
 
 const GET_HANDLERS = gql`
-  query {
-    listHandlers {
+  query listHandlers($input: PageDto!) {
+    listHandlers(listHandlerDto: $input) {
       handlers {
         id
         email

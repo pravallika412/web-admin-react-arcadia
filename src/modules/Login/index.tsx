@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { Alert, Snackbar } from "@mui/material";
 import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
+import SnackbarComponent from "../../shared/components/Snackbar";
 
 interface IFormInput {
   email: string;
@@ -118,11 +119,6 @@ export default function SignIn() {
           </Button>
         </Box>
       </Box>
-      <Snackbar open={isError} autoHideDuration={6000}>
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {error?.message}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 }

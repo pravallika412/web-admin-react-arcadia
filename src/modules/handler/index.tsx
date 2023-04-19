@@ -79,7 +79,7 @@ const Handler = () => {
   } = useForm();
 
   useEffect(() => {
-    getHandlers();
+    getHandlers({ variables: { input: {} } });
   }, []);
 
   useEffect(() => {
