@@ -15,13 +15,14 @@ const GET_HANDLERS = gql`
       handlers {
         id
         email
-        official_email
+        name
         status
         handling_products_count
         joining_date
         device_id
         brand
       }
+      totalCount
     }
   }
 `;
@@ -35,13 +36,13 @@ const UPDATE_HANDLER = gql`
   }
 `;
 
-const SUSPEND_HANDLER = gql`
-  mutation suspendHandler($id: SuspendHandlerDto!) {
-    suspendHandler(suspendHandlerDto: $id) {
+const DELETE_HANDLER = gql`
+  mutation deleteHandler($id: DeleteHandlerDto!) {
+    deleteHandler(deleteHandlerDto: $id) {
       success
       message
     }
   }
 `;
 
-export { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, SUSPEND_HANDLER };
+export { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, DELETE_HANDLER };

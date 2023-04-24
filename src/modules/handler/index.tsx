@@ -31,7 +31,8 @@ import Dialog, { DialogProps } from "@mui/material/Dialog";
 import { useLazyQuery } from "@apollo/client";
 import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
-import { CREATE_HANDLER, GET_HANDLERS, SUSPEND_HANDLER, UPDATE_HANDLER } from "../../shared/graphQL/handler/queries";
+import { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, DELETE_HANDLER } from "../../shared/graphQL/handler/queries";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const useStyles = makeStyles({
   root: {
@@ -47,27 +48,33 @@ const useStyles = makeStyles({
 });
 
 const columns = [
-  { id: "email", label: "Name", minWidth: 170 },
+  { id: "name", label: "Name", minWidth: 170 },
   { id: "status", label: "Status", minWidth: 170 },
   { id: "handling_products_count", label: "Product Count", minWidth: 170 },
   { id: "joining_date", label: "Joining Date", minWidth: 170 },
   { id: "action", label: "Action" },
 ];
 
+const handlerStatus = [
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "suspend", label: "Suspend" },
+];
+
 const Handler = () => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const [openSuspend, setOpenSuspend] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const [suspendId, setSuspendId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [openDelete, setOpenDelete] = useState(false);
   const [createHandler, { data: createHandlerData }] = useMutation(CREATE_HANDLER);
   const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_HANDLER);
-  const [suspendHandler, { data: suspendHandlerData }] = useMutation(SUSPEND_HANDLER);
+  const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_HANDLER);
   const [getHandlers, { loading, error, data: getAllHandlers, refetch }] = useLazyQuery(GET_HANDLERS);
 
   const {
@@ -101,18 +108,24 @@ const Handler = () => {
   }, [updateHandlerData]);
 
   useEffect(() => {
-    if (suspendHandlerData) {
+    if (deleteHandlerData) {
       refetch();
     }
-  }, [suspendHandlerData]);
+  }, [deleteHandlerData]);
+
+  const handleDelete = () => {
+    deleteHandler({ variables: { id: { id: deleteId } } });
+    setOpenDelete(false);
+  };
 
   const onSubmit = (data) => {
+    let joiningDate = new Date(data.joiningDate);
     let payload = {
+      name: data.name,
       email: data.email,
-      official_email: data.officialEmail,
       password: data.password,
+      joiningDate: joiningDate.getFullYear() + "-" + (joiningDate.getMonth() + 1) + "-" + joiningDate.getDate(),
     };
-
     if (isEditing) {
       updateHandler({ variables: { id: { id: selectedData }, input: payload } });
     } else {
@@ -125,8 +138,9 @@ const Handler = () => {
   const handleEditClick = (row) => {
     let editData = getAllHandlers.listHandlers.handlers.filter((e) => e.id === row.id)[0];
     let updatepayload = {
+      name: editData.name,
       email: editData.email,
-      officialEmail: editData.official_email,
+      joiningDate: editData.joiningDate,
     };
     reset(updatepayload);
     setIsEditing(true);
@@ -134,14 +148,9 @@ const Handler = () => {
     setOpen(true);
   };
 
-  const handleSuspend = () => {
-    suspendHandler({ variables: { id: { id: suspendId } } });
-    setOpenSuspend(false);
-  };
-
-  const handleSuspendClick = (row) => {
-    setSuspendId(row.id);
-    setOpenSuspend(true);
+  const handleDeleteClick = (row) => {
+    setDeleteId(row.id);
+    setOpenDelete(true);
   };
 
   const handleOpen = () => {
@@ -152,7 +161,7 @@ const Handler = () => {
 
   const handleClose = () => {
     setOpen(false);
-    setOpenSuspend(false);
+    setOpenDelete(false);
     setSelectedData(null);
     reset();
   };
@@ -165,12 +174,6 @@ const Handler = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  // if (loading) return <SuspenseLoader />;
-
-  // if (error) {
-  //   return <h1>{error.message}</h1>;
-  // }
 
   return (
     <Container component="main">
@@ -202,9 +205,9 @@ const Handler = () => {
                               <IconButton onClick={() => handleEditClick(product)}>
                                 <EditIcon />
                               </IconButton>
-                              <Button variant="outlined" onClick={() => handleSuspendClick(product)} disabled={product["status"] == "suspended"} color="error">
-                                Suspend
-                              </Button>
+                              <IconButton onClick={() => handleDeleteClick(product)}>
+                                <DeleteIcon />
+                              </IconButton>
                             </>
                           ) : (
                             value
@@ -234,62 +237,83 @@ const Handler = () => {
           <DialogContent>
             <div>
               <TextField
+                label="Name"
+                name="name"
+                margin="normal"
+                required
+                fullWidth
+                {...register(
+                  "name",
+                  !isEditing
+                    ? {
+                        required: {
+                          value: true,
+                          message: "Name is required",
+                        },
+                        pattern: {
+                          value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
+                          message: "Please enter valid name",
+                        },
+                        maxLength: {
+                          value: 15,
+                          message: "Max length exceeded",
+                        },
+                      }
+                    : {}
+                )}
+                error={!!errors.name}
+                helperText={errors?.name?.message}
+              />
+            </div>
+
+            <div>
+              <TextField
                 label="Email"
                 name="email"
                 margin="normal"
                 required
                 fullWidth
-                {...register("email", {
-                  required: {
-                    value: true,
-                    message: "Email is required",
-                  },
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter valid name",
-                  },
-                })}
+                {...register(
+                  "email",
+                  !isEditing
+                    ? {
+                        required: {
+                          value: true,
+                          message: "Email is required",
+                        },
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: "Please enter valid Email",
+                        },
+                      }
+                    : {}
+                )}
+                error={!!errors.email}
+                helperText={errors?.email?.message}
               />
-              <ErrorMessage errors={errors} name="email" render={({ message }) => <p>{message}</p>} />
             </div>
 
             <div>
               <TextField
-                label="Official Email"
-                name="officialEmail"
-                margin="normal"
-                required
-                fullWidth
-                {...register("officialEmail", {
-                  required: {
-                    value: true,
-                    message: "Official Email is required",
-                  },
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Please enter valid Email",
-                  },
-                })}
-              />
-              <ErrorMessage errors={errors} name="officialEmail" render={({ message }) => <p>{message}</p>} />
-            </div>
-
-            <div>
-              <TextField
-                {...register("password", {
-                  required: {
-                    value: true,
-                    message: "Password is required",
-                  },
-                  pattern: {
-                    value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
-                    message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
-                  },
-                  minLength: {
-                    value: 8,
-                    message: "Password must be 8 characters long",
-                  },
-                })}
+                {...register(
+                  "password",
+                  !isEditing
+                    ? {
+                        required: {
+                          value: true,
+                          message: "Password is required",
+                        },
+                        pattern: {
+                          value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
+                          message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
+                        },
+                        minLength: {
+                          value: 8,
+                          message: "Password must be 8 characters long",
+                        },
+                      }
+                    : {}
+                )}
                 margin="normal"
                 required
                 fullWidth
@@ -297,9 +321,52 @@ const Handler = () => {
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="current-password"
+                error={!!errors.password}
+                helperText={errors?.password?.message}
               />
-              <ErrorMessage errors={errors} name="password" render={({ message }) => <span>{message}</span>} />
+            </div>
+            <div>
+              <TextField
+                label="Joining Date"
+                name="joiningDate"
+                margin="normal"
+                required
+                InputLabelProps={{ shrink: true }}
+                type="date"
+                fullWidth
+                {...register(
+                  "joiningDate",
+                  !isEditing
+                    ? {
+                        required: {
+                          value: true,
+                          message: "Joining Dateis required",
+                        },
+                      }
+                    : {}
+                )}
+                error={!!errors.joiningDate}
+                helperText={errors?.joiningDate?.message}
+              />
+            </div>
+            <div>
+              {isEditing && (
+                <Controller
+                  name="status"
+                  control={control}
+                  defaultValue=""
+                  rules={!isEditing ? { required: "Status is required" } : {}}
+                  render={({ field, fieldState: { error } }) => (
+                    <TextField {...field} select label="Status" error={Boolean(error)} helperText={error?.message} fullWidth>
+                      {handlerStatus.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              )}
             </div>
           </DialogContent>
           <DialogActions>
@@ -310,14 +377,14 @@ const Handler = () => {
           </DialogActions>
         </Box>
       </Dialog>
-      <Dialog open={openSuspend} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <DialogTitle id="alert-dialog-title">Suspend</DialogTitle>
+      <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">Delete</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">Are you sure you want to Suspend this handler?</DialogContentText>
+          <DialogContentText id="alert-dialog-description">Are you sure you want to delete this Handler?</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>No</Button>
-          <Button onClick={handleSuspend} autoFocus>
+          <Button onClick={handleDelete} autoFocus>
             Yes
           </Button>
         </DialogActions>
