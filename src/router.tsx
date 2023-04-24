@@ -21,6 +21,7 @@ const Login = Loader(lazy(() => import("./modules/Login")));
 const Overview = Loader(lazy(() => import("./modules/overview")));
 const Subscription = Loader(lazy(() => import("./modules/subscription")));
 const Handler = Loader(lazy(() => import("./modules/handler")));
+const Dog = Loader(lazy(() => import("./modules/Dog")));
 // Status
 
 const Status404 = Loader(lazy(() => import("./modules/pages/Status/Status404")));
@@ -72,6 +73,10 @@ const routes: RouteObject[] = [
       {
         path: "handler",
         element: <Handler />,
+      },
+      {
+        path: "dog",
+        element: <Dog />,
       },
     ],
   },

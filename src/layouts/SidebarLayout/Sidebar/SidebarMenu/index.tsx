@@ -187,6 +187,11 @@ function SidebarMenu() {
                   Handler
                 </Button>
               </ListItem>
+              <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dashboards/dog" startIcon={<DesignServicesTwoToneIcon />}>
+                  Dog
+                </Button>
+              </ListItem>
             </List>
           </SubMenuWrapper>
         </List>
