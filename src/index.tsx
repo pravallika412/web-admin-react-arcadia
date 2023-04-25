@@ -9,9 +9,9 @@ import * as serviceWorker from "./serviceWorker";
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider, from } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
-import SnackbarComponent from "./shared/components/Snackbar";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import toast, { Toaster } from "react-hot-toast";
+import { Alert, Snackbar } from "@mui/material";
 
 const baseURL = process.env.API_BASE_URL;
 const httpLink = createHttpLink({
@@ -21,7 +21,14 @@ const httpLink = createHttpLink({
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
-      toast(message);
+      toast(
+        <Snackbar open={true} autoHideDuration={3000} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+          <Alert severity="error" sx={{ width: "100%" }}>
+            {message}
+          </Alert>
+        </Snackbar>,
+        { duration: 3000, style: { display: "contents" } }
+      );
     });
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
@@ -47,7 +54,7 @@ ReactDOM.render(
       <ApolloProvider client={client}>
         <BrowserRouter>
           <App />
-          <ToastContainer />
+          <Toaster />
         </BrowserRouter>
       </ApolloProvider>
     </SidebarProvider>

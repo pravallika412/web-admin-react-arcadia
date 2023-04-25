@@ -1,11 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
 import {
-  FormControlLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
   TextField,
   Button,
   Box,
@@ -24,11 +19,9 @@ import {
   IconButton,
   DialogContentText,
 } from "@mui/material";
-import { useMutation } from "@apollo/client";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import Dialog, { DialogProps } from "@mui/material/Dialog";
-import { useLazyQuery } from "@apollo/client";
+import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, DELETE_HANDLER } from "../../shared/graphQL/handler/queries";
@@ -62,9 +55,7 @@ const handlerStatus = [
 ];
 
 const Handler = () => {
-  const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const [uploadFile, setUploadFile] = useState(null);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -75,7 +66,7 @@ const Handler = () => {
   const [createHandler, { data: createHandlerData }] = useMutation(CREATE_HANDLER);
   const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_HANDLER);
   const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_HANDLER);
-  const [getHandlers, { loading, error, data: getAllHandlers, refetch }] = useLazyQuery(GET_HANDLERS);
+  const [getHandlers, { data: getAllHandlers, refetch }] = useLazyQuery(GET_HANDLERS);
 
   const {
     control,
@@ -304,7 +295,7 @@ const Handler = () => {
                           message: "Password is required",
                         },
                         pattern: {
-                          value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
+                          value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
                           message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
                         },
                         minLength: {

@@ -1,11 +1,9 @@
 import { Controller, useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
 import {
   FormControlLabel,
   MenuItem,
   Radio,
   RadioGroup,
-  Select,
   TextField,
   Button,
   Box,
@@ -25,11 +23,9 @@ import {
   FormHelperText,
   FormLabel,
 } from "@mui/material";
-import { useMutation } from "@apollo/client";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import Dialog, { DialogProps } from "@mui/material/Dialog";
-import { useLazyQuery } from "@apollo/client";
+import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import { CREATE_SUBSCRIPTION, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
@@ -388,7 +384,7 @@ const Subscription = () => {
                 rules={{
                   required: "Price is required",
                   pattern: {
-                    value: /^[1-9][0-9]*\.?[0-9]*$/,
+                    value: /^[1-9]\d*\.?\d*$/,
                     message: "Please enter a positive number",
                   },
                 }}
@@ -405,7 +401,7 @@ const Subscription = () => {
                   rules={{
                     required: "Renewal Number is required",
                     pattern: {
-                      value: /^[1-9][0-9]*\.?[0-9]*$/,
+                      value: /^[1-9]\d*\.?\d*$/,
                       message: "Please enter a positive number",
                     },
                   }}
@@ -424,7 +420,7 @@ const Subscription = () => {
                 rules={{
                   required: "Supportable Product Count is required",
                   pattern: {
-                    value: /^[1-9][0-9]*\.?[0-9]*$/,
+                    value: /^[1-9]\d*\.?\d*$/,
                     message: "Please enter a positive number",
                   },
                 }}
