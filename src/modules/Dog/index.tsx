@@ -1,11 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
 import {
-  FormControlLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
   TextField,
   Button,
   Box,
@@ -24,11 +19,9 @@ import {
   IconButton,
   DialogContentText,
 } from "@mui/material";
-import { useMutation } from "@apollo/client";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import Dialog, { DialogProps } from "@mui/material/Dialog";
-import { useLazyQuery } from "@apollo/client";
+import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import { CREATE_PRODUCT, DELETE_PRODUCT, GET_PRODUCTS, UPDATE_PRODUCT } from "../../shared/graphQL/dog/queries";
@@ -60,7 +53,6 @@ const columns = [
 ];
 
 const Dog = () => {
-  const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState([]);
   const [openDelete, setOpenDelete] = useState(false);
@@ -74,7 +66,7 @@ const Dog = () => {
   const [createHandler, { data: createHandlerData }] = useMutation(CREATE_PRODUCT);
   const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_PRODUCT);
   const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_PRODUCT);
-  const [getProducts, { loading, error, data: getAllProducts, refetch }] = useLazyQuery(GET_PRODUCTS);
+  const [getProducts, { data: getAllProducts, refetch }] = useLazyQuery(GET_PRODUCTS);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   const {
@@ -137,17 +129,6 @@ const Dog = () => {
 
   const onSubmit = (data) => {
     console.log(data);
-    // let payload = {
-    //   email: data.email,
-    //   official_email: data.officialEmail,
-    //   password: data.password,
-    // };
-
-    // if (isEditing) {
-    //   updateHandler({ variables: { id: { id: selectedData }, input: payload } });
-    // } else {
-    //   createHandler({ variables: { input: payload } });
-    // }
 
     setOpen(false);
   };

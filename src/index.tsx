@@ -10,7 +10,7 @@ import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider, from } fro
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 import "react-toastify/dist/ReactToastify.css";
-import toast, { Toaster, resolveValue } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Alert, Snackbar } from "@mui/material";
 
 const baseURL = process.env.API_BASE_URL;
@@ -22,12 +22,12 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
       toast(
-        <Snackbar open={true} autoHideDuration={900000} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+        <Snackbar open={true} autoHideDuration={3000} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
           <Alert severity="error" sx={{ width: "100%" }}>
             {message}
           </Alert>
         </Snackbar>,
-        { duration: 400000, style: { display: "contents" } }
+        { duration: 3000, style: { display: "contents" } }
       );
     });
   if (networkError) console.log(`[Network error]: ${networkError}`);

@@ -1,12 +1,7 @@
-import * as React from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
@@ -16,10 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@apollo/client";
 import { useEffect } from "react";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
-import { Alert, Snackbar } from "@mui/material";
 import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
-import SnackbarComponent from "../../shared/components/Snackbar";
 
 interface IFormInput {
   email: string;
@@ -33,19 +25,15 @@ export default function SignIn() {
     formState: { errors },
   } = useForm();
 
-  const [isError, setIsError] = React.useState(false);
   const navigate = useNavigate();
-  const [loginUser, { loading, error, data }] = useMutation(LOGIN_ADMIN);
+  const [loginUser, { data }] = useMutation(LOGIN_ADMIN);
 
   useEffect(() => {
     if (data) {
       window.localStorage.setItem("token", data.signIn.jwtToken);
       navigate("/dashboards/overview");
     }
-    if (error) {
-      setIsError(true);
-    }
-  }, [navigate, data, error]);
+  }, [navigate, data]);
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
     loginUser({ variables: { input: formResponse } });
@@ -96,7 +84,7 @@ export default function SignIn() {
                 message: "Password is required",
               },
               pattern: {
-                value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
+                value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
                 message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
               },
               minLength: {

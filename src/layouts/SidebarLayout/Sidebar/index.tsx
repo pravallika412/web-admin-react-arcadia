@@ -2,7 +2,7 @@ import { useContext } from "react";
 import Scrollbar from "../../../shared/components/Scrollbar";
 import { SidebarContext } from "../../../shared/contexts/SidebarContext";
 
-import { Box, Drawer, alpha, styled, Divider, useTheme, Button, lighten, darken, Tooltip } from "@mui/material";
+import { Box, Drawer, alpha, styled, Divider, useTheme, lighten, darken } from "@mui/material";
 
 import SidebarMenu from "./SidebarMenu";
 import Logo from "../../../shared/components/LogoSign";
