@@ -14,8 +14,6 @@ const LogoWrapper = styled(Link)(
 );
 
 function Logo() {
-  const theme = useTheme();
-
   return (
     <>
       <LogoWrapper to="/dashboards/overview">

@@ -1,10 +1,9 @@
-import { Box, Button, ListItemIcon } from "@mui/material";
+import { Button, ListItemIcon } from "@mui/material";
 import { useState } from "react";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import MetamaskIcon from "../../../../../assets/images/Metamask.png";
@@ -34,31 +33,6 @@ function ConnectWallet() {
               <ListItemText primary="Metamask" />
             </ListItemButton>
           </ListItem>
-          {/* {emails.map((email) => (
-          <ListItem disableGutters>
-            <ListItemButton onClick={() => handleListItemClick(email)} key={email}>
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
-                  <PersonIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={email} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-        <ListItem disableGutters>
-          <ListItemButton
-            autoFocus
-            onClick={() => handleListItemClick('addAccount')}
-          >
-            <ListItemAvatar>
-              <Avatar>
-                <AddIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Add account" />
-          </ListItemButton>
-        </ListItem> */}
         </List>
       </Dialog>
     </>
