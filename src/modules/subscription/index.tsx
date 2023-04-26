@@ -160,7 +160,7 @@ const Subscription = () => {
       let payload = {
         name: data.name,
         description: data.description,
-        recurring: data.recurring === "yes" ? true : false,
+        recurring: true,
         planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
         renewalPeriod: data.renewalPeriod,
         price: Number(data.price),
@@ -313,26 +313,6 @@ const Subscription = () => {
               />
             </div>
 
-            <div>
-              {!isEditing && (
-                <>
-                  <FormLabel id="demo-controlled-radio-buttons-group">Recurring</FormLabel>
-                  <Controller
-                    name="recurring"
-                    control={control}
-                    defaultValue=""
-                    rules={{ required: "Recurring is required" }}
-                    render={({ field }) => (
-                      <RadioGroup {...field}>
-                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                        <FormControlLabel value="no" control={<Radio />} label="No" />
-                      </RadioGroup>
-                    )}
-                  />
-                </>
-              )}
-              <FormHelperText error>{errors?.recurring?.message}</FormHelperText>
-            </div>
             <div>
               {!isEditing && (
                 <TextField
