@@ -18,34 +18,26 @@ import {
   TablePagination,
   IconButton,
   DialogContentText,
+  useTheme,
+  Grid,
+  Typography,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
-import { makeStyles } from "@mui/styles";
-import EditIcon from "@mui/icons-material/Edit";
 import { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, DELETE_HANDLER } from "../../shared/graphQL/handler/queries";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { DatePicker } from "@mui/lab";
-
-const useStyles = makeStyles({
-  root: {
-    width: "100%",
-  },
-  container: {
-    maxHeight: 440,
-  },
-  image: {
-    maxWidth: 50,
-    maxHeight: 50,
-  },
-});
+import Label from "../../shared/components/Label";
+import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 
 const columns = [
   { id: "name", label: "Name", minWidth: 170 },
-  { id: "status", label: "Status", minWidth: 170 },
+  { id: "email", label: "Email", minWidth: 170 },
   { id: "handling_products_count", label: "Product Count", minWidth: 170 },
   { id: "joining_date", label: "Joining Date", minWidth: 170 },
+  { id: "status", label: "Status", minWidth: 170 },
   { id: "action", label: "Action" },
 ];
 
@@ -56,6 +48,7 @@ const handlerStatus = [
 ];
 
 const Handler = () => {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
@@ -177,12 +170,46 @@ const Handler = () => {
     const formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
   };
+  type Color = "error" | "info" | "secondary";
+  const getStatusLabel = (status: "active" | "inactive" | "suspended"): JSX.Element => {
+    let color = "";
+    let text = "";
+    switch (status) {
+      case "active":
+        text = "Active";
+        color = "info";
+        break;
+      case "inactive":
+        text = "Inactive";
+        color = "secondary";
+        break;
+      case "suspended":
+        text = "Suspended";
+        color = "error";
+        break;
+      default:
+        color = "warning";
+        text = "Inactive";
+        break;
+    }
+    return <Label color={color as Color}>{text}</Label>;
+  };
 
   return (
     <Container component="main">
-      <Button onClick={handleOpen} sx={{ margin: 1 }} variant="contained">
-        Add Handler
-      </Button>
+      <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
+        <Grid item>
+          <Typography variant="h3" component="h3" gutterBottom>
+            List of Handlers
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Button sx={{ my: 2 }} variant="contained" onClick={handleOpen} startIcon={<AddTwoToneIcon fontSize="small" />}>
+            Add Handler
+          </Button>
+        </Grid>
+      </Grid>
+
       <Paper>
         <TableContainer>
           <Table aria-label="Product table">
@@ -205,15 +232,41 @@ const Handler = () => {
                         <TableCell key={column.id}>
                           {column.id === "action" ? (
                             <>
-                              <IconButton onClick={() => handleEditClick(product)}>
-                                <EditIcon />
+                              <IconButton
+                                sx={{
+                                  "&:hover": {
+                                    background: theme.colors.primary.lighter,
+                                  },
+                                  color: theme.palette.primary.main,
+                                }}
+                                color="inherit"
+                                size="small"
+                                onClick={() => handleEditClick(product)}
+                              >
+                                <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
                               </IconButton>
-                              <IconButton onClick={() => handleDeleteClick(product)}>
-                                <DeleteIcon />
+                              <IconButton
+                                sx={{
+                                  "&:hover": { background: theme.colors.error.lighter },
+                                  color: theme.palette.error.main,
+                                }}
+                                color="inherit"
+                                size="small"
+                                onClick={() => handleDeleteClick(product)}
+                              >
+                                <DeleteTwoToneIcon fontSize="small" />
                               </IconButton>
                             </>
                           ) : column.id === "joining_date" ? (
                             formatDate(value)
+                          ) : column.id === "handling_products_count" ? (
+                            value == null ? (
+                              0
+                            ) : (
+                              value
+                            )
+                          ) : column.id === "status" ? (
+                            getStatusLabel(value)
                           ) : (
                             value
                           )}
@@ -237,8 +290,10 @@ const Handler = () => {
         />
       </Paper>
       <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
-        <DialogTitle id="scroll-dialog-title">{isEditing ? "Update Handler" : "Create Handler"}</DialogTitle>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: 500 }}>
+        <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 16px" }}>
+          {isEditing ? "Update Handler" : "Create Handler"}
+        </DialogTitle>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: 500 }}>
           <DialogContent>
             <div>
               <TextField

@@ -156,22 +156,22 @@ function SidebarMenu() {
           <SubMenuWrapper>
             <List component="div">
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dashboards/overview" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/overview" startIcon={<DesignServicesTwoToneIcon />}>
                   Overview
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dashboards/subscription" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<DesignServicesTwoToneIcon />}>
                   Subscription
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dashboards/handler" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/handler" startIcon={<DesignServicesTwoToneIcon />}>
                   Handler
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dashboards/dog" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dog" startIcon={<DesignServicesTwoToneIcon />}>
                   Dog
                 </Button>
               </ListItem>

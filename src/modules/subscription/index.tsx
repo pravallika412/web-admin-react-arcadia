@@ -1,9 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import {
-  FormControlLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
   TextField,
   Button,
   Box,
@@ -20,16 +17,18 @@ import {
   TableBody,
   TablePagination,
   IconButton,
-  FormHelperText,
-  FormLabel,
+  useTheme,
+  Grid,
+  Typography,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "@mui/styles";
-import EditIcon from "@mui/icons-material/Edit";
 import { CREATE_SUBSCRIPTION, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 
 const useStyles = makeStyles({
   root: {
@@ -48,7 +47,9 @@ const columns = [
   { id: "name", label: "Name", minWidth: 170 },
   { id: "description", label: "Description", minWidth: 170 },
   { id: "plan_image", label: "Plan Image", minWidth: 170 },
+  { id: "default_price", subid1: "renewal_number", subid2: "renewal_period", label: "Recurring Period", minWidth: 170 },
   { id: "default_price", subid: "price", label: "Price", minWidth: 170 },
+  { id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
   { id: "action", label: "Action" },
 ];
 
@@ -59,6 +60,7 @@ const renewalPeriodOptions = [
 ];
 
 const Subscription = () => {
+  const theme = useTheme();
   const classes = useStyles();
   const [file, setFile] = useState([]);
   const [open, setOpen] = useState(false);
@@ -216,9 +218,18 @@ const Subscription = () => {
 
   return (
     <Container component="main">
-      <Button onClick={handleOpen} sx={{ margin: 1 }} variant="contained">
-        Add Plan
-      </Button>
+      <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
+        <Grid item>
+          <Typography variant="h3" component="h3" gutterBottom>
+            List of Subscriptions
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Button sx={{ my: 2 }} variant="contained" onClick={handleOpen} startIcon={<AddTwoToneIcon fontSize="small" />}>
+            Add Plan
+          </Button>
+        </Grid>
+      </Grid>
       <Paper>
         <TableContainer>
           <Table aria-label="Product table">
@@ -242,10 +253,26 @@ const Subscription = () => {
                           {column.id === "plan_image" ? (
                             <img src={value} alt="Plan Image" className={classes.image} />
                           ) : column.id === "default_price" ? (
-                            value[column.subid]
+                            column.subid === "price" ? (
+                              "$" + value[column.subid]
+                            ) : column.subid === "supportable_product_count" ? (
+                              value[column.subid]
+                            ) : (
+                              value[column.subid1] + " " + value[column.subid2]
+                            )
                           ) : column.id === "action" ? (
-                            <IconButton onClick={() => handleEditClick(product)}>
-                              <EditIcon />
+                            <IconButton
+                              sx={{
+                                "&:hover": {
+                                  background: theme.colors.primary.lighter,
+                                },
+                                color: theme.palette.primary.main,
+                              }}
+                              color="inherit"
+                              size="small"
+                              onClick={() => handleEditClick(product)}
+                            >
+                              <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
                             </IconButton>
                           ) : (
                             value
@@ -270,8 +297,10 @@ const Subscription = () => {
         />
       </Paper>
       <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
-        <DialogTitle id="scroll-dialog-title">{isEditing ? "Update Plan" : "Add Plan"}</DialogTitle>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: 500 }}>
+        <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 24px" }}>
+          {isEditing ? "Update Plan" : "Add Plan"}
+        </DialogTitle>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: 500 }}>
           <DialogContent>
             <div>
               <Controller

@@ -1,6 +1,6 @@
 import { Box, styled, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
-import Logoo from "../../../assets/images/logo.jpeg";
+import Logoo from "../../../assets/images/WDFLogo.svg";
 
 const LogoWrapper = styled(Link)(
   ({ theme }) => `
@@ -16,7 +16,7 @@ const LogoWrapper = styled(Link)(
 function Logo() {
   return (
     <>
-      <LogoWrapper to="/dashboards/overview">
+      <LogoWrapper to="/overview">
         <Box
           component="img"
           sx={{
