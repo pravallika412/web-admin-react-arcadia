@@ -1,5 +1,4 @@
 const webpack = require("webpack");
-// const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const Dotenv = require("dotenv-webpack");
 
 module.exports = {
@@ -10,12 +9,6 @@ module.exports = {
     open: true,
     historyApiFallback: true,
   },
-  // plugins: [
-  //   // new ReactRefreshWebpackPlugin(),
-  //   new webpack.DefinePlugin({
-  //     'process.env.name': JSON.stringify('Aditya'),
-  //   }),
-  // ],
   plugins: [
     new webpack.ProvidePlugin({
       React: "react",

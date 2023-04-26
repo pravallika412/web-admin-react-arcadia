@@ -26,6 +26,7 @@ import { makeStyles } from "@mui/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, DELETE_HANDLER } from "../../shared/graphQL/handler/queries";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { DatePicker } from "@mui/lab";
 
 const useStyles = makeStyles({
   root: {
@@ -51,7 +52,7 @@ const columns = [
 const handlerStatus = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
-  { value: "suspend", label: "Suspend" },
+  { value: "suspended", label: "Suspend" },
 ];
 
 const Handler = () => {
@@ -116,6 +117,7 @@ const Handler = () => {
       email: data.email,
       password: data.password,
       joiningDate: joiningDate.getFullYear() + "-" + (joiningDate.getMonth() + 1) + "-" + joiningDate.getDate(),
+      status: data.status,
     };
     if (isEditing) {
       updateHandler({ variables: { id: { id: selectedData }, input: payload } });
@@ -131,7 +133,8 @@ const Handler = () => {
     let updatepayload = {
       name: editData.name,
       email: editData.email,
-      joiningDate: editData.joiningDate,
+      joiningDate: formatDate(editData.joining_date),
+      status: editData.status,
     };
     reset(updatepayload);
     setIsEditing(true);
@@ -164,6 +167,15 @@ const Handler = () => {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const formatDate = (dateToFormat) => {
+    const date = new Date(dateToFormat);
+    const year = date.getFullYear();
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);
+    const day = ("0" + date.getDate()).slice(-2);
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
   };
 
   return (
@@ -200,6 +212,8 @@ const Handler = () => {
                                 <DeleteIcon />
                               </IconButton>
                             </>
+                          ) : column.id === "joining_date" ? (
+                            formatDate(value)
                           ) : (
                             value
                           )}
@@ -233,25 +247,20 @@ const Handler = () => {
                 margin="normal"
                 required
                 fullWidth
-                {...register(
-                  "name",
-                  !isEditing
-                    ? {
-                        required: {
-                          value: true,
-                          message: "Name is required",
-                        },
-                        pattern: {
-                          value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                          message: "Please enter valid name",
-                        },
-                        maxLength: {
-                          value: 15,
-                          message: "Max length exceeded",
-                        },
-                      }
-                    : {}
-                )}
+                {...register("name", {
+                  required: {
+                    value: true,
+                    message: "Name is required",
+                  },
+                  pattern: {
+                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                    message: "Please enter valid name",
+                  },
+                  maxLength: {
+                    value: 15,
+                    message: "Max length exceeded",
+                  },
+                })}
                 error={!!errors.name}
                 helperText={errors?.name?.message}
               />
@@ -264,21 +273,16 @@ const Handler = () => {
                 margin="normal"
                 required
                 fullWidth
-                {...register(
-                  "email",
-                  !isEditing
-                    ? {
-                        required: {
-                          value: true,
-                          message: "Email is required",
-                        },
-                        pattern: {
-                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: "Please enter valid Email",
-                        },
-                      }
-                    : {}
-                )}
+                {...register("email", {
+                  required: {
+                    value: true,
+                    message: "Email is required",
+                  },
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter valid Email",
+                  },
+                })}
                 error={!!errors.email}
                 helperText={errors?.email?.message}
               />
@@ -317,27 +321,19 @@ const Handler = () => {
               />
             </div>
             <div>
-              <TextField
-                label="Joining Date"
+              <Controller
                 name="joiningDate"
-                margin="normal"
-                required
-                InputLabelProps={{ shrink: true }}
-                type="date"
-                fullWidth
-                {...register(
-                  "joiningDate",
-                  !isEditing
-                    ? {
-                        required: {
-                          value: true,
-                          message: "Joining Dateis required",
-                        },
-                      }
-                    : {}
+                control={control}
+                defaultValue=""
+                rules={!isEditing ? { required: "Joining Date is required" } : {}}
+                render={({ field: { onChange, value } }) => (
+                  <DatePicker
+                    label="Joining Date"
+                    value={value}
+                    onChange={(date) => onChange(formatDate(date))}
+                    renderInput={(params) => <TextField {...params} margin="normal" fullWidth error={Boolean(errors?.joiningDate)} helperText={errors?.joiningDate?.message} />}
+                  />
                 )}
-                error={!!errors.joiningDate}
-                helperText={errors?.joiningDate?.message}
               />
             </div>
             <div>
