@@ -393,6 +393,7 @@ const Handler = () => {
                   <DatePicker
                     label="Joining Date"
                     value={value}
+                    disablePast={!isEditing ? true : false}
                     onChange={(date) => onChange(formatDate(date))}
                     renderInput={(params) => <TextField {...params} margin="normal" fullWidth error={Boolean(errors?.joiningDate)} helperText={errors?.joiningDate?.message} />}
                   />
@@ -407,7 +408,7 @@ const Handler = () => {
                   defaultValue=""
                   rules={!isEditing ? { required: "Status is required" } : {}}
                   render={({ field, fieldState: { error } }) => (
-                    <TextField {...field} select label="Status" error={Boolean(error)} helperText={error?.message} fullWidth>
+                    <TextField {...field} select label="Status" sx={{ mt: 1 }} error={Boolean(error)} helperText={error?.message} fullWidth>
                       {handlerStatus.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
