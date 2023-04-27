@@ -55,12 +55,12 @@ const routes: RouteObject[] = [
     ],
   },
   {
-    path: "dashboards",
+    path: "",
     element: <SidebarLayout />,
     children: [
       {
         path: "",
-        element: <Navigate to="crypto" replace />,
+        element: <Navigate to="overview" replace />,
       },
       {
         path: "overview",

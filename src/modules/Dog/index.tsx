@@ -191,7 +191,7 @@ const Dog = () => {
   return (
     <Container component="main">
       <Button onClick={handleOpen} sx={{ margin: 1 }} variant="contained">
-        Add Handler
+        Add Dog
       </Button>
       <Paper>
         <TableContainer>
