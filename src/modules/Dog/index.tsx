@@ -206,31 +206,39 @@ const Dog = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={product.id}>
-                    {columns.map((column) => {
-                      const value = product[column.id];
-                      return (
-                        <TableCell key={column.id}>
-                          {column.id === "action" ? (
-                            <>
-                              <IconButton onClick={() => handleEditClick(product)}>
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton onClick={() => handleSuspendClick(product)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </>
-                          ) : (
-                            value
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+              {products.length > 0 ? (
+                products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
+                  return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={product.id}>
+                      {columns.map((column) => {
+                        const value = product[column.id];
+                        return (
+                          <TableCell key={column.id}>
+                            {column.id === "action" ? (
+                              <>
+                                <IconButton onClick={() => handleEditClick(product)}>
+                                  <EditIcon />
+                                </IconButton>
+                                <IconButton onClick={() => handleSuspendClick(product)}>
+                                  <DeleteIcon />
+                                </IconButton>
+                              </>
+                            ) : (
+                              value
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell align="center" colSpan={6}>
+                    No results found!
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
