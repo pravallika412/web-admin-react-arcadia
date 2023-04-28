@@ -223,59 +223,67 @@ const Handler = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={product.id}>
-                    {columns.map((column) => {
-                      const value = product[column.id];
-                      return (
-                        <TableCell key={column.id}>
-                          {column.id === "action" ? (
-                            <>
-                              <IconButton
-                                sx={{
-                                  "&:hover": {
-                                    background: theme.colors.primary.lighter,
-                                  },
-                                  color: theme.palette.primary.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={() => handleEditClick(product)}
-                              >
-                                <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
-                              </IconButton>
-                              <IconButton
-                                sx={{
-                                  "&:hover": { background: theme.colors.error.lighter },
-                                  color: theme.palette.error.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={() => handleDeleteClick(product)}
-                              >
-                                <DeleteTwoToneIcon fontSize="small" />
-                              </IconButton>
-                            </>
-                          ) : column.id === "joining_date" ? (
-                            formatDate(value)
-                          ) : column.id === "handling_products_count" ? (
-                            value == null ? (
-                              0
+              {products.length > 0 ? (
+                products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
+                  return (
+                    <TableRow hover tabIndex={-1} key={product.id}>
+                      {columns.map((column) => {
+                        const value = product[column.id];
+                        return (
+                          <TableCell key={column.id}>
+                            {column.id === "action" ? (
+                              <>
+                                <IconButton
+                                  sx={{
+                                    "&:hover": {
+                                      background: theme.colors.primary.lighter,
+                                    },
+                                    color: theme.palette.primary.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => handleEditClick(product)}
+                                >
+                                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+                                </IconButton>
+                                <IconButton
+                                  sx={{
+                                    "&:hover": { background: theme.colors.error.lighter },
+                                    color: theme.palette.error.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => handleDeleteClick(product)}
+                                >
+                                  <DeleteTwoToneIcon fontSize="small" />
+                                </IconButton>
+                              </>
+                            ) : column.id === "joining_date" ? (
+                              formatDate(value)
+                            ) : column.id === "handling_products_count" ? (
+                              value == null ? (
+                                0
+                              ) : (
+                                value
+                              )
+                            ) : column.id === "status" ? (
+                              getStatusLabel(value)
                             ) : (
                               value
-                            )
-                          ) : column.id === "status" ? (
-                            getStatusLabel(value)
-                          ) : (
-                            value
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell align="center" colSpan={6}>
+                    No results found!
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -385,6 +393,7 @@ const Handler = () => {
                   <DatePicker
                     label="Joining Date"
                     value={value}
+                    disablePast={!isEditing ? true : false}
                     onChange={(date) => onChange(formatDate(date))}
                     renderInput={(params) => <TextField {...params} margin="normal" fullWidth error={Boolean(errors?.joiningDate)} helperText={errors?.joiningDate?.message} />}
                   />
@@ -399,7 +408,7 @@ const Handler = () => {
                   defaultValue=""
                   rules={!isEditing ? { required: "Status is required" } : {}}
                   render={({ field, fieldState: { error } }) => (
-                    <TextField {...field} select label="Status" error={Boolean(error)} helperText={error?.message} fullWidth>
+                    <TextField {...field} select label="Status" sx={{ mt: 1 }} error={Boolean(error)} helperText={error?.message} fullWidth>
                       {handlerStatus.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}

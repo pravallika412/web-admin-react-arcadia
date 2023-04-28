@@ -243,46 +243,54 @@ const Subscription = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={product._id}>
-                    {columns.map((column) => {
-                      const value = product[column.id];
-                      return (
-                        <TableCell key={column.id}>
-                          {column.id === "plan_image" ? (
-                            <img src={value} alt="Plan Image" className={classes.image} />
-                          ) : column.id === "default_price" ? (
-                            column.subid === "price" ? (
-                              "$" + value[column.subid]
-                            ) : column.subid === "supportable_product_count" ? (
-                              value[column.subid]
+              {products.length > 0 ? (
+                products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
+                  return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={product._id}>
+                      {columns.map((column) => {
+                        const value = product[column.id];
+                        return (
+                          <TableCell key={column.id}>
+                            {column.id === "plan_image" ? (
+                              <img src={value} alt="Plan Image" className={classes.image} />
+                            ) : column.id === "default_price" ? (
+                              column.subid === "price" ? (
+                                "$" + value[column.subid]
+                              ) : column.subid === "supportable_product_count" ? (
+                                value[column.subid]
+                              ) : (
+                                value[column.subid1] + " " + value[column.subid2]
+                              )
+                            ) : column.id === "action" ? (
+                              <IconButton
+                                sx={{
+                                  "&:hover": {
+                                    background: theme.colors.primary.lighter,
+                                  },
+                                  color: theme.palette.primary.main,
+                                }}
+                                color="inherit"
+                                size="small"
+                                onClick={() => handleEditClick(product)}
+                              >
+                                <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+                              </IconButton>
                             ) : (
-                              value[column.subid1] + " " + value[column.subid2]
-                            )
-                          ) : column.id === "action" ? (
-                            <IconButton
-                              sx={{
-                                "&:hover": {
-                                  background: theme.colors.primary.lighter,
-                                },
-                                color: theme.palette.primary.main,
-                              }}
-                              color="inherit"
-                              size="small"
-                              onClick={() => handleEditClick(product)}
-                            >
-                              <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
-                            </IconButton>
-                          ) : (
-                            value
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+                              value
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell align="center" colSpan={6}>
+                    No results found!
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -318,7 +326,7 @@ const Subscription = () => {
                     message: "Max length exceeded",
                   },
                 }}
-                render={({ field }) => <TextField {...field} label="Name" margin="normal" fullWidth error={!!errors.name} helperText={errors?.name?.message} />}
+                render={({ field }) => <TextField {...field} label="Plan Name" margin="normal" fullWidth error={!!errors.name} helperText={errors?.name?.message} />}
               />
             </div>
 
@@ -338,7 +346,7 @@ const Subscription = () => {
                     message: "Max length exceeded",
                   },
                 }}
-                render={({ field }) => <TextField {...field} label="Description" margin="normal" fullWidth error={!!errors.description} helperText={errors?.description?.message} />}
+                render={({ field }) => <TextField {...field} label="Plan Description" margin="normal" fullWidth error={!!errors.description} helperText={errors?.description?.message} />}
               />
             </div>
 
