@@ -387,8 +387,22 @@ const Handler = () => {
               <Controller
                 name="joiningDate"
                 control={control}
-                defaultValue=""
-                rules={!isEditing ? { required: "Joining Date is required" } : {}}
+                defaultValue={null}
+                rules={
+                  !isEditing
+                    ? {
+                        required: "Joining Date is required",
+                        validate: (value) => {
+                          const date = new Date(value).getTime();
+                          if (isNaN(date)) {
+                            return "Invalid date format";
+                          } else {
+                            return "Please enter joining date";
+                          }
+                        },
+                      }
+                    : {}
+                }
                 render={({ field: { onChange, value } }) => (
                   <DatePicker
                     label="Joining Date"
