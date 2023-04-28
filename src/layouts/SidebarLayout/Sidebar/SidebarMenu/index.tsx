@@ -161,6 +161,11 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/core-entity" startIcon={<DesignServicesTwoToneIcon />}>
+                  Core Entity
+                </Button>
+              </ListItem>
+              <ListItem component="div">
                 <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<DesignServicesTwoToneIcon />}>
                   Subscription
                 </Button>

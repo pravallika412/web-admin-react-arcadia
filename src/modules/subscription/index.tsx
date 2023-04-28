@@ -381,7 +381,7 @@ const Subscription = () => {
                   defaultValue=""
                   rules={{ required: "Renewal period is required" }}
                   render={({ field, fieldState: { error } }) => (
-                    <TextField {...field} select label="Renewal Period" error={Boolean(error)} helperText={error?.message} fullWidth>
+                    <TextField {...field} select label="Renewal Period" sx={{ mt: 1 }} error={Boolean(error)} helperText={error?.message} fullWidth>
                       {renewalPeriodOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
