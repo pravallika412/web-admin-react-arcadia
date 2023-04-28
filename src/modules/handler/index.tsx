@@ -395,8 +395,9 @@ const Handler = () => {
                         validate: (value) => {
                           const date = new Date(value).getTime();
                           if (isNaN(date)) {
+                            console.log(date);
                             return "Invalid date format";
-                          } else {
+                          } else if (date == 0) {
                             return "Please enter joining date";
                           }
                         },
