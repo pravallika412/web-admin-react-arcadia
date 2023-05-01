@@ -80,6 +80,12 @@ export default function SignIn() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 1 }}>
             <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
               {...register("email", {
                 required: {
                   value: true,
@@ -87,20 +93,20 @@ export default function SignIn() {
                 },
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter valid email",
+                  message: "Please enter valid Email",
                 },
               })}
+              error={!!errors.email}
+              helperText={errors?.email?.message}
+            />
+            <TextField
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-            />
-            <ErrorMessage errors={errors} name="email" render={({ message }) => <span>{message}</span>} />
-            <TextField
+              name="password"
+              label="Password"
+              id="password"
+              type={showPassword ? "text" : "password"}
               {...register("password", {
                 required: {
                   value: true,
@@ -115,12 +121,6 @@ export default function SignIn() {
                   message: "Password must be 8 characters long",
                 },
               })}
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? "text" : "password"}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -130,10 +130,9 @@ export default function SignIn() {
                   </InputAdornment>
                 ),
               }}
-              id="password"
-              autoComplete="current-password"
+              error={!!errors.password}
+              helperText={errors?.password?.message}
             />
-            <ErrorMessage errors={errors} name="password" render={({ message }) => <span>{message}</span>} />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Sign In
             </Button>

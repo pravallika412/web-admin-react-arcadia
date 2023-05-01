@@ -20,6 +20,7 @@ import {
   useTheme,
   Grid,
   Typography,
+  InputAdornment,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -47,16 +48,9 @@ const columns = [
   { id: "name", label: "Name", minWidth: 170 },
   { id: "description", label: "Description", minWidth: 170 },
   { id: "plan_image", label: "Plan Image", minWidth: 170 },
-  { id: "default_price", subid1: "renewal_number", subid2: "renewal_period", label: "Recurring Period", minWidth: 170 },
   { id: "default_price", subid: "price", label: "Price", minWidth: 170 },
   { id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
   { id: "action", label: "Action" },
-];
-
-const renewalPeriodOptions = [
-  { value: "day", label: "Day" },
-  { value: "month", label: "Month" },
-  { value: "week", label: "Week" },
 ];
 
 const Subscription = () => {
@@ -155,6 +149,7 @@ const Subscription = () => {
         name: data.name,
         description: data.description,
         price: Number(data.price),
+        planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
         supportableProductCount: Number(data.supportableProductCount),
       };
       updateSubscription({ variables: { input: updatePayload } });
@@ -164,9 +159,9 @@ const Subscription = () => {
         description: data.description,
         recurring: true,
         planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
-        renewalPeriod: data.renewalPeriod,
+        renewalPeriod: "month",
         price: Number(data.price),
-        renewalNumber: Number(data.renewalNumber),
+        renewalNumber: 1,
         supportableProductCount: Number(data.supportableProductCount),
       };
       createSubscription({ variables: { input: payload } });
@@ -221,7 +216,7 @@ const Subscription = () => {
       <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
         <Grid item>
           <Typography variant="h3" component="h3" gutterBottom>
-            List of Subscriptions
+            List of Plans
           </Typography>
         </Grid>
         <Grid item>
@@ -256,10 +251,8 @@ const Subscription = () => {
                             ) : column.id === "default_price" ? (
                               column.subid === "price" ? (
                                 "$" + value[column.subid]
-                              ) : column.subid === "supportable_product_count" ? (
-                                value[column.subid]
                               ) : (
-                                value[column.subid1] + " " + value[column.subid2]
+                                value[column.subid]
                               )
                             ) : column.id === "action" ? (
                               <IconButton
@@ -318,11 +311,11 @@ const Subscription = () => {
                 rules={{
                   required: "Name is required",
                   pattern: {
-                    value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
+                    value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
                     message: "Please enter a valid name",
                   },
                   maxLength: {
-                    value: 15,
+                    value: 20,
                     message: "Max length exceeded",
                   },
                 }}
@@ -351,53 +344,31 @@ const Subscription = () => {
             </div>
 
             <div>
-              {!isEditing && (
-                <TextField
-                  label="Plan Image"
-                  name="planImage"
-                  margin="normal"
-                  required
-                  fullWidth
-                  {...register("planImage", {
-                    onChange: (e) => handleFileChange(e),
-                    required: {
-                      value: true,
-                      message: "This is required",
-                    },
-                  })}
-                  type="file"
-                  InputLabelProps={{ shrink: true }}
-                  error={!!errors.planImage}
-                  helperText={errors?.planImage?.message}
-                />
-              )}
-            </div>
-
-            <div>
-              {!isEditing && (
-                <Controller
-                  name="renewalPeriod"
-                  control={control}
-                  defaultValue=""
-                  rules={{ required: "Renewal period is required" }}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField {...field} select label="Renewal Period" sx={{ mt: 1 }} error={Boolean(error)} helperText={error?.message} fullWidth>
-                      {renewalPeriodOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-                />
-              )}
+              <TextField
+                label="Plan Image"
+                name="planImage"
+                margin="normal"
+                required
+                fullWidth
+                {...register("planImage", {
+                  onChange: (e) => handleFileChange(e),
+                  required: {
+                    value: true,
+                    message: "This is required",
+                  },
+                })}
+                type="file"
+                InputLabelProps={{ shrink: true }}
+                error={!!errors.planImage}
+                helperText={errors?.planImage?.message}
+              />
             </div>
 
             <div>
               <Controller
                 name="price"
                 control={control}
-                defaultValue=""
+                defaultValue="$"
                 rules={{
                   required: "Price is required",
                   pattern: {
@@ -405,28 +376,21 @@ const Subscription = () => {
                     message: "Please enter a positive number",
                   },
                 }}
-                render={({ field }) => <TextField {...field} type="number" label="Price" margin="normal" fullWidth error={!!errors.price} helperText={errors?.price?.message} />}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="number"
+                    label="Price"
+                    margin="normal"
+                    fullWidth
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    }}
+                    error={!!errors.price}
+                    helperText={errors?.price?.message}
+                  />
+                )}
               />
-            </div>
-
-            <div>
-              {!isEditing && (
-                <Controller
-                  name="renewalNumber"
-                  control={control}
-                  defaultValue=""
-                  rules={{
-                    required: "Renewal Number is required",
-                    pattern: {
-                      value: /^[1-9]\d*\.?\d*$/,
-                      message: "Please enter a positive number",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <TextField {...field} type="number" label="Renewal Number" margin="normal" fullWidth error={!!errors.renewalNumber} helperText={errors?.renewalNumber?.message} />
-                  )}
-                />
-              )}
             </div>
 
             <div>
@@ -442,15 +406,7 @@ const Subscription = () => {
                   },
                 }}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    type="number"
-                    label="Supportable Product Count"
-                    margin="normal"
-                    fullWidth
-                    error={!!errors.supportableProductCount}
-                    helperText={errors?.supportableProductCount?.message}
-                  />
+                  <TextField {...field} type="number" label="Product Count" margin="normal" fullWidth error={!!errors.supportableProductCount} helperText={errors?.supportableProductCount?.message} />
                 )}
               />
             </div>

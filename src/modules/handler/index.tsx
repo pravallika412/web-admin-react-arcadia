@@ -21,6 +21,7 @@ import {
   useTheme,
   Grid,
   Typography,
+  InputAdornment,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -31,19 +32,22 @@ import Label from "../../shared/components/Label";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const columns = [
   { id: "name", label: "Name", minWidth: 170 },
   { id: "email", label: "Email", minWidth: 170 },
   { id: "handling_products_count", label: "Product Count", minWidth: 170 },
-  { id: "joining_date", label: "Joining Date", minWidth: 170 },
+  { id: "joining_date", label: "Joining Date", type: "date", minWidth: 170 },
+  { id: "createdAt", label: "Created At", type: "date", minWidth: 170 },
   { id: "status", label: "Status", minWidth: 170 },
   { id: "action", label: "Action" },
 ];
 
 const handlerStatus = [
+  { value: "inactive", label: "Select Status" },
   { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
   { value: "suspended", label: "Suspend" },
 ];
 
@@ -57,6 +61,7 @@ const Handler = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [openDelete, setOpenDelete] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [createHandler, { data: createHandlerData }] = useMutation(CREATE_HANDLER);
   const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_HANDLER);
   const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_HANDLER);
@@ -163,6 +168,7 @@ const Handler = () => {
   };
 
   const formatDate = (dateToFormat) => {
+    console.log(dateToFormat);
     const date = new Date(dateToFormat);
     const year = date.getFullYear();
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -193,6 +199,12 @@ const Handler = () => {
         break;
     }
     return <Label color={color as Color}>{text}</Label>;
+  };
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
   };
 
   return (
@@ -258,7 +270,7 @@ const Handler = () => {
                                   <DeleteTwoToneIcon fontSize="small" />
                                 </IconButton>
                               </>
-                            ) : column.id === "joining_date" ? (
+                            ) : column.type === "date" ? (
                               formatDate(value)
                             ) : column.id === "handling_products_count" ? (
                               value == null ? (
@@ -377,8 +389,17 @@ const Handler = () => {
                 fullWidth
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
                 error={!!errors.password}
                 helperText={errors?.password?.message}
               />
@@ -408,7 +429,6 @@ const Handler = () => {
                   <DatePicker
                     label="Joining Date"
                     value={value}
-                    disablePast={!isEditing ? true : false}
                     onChange={(date) => onChange(formatDate(date))}
                     renderInput={(params) => <TextField {...params} margin="normal" fullWidth error={Boolean(errors?.joiningDate)} helperText={errors?.joiningDate?.message} />}
                   />
@@ -424,11 +444,20 @@ const Handler = () => {
                   rules={!isEditing ? { required: "Status is required" } : {}}
                   render={({ field, fieldState: { error } }) => (
                     <TextField {...field} select label="Status" sx={{ mt: 1 }} error={Boolean(error)} helperText={error?.message} fullWidth>
-                      {handlerStatus.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
+                      {handlerStatus.map((option) => {
+                        if (option.value === "inactive") {
+                          return (
+                            <MenuItem key={option.value} value={option.value} disabled>
+                              {option.label}
+                            </MenuItem>
+                          ); // don't render MenuItem if option value is "inactive"
+                        }
+                        return (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        );
+                      })}
                     </TextField>
                   )}
                 />
