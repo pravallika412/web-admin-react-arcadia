@@ -42,7 +42,7 @@ const columns = [
   { id: "joining_date", label: "Joining Date", type: "date", minWidth: 170 },
   { id: "createdAt", label: "Created At", type: "date", minWidth: 170 },
   { id: "status", label: "Status", minWidth: 170 },
-  { id: "action", label: "Action" },
+  { id: "action", label: "Action", minWidth: 170 },
 ];
 
 const handlerStatus = [

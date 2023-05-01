@@ -49,7 +49,7 @@ const columns = [
   { id: "description", label: "Description", minWidth: 170 },
   { id: "plan_image", label: "Plan Image", minWidth: 170 },
   { id: "default_price", subid: "price", label: "Price", minWidth: 170 },
-  { id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
+  // { id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
   { id: "action", label: "Action" },
 ];
 
@@ -59,6 +59,7 @@ const Subscription = () => {
   const [file, setFile] = useState([]);
   const [open, setOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
+  const [uploadFileEdit, setUploadFileEdit] = useState(null);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -79,8 +80,11 @@ const Subscription = () => {
   } = useForm();
 
   useEffect(() => {
-    if (createPresignedUrl) {
+    if (createPresignedUrl && !isEditing) {
       setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
+    }
+    if (createPresignedUrl && isEditing) {
+      setUploadFileEdit(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
     }
   }, [createPresignedUrl]);
 
@@ -89,6 +93,12 @@ const Subscription = () => {
       uploadImageFn(uploadFile, file);
     }
   }, [uploadFile]);
+
+  useEffect(() => {
+    if (uploadFileEdit) {
+      uploadImageFn(uploadFileEdit, file);
+    }
+  }, [uploadFileEdit]);
 
   useEffect(() => {
     getPlans();
@@ -149,7 +159,7 @@ const Subscription = () => {
         name: data.name,
         description: data.description,
         price: Number(data.price),
-        planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
+        planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile,
         supportableProductCount: Number(data.supportableProductCount),
       };
       updateSubscription({ variables: { input: updatePayload } });
@@ -348,15 +358,19 @@ const Subscription = () => {
                 label="Plan Image"
                 name="planImage"
                 margin="normal"
-                required
                 fullWidth
-                {...register("planImage", {
-                  onChange: (e) => handleFileChange(e),
-                  required: {
-                    value: true,
-                    message: "This is required",
-                  },
-                })}
+                {...register(
+                  "planImage",
+                  !isEditing
+                    ? {
+                        onChange: (e) => handleFileChange(e),
+                        required: {
+                          value: true,
+                          message: "This is required",
+                        },
+                      }
+                    : { onChange: (e) => handleFileChange(e) }
+                )}
                 type="file"
                 InputLabelProps={{ shrink: true }}
                 error={!!errors.planImage}
