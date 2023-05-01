@@ -21,6 +21,7 @@ const GET_HANDLERS = gql`
         joining_date
         device_id
         brand
+        createdAt
       }
       totalCount
     }
