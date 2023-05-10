@@ -168,7 +168,6 @@ const Handler = () => {
   };
 
   const formatDate = (dateToFormat) => {
-    console.log(dateToFormat);
     const date = new Date(dateToFormat);
     const year = date.getFullYear();
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -416,7 +415,6 @@ const Handler = () => {
                         validate: (value) => {
                           const date = new Date(value).getTime();
                           if (isNaN(date)) {
-                            console.log(date);
                             return "Invalid date format";
                           } else if (date == 0) {
                             return "Please enter joining date";

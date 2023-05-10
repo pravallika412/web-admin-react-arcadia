@@ -6,6 +6,11 @@ import { SidebarContext } from "../../../../shared/contexts/SidebarContext";
 
 import DesignServicesTwoToneIcon from "@mui/icons-material/DesignServicesTwoTone";
 import CheckBoxTwoToneIcon from "@mui/icons-material/CheckBoxTwoTone";
+import SettingsIcon from "@mui/icons-material/Settings";
+import PetsIcon from "@mui/icons-material/Pets";
+import PersonIcon from "@mui/icons-material/Person";
+import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
+import BarChartIcon from "@mui/icons-material/BarChart";
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -156,8 +161,8 @@ function SidebarMenu() {
           <SubMenuWrapper>
             <List component="div">
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/overview" startIcon={<DesignServicesTwoToneIcon />}>
-                  Overview
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/overview" startIcon={<BarChartIcon />}>
+                  Dashboard
                 </Button>
               </ListItem>
               <ListItem component="div">
@@ -166,18 +171,28 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/sponsors" startIcon={<DesignServicesTwoToneIcon />}>
+                  Sponsor
+                </Button>
+              </ListItem>
+              <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<SubscriptionsIcon />}>
                   Subscription
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/handler" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/handler" startIcon={<PersonIcon />}>
                   Handler
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dog" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dog" startIcon={<PetsIcon />}>
                   Dog
+                </Button>
+              </ListItem>
+              <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/settings" startIcon={<SettingsIcon />}>
+                  Settings
                 </Button>
               </ListItem>
             </List>

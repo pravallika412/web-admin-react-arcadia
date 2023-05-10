@@ -1,7 +1,9 @@
-import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, Tab, Tabs, TextField, Typography } from "@mui/material";
-import { SyntheticEvent, useState } from "react";
+import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, MenuItem, Select, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { SyntheticEvent, useEffect, useState } from "react";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
-import { useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { CREATE_ENTITY, GET_DATATYPES } from "../../shared/graphQL/core-entity/queries";
+import { useLazyQuery, useMutation } from "@apollo/client";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -33,20 +35,59 @@ function a11yProps(index: number) {
 const CoreEntity = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(0);
+  const [ageOptions, setAgeOptions] = useState([]);
+  const [getDataTypes, { data: getAllDataTypes, refetch }] = useLazyQuery(GET_DATATYPES);
+  const [createEntity, { data: createEntityData }] = useMutation(CREATE_ENTITY);
 
   const {
     control,
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm();
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "fields",
+  });
+
+  useEffect(() => {
+    getDataTypes();
+  }, []);
+
+  useEffect(() => {
+    if (getAllDataTypes) {
+      setAgeOptions(getAllDataTypes.retrieveDataTypes);
+    }
+  }, [getAllDataTypes]);
 
   const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
   const handleOpen = () => {
     setOpen(true);
+  };
+
+  const onSubmit = (data) => {
+    const initialFields = [
+      { fieldName: "name", dataType: 1, data: "" },
+      { fieldName: "photo_url", dataType: 7, data: "" },
+      { fieldName: "status", dataType: 5, data: ["active", "inactive"] },
+    ];
+    data.fields.push(...initialFields);
+    data.fields.forEach((e) => {
+      if (e.dataType == 5 && typeof e.data == "string") {
+        console.log(e.data);
+        e.data = e.data.split(",");
+      }
+    });
+    const payload = {
+      collectionName: data.collectionName,
+      fields: JSON.stringify(data.fields),
+    };
+    createEntity({ variables: { input: payload } });
   };
 
   return (
@@ -66,188 +107,93 @@ const CoreEntity = () => {
                   Collection
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  <TextField
-                    label="Collection Name"
-                    name="collectionName"
-                    margin="normal"
-                    required
-                    fullWidth
-                    {...register("collectionName", {
-                      required: {
-                        value: true,
-                        message: "Collection Name is required",
-                      },
-                      pattern: {
-                        value: /^[A-Za-z][A-Za-z\s]*$/,
-                        message: "Please enter valid collection name",
-                      },
-                      maxLength: {
-                        value: 15,
-                        message: "Max length exceeded",
-                      },
-                    })}
-                    error={!!errors.collectionName}
-                    helperText={errors?.collectionName?.message}
-                  />
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Entity Name"
-                        name="entityName"
-                        margin="normal"
-                        fullWidth
-                        required
-                        {...register("entityName", {
-                          required: {
-                            value: true,
-                            message: "Entity Name is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid entity name",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.entityName}
-                        helperText={errors?.entityName?.message}
-                      />
+                  <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+                    <TextField
+                      label="Collection Name"
+                      name="collectionName"
+                      margin="normal"
+                      required
+                      fullWidth
+                      {...register("collectionName", {
+                        required: {
+                          value: true,
+                          message: "Collection Name is required",
+                        },
+                        pattern: {
+                          value: /^[A-Za-z][A-Za-z\s]*$/,
+                          message: "Please enter valid collection name",
+                        },
+                        maxLength: {
+                          value: 15,
+                          message: "Max length exceeded",
+                        },
+                      })}
+                      error={!!errors.collectionName}
+                      helperText={errors?.collectionName?.message}
+                    />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField label="Entity Name" margin="normal" value="name" disabled fullWidth />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField label="Entity Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Entity Type"
-                        name="entityType"
-                        margin="normal"
-                        required
-                        fullWidth
-                        {...register("entityType", {
-                          required: {
-                            value: true,
-                            message: "Entity Type is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid entity type",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.entityType}
-                        helperText={errors?.entityType?.message}
-                        select
-                      />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField label="Entity Name" margin="normal" value="photo_url" disabled fullWidth />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField label="Entity Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Entity Name"
-                        name="entityName"
-                        margin="normal"
-                        fullWidth
-                        required
-                        {...register("entityName", {
-                          required: {
-                            value: true,
-                            message: "Entity Name is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid entity name",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.entityName}
-                        helperText={errors?.entityName?.message}
-                      />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField label="Entity Name" margin="normal" value="status" disabled fullWidth />
+                      </Grid>
+                      <Grid item xs={5}>
+                        <TextField label="Entity Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <Button variant="contained" sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: "", data: "" })}>
+                          Add
+                        </Button>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Entity Type"
-                        name="entityType"
-                        margin="normal"
-                        required
-                        fullWidth
-                        {...register("entityType", {
-                          required: {
-                            value: true,
-                            message: "Entity Type is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid entity type",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.entityType}
-                        helperText={errors?.entityType?.message}
-                        select
-                      />
+                    {fields.map((field, index) => (
+                      <div key={field.id}>
+                        <Grid container spacing={2} my={1}>
+                          <Grid item xs={6}>
+                            <TextField label="Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
+                          </Grid>
+                          <Grid item xs={5}>
+                            <Select label="Type" variant="outlined" defaultValue="" fullWidth {...register(`fields.${index}.dataType`)}>
+                              {ageOptions.map((option) => (
+                                <MenuItem key={option.order} value={option.order}>
+                                  {option.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </Grid>
+                          {watch(`fields.${index}.dataType`) === 5 && (
+                            <Grid item xs={12}>
+                              <TextField label="Textarea" multiline rows={4} fullWidth {...register(`fields.${index}.data`)} />
+                            </Grid>
+                          )}
+                          <Grid item xs={1}>
+                            <Button variant="contained" sx={{ mt: 0.5 }} onClick={() => remove(index)}>
+                              Remove
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </div>
+                    ))}
+                    <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
+                      <Button variant="contained" type="submit">
+                        Create
+                      </Button>
                     </Grid>
-                  </Grid>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Entity Name"
-                        name="entityName"
-                        margin="normal"
-                        fullWidth
-                        required
-                        {...register("entityName", {
-                          required: {
-                            value: true,
-                            message: "Entity Name is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid entity name",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.entityName}
-                        helperText={errors?.entityName?.message}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Entity Type"
-                        name="entityType"
-                        margin="normal"
-                        required
-                        fullWidth
-                        {...register("entityType", {
-                          required: {
-                            value: true,
-                            message: "Entity Type is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid entity type",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.entityType}
-                        helperText={errors?.entityType?.message}
-                        select
-                      />
-                    </Grid>
-                  </Grid>
+                  </Box>
                 </TabPanel>
               </Box>
             </CardContent>
