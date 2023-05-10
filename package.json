@@ -28,6 +28,7 @@
     "date-fns": "2.28.0",
     "graphql": "^16.6.0",
     "history": "5.3.0",
+    "json-graphql-server": "^2.3.2",
     "nprogress": "0.2.0",
     "numeral": "2.0.6",
     "path": "^0.12.7",

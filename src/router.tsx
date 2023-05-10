@@ -23,6 +23,7 @@ const Subscription = Loader(lazy(() => import("./modules/subscription")));
 const Handler = Loader(lazy(() => import("./modules/handler")));
 const Dog = Loader(lazy(() => import("./modules/Dog")));
 const CoreEntity = Loader(lazy(() => import("./modules/CoreEntity")));
+const Sponsors = Loader(lazy(() => import("./modules/sponsor")));
 const Settings = Loader(lazy(() => import("./modules/settings")));
 // Status
 
@@ -83,6 +84,10 @@ const routes: RouteObject[] = [
       {
         path: "core-entity",
         element: <CoreEntity />,
+      },
+      {
+        path: "sponsors",
+        element: <Sponsors />,
       },
       {
         path: "settings",

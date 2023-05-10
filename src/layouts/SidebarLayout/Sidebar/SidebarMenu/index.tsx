@@ -171,6 +171,11 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/sponsors" startIcon={<DesignServicesTwoToneIcon />}>
+                  Sponsor
+                </Button>
+              </ListItem>
+              <ListItem component="div">
                 <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<SubscriptionsIcon />}>
                   Subscription
                 </Button>

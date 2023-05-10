@@ -44,6 +44,7 @@ const CoreEntity = () => {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm();
 
@@ -76,11 +77,16 @@ const CoreEntity = () => {
       { fieldName: "status", dataType: 5, data: ["active", "inactive"] },
     ];
     data.fields.push(...initialFields);
+    data.fields.forEach((e) => {
+      if (e.dataType == 5 && typeof e.data == "string") {
+        console.log(e.data);
+        e.data = e.data.split(",");
+      }
+    });
     const payload = {
       collectionName: data.collectionName,
-      fields: JSON.stringify(data.fields).replace(/"/g, '\\"'),
+      fields: JSON.stringify(data.fields),
     };
-    console.log(payload);
     createEntity({ variables: { input: payload } });
   };
 
@@ -169,6 +175,11 @@ const CoreEntity = () => {
                               ))}
                             </Select>
                           </Grid>
+                          {watch(`fields.${index}.dataType`) === 5 && (
+                            <Grid item xs={12}>
+                              <TextField label="Textarea" multiline rows={4} fullWidth {...register(`fields.${index}.data`)} />
+                            </Grid>
+                          )}
                           <Grid item xs={1}>
                             <Button variant="contained" sx={{ mt: 0.5 }} onClick={() => remove(index)}>
                               Remove
