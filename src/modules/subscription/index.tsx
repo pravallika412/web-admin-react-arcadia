@@ -160,7 +160,7 @@ const Subscription = () => {
         description: data.description,
         price: Number(data.price),
         planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile,
-        supportableProductCount: Number(data.supportableProductCount),
+        supportableProductCount: data.supportableProductCount,
       };
       updateSubscription({ variables: { input: updatePayload } });
     } else {
@@ -172,7 +172,7 @@ const Subscription = () => {
         renewalPeriod: "month",
         price: Number(data.price),
         renewalNumber: 1,
-        supportableProductCount: Number(data.supportableProductCount),
+        supportableProductCount: data.supportableProductCount,
       };
       createSubscription({ variables: { input: payload } });
     }
@@ -415,12 +415,12 @@ const Subscription = () => {
                 rules={{
                   required: "Supportable Product Count is required",
                   pattern: {
-                    value: /^[1-9]\d*\.?\d*$/,
-                    message: "Please enter a positive number",
+                    value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
+                    message: "Please enter a valid Product Count",
                   },
                 }}
                 render={({ field }) => (
-                  <TextField {...field} type="number" label="Product Count" margin="normal" fullWidth error={!!errors.supportableProductCount} helperText={errors?.supportableProductCount?.message} />
+                  <TextField {...field} label="Product Count" margin="normal" fullWidth error={!!errors.supportableProductCount} helperText={errors?.supportableProductCount?.message} />
                 )}
               />
             </div>

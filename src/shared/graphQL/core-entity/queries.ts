@@ -19,4 +19,14 @@ const GET_DATATYPES = gql`
   }
 `;
 
-export { CREATE_ENTITY, GET_DATATYPES };
+const GET_COREENTITY = gql`
+  query {
+    retrieveCoreEntity {
+      _id
+      product_table_name
+      product_schema
+    }
+  }
+`;
+
+export { CREATE_ENTITY, GET_DATATYPES, GET_COREENTITY };

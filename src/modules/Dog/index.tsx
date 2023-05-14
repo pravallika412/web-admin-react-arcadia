@@ -14,10 +14,17 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  Select,
   TableBody,
   TablePagination,
   IconButton,
   DialogContentText,
+  TextareaAutosize,
+  FormControlLabel,
+  Checkbox,
+  Stepper,
+  Step,
+  StepLabel,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -29,6 +36,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { DogValidationSchema } from "../../shared/utilities/dogValidationSchema";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
+import { DatePicker } from "@mui/lab";
+import { Link, Route, Routes } from "react-router-dom";
+import AddDog from "./addDog";
 
 const useStyles = makeStyles({
   root: {
@@ -52,6 +62,95 @@ const columns = [
   { id: "action", label: "Action" },
 ];
 
+const datatypes = [
+  {
+    order: 1,
+    name: "String",
+    fieldType: "Text",
+  },
+  {
+    order: 2,
+    name: "Number",
+    fieldType: "Text",
+  },
+  {
+    order: 3,
+    name: "Date",
+    fieldType: "DatePicker",
+  },
+  {
+    order: 4,
+    name: "Boolean",
+    fieldType: "Select",
+  },
+  {
+    order: 5,
+    name: "Enum",
+    fieldType: "Text(comma-separated)",
+  },
+  {
+    order: 6,
+    name: "Textarea",
+    fieldType: "Textarea",
+  },
+  {
+    order: 7,
+    name: "File",
+    fieldType: "File",
+  },
+  {
+    order: 8,
+    name: "Files",
+    fieldType: "Files",
+  },
+];
+const data = [
+  { fieldName: "name", dataType: 1, data: "" },
+  { fieldName: "dob", dataType: 3, data: "" },
+  { fieldName: "adoption_date", dataType: 3, data: "" },
+  { fieldName: "rest_date", dataType: 3, data: "" },
+  { fieldName: "service", dataType: 5, data: ["army", "navy"] },
+  {
+    fieldName: "service_start",
+    dataType: 3,
+    data: "",
+  },
+  {
+    fieldName: "service_end",
+    dataType: 3,
+    data: "",
+  },
+  {
+    fieldName: "photo_url",
+    dataType: 7,
+    data: "",
+  },
+  {
+    fieldName: "gallery",
+    dataType: 8,
+    data: "",
+  },
+  {
+    fieldName: "medals",
+    dataType: 8,
+    data: "",
+  },
+  {
+    fieldName: "medical_reports",
+    dataType: 8,
+    data: "",
+  },
+  {
+    fieldName: "status",
+    dataType: 5,
+    data: ["active", "inactive"],
+  },
+  {
+    fieldName: "Profile_status",
+    dataType: 5,
+    data: ["sleeping", "playing"],
+  },
+];
 const Dog = () => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState([]);
@@ -76,6 +175,50 @@ const Dog = () => {
     reset,
     formState: { errors },
   } = useForm({ resolver: yupResolver(DogValidationSchema) });
+
+  const [formData, setFormData] = useState({});
+
+  const steps = ["Basic Information", "Other Information"];
+
+  const handleChange = (fieldName, value) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [fieldName]: value,
+    }));
+  };
+
+  const getFieldComponent = (field) => {
+    const fieldType = datatypes.find((type) => type.order === field.dataType).fieldType;
+    const fieldName = field.fieldName;
+    const fieldValue = formData[fieldName] || "";
+
+    switch (fieldType) {
+      case "Text":
+        return <TextField label={fieldName} value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)} />;
+      // case "DatePicker":
+      //   return <DatePicker label={fieldName} value={fieldValue} onChange={(date) => handleChange(fieldName, date)} />;
+      case "Select":
+        const options = field.data;
+        return (
+          <Select label={fieldName} value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)}>
+            {options.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </Select>
+        );
+      case "Text(comma-separated)":
+        const enumOptions = field.data;
+        return <TextField label={fieldName} value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)} helperText={`Choose one of these options: ${enumOptions.join(", ")}`} />;
+      case "Textarea":
+        return <TextareaAutosize value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)} />;
+      case "Checkbox":
+        return <FormControlLabel control={<Checkbox />} label={fieldName} checked={fieldValue} />;
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     getProducts({ variables: { input: {} } });
@@ -125,12 +268,6 @@ const Dog = () => {
         "Content-Type": data.type,
       },
     });
-  };
-
-  const onSubmit = (data) => {
-    console.log(data);
-
-    setOpen(false);
   };
 
   const handleEditClick = (row) => {
@@ -190,9 +327,11 @@ const Dog = () => {
 
   return (
     <Container component="main">
-      <Button onClick={handleOpen} sx={{ margin: 1 }} variant="contained">
-        Add Dog
-      </Button>
+      <Link to="/dog/addDog">
+        <Button onClick={handleOpen} sx={{ margin: 1 }} variant="contained">
+          Add Dog
+        </Button>
+      </Link>
       <Paper>
         <TableContainer>
           <Table aria-label="Product table">
@@ -252,169 +391,24 @@ const Dog = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
+      {/* <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
         <DialogTitle id="scroll-dialog-title">{isEditing ? "Update Handler" : "Create Handler"}</DialogTitle>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: 500 }}>
           <DialogContent>
             <div>
-              <TextField label="Name" margin="normal" required fullWidth {...register("name")} error={!!errors.name} helperText={errors.name?.message} />
+              {data.map((field) => (
+                <div key={field.fieldName}>{getFieldComponent(field)}</div>
+              ))}
             </div>
-            <div>
-              <TextField label="Service" margin="normal" defaultValue="" required fullWidth select {...register("service")} error={!!errors.service} helperText={errors.service?.message}>
-                <MenuItem value="navy">Navy</MenuItem>
-                <MenuItem value="army">Army</MenuItem>
-              </TextField>
-            </div>
-            <div>
-              <TextField
-                label="Photo URL"
-                name="photo_url"
-                margin="normal"
-                type="file"
-                required
-                fullWidth
-                {...register("photo_url", {
-                  onChange: (e) => handleFileChange(e),
-                  required: {
-                    value: true,
-                    message: "This is required",
-                  },
-                })}
-                InputLabelProps={{ shrink: true }}
-                error={!!errors.photo_url}
-                helperText={errors?.photo_url?.message}
-              />
-            </div>
-            <Controller
-              name="file"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  onChange={(e) => handleFileChange(e)}
-                  {...field}
-                  label="Upload File"
-                  type="file"
-                  variant="outlined"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  error={!!errors.file}
-                  helperText={errors.file && errors.file.message}
-                  fullWidth
-                />
-              )}
-            />
-            {/* <div>
-              <Controller
-                name="photo_url"
-                control={control}
-                defaultValue=""
-                render={({ field }) => <TextField {...field} type="file" label="File" error={!!errors.photo_url} helperText={errors?.photo_url?.message} InputLabelProps={{ shrink: true }} />}
-              />
-            </div> */}
-            <div>
-              <TextField
-                label="Gallery"
-                margin="normal"
-                required
-                fullWidth
-                {...register("gallery")}
-                type="file"
-                onChange={(e) => handleFileChange(e)}
-                InputLabelProps={{ shrink: true }}
-                error={!!errors.gallery}
-                helperText={errors?.gallery?.message}
-              />
-            </div>
-            <div>
-              <TextField label="Medals" margin="normal" required fullWidth {...register("medals")} error={!!errors.medals} helperText={errors.medals?.message} />
-            </div>
-            <div>
-              <TextField
-                label="Medical Report"
-                margin="normal"
-                required
-                fullWidth
-                {...register("medical_report", {
-                  onChange: (e) => handleFileChange(e),
-                })}
-                type="file"
-                InputLabelProps={{ shrink: true }}
-                error={!!errors.medical_report}
-                helperText={errors?.medical_report?.message}
-              />
-            </div>
-            <div>
-              <TextField label="Profile Status" margin="normal" required fullWidth {...register("profile_status")} error={!!errors.profile_status} helperText={errors.profile_status?.message} />
-            </div>
-            <div>
-              <TextField label="Breed Name" margin="normal" required fullWidth {...register("breed_name")} error={!!errors.breed_name} helperText={errors.breed_name?.message} />
-            </div>
-            <div>
-              <TextField
-                label="Date of Birth"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
-                required
-                fullWidth
-                {...register("dob")}
-                error={!!errors.dob}
-                helperText={errors.dob?.message}
-              />
-            </div>
-            <div>
-              <TextField
-                label="Service Start Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
-                required
-                fullWidth
-                {...register("service_start")}
-                error={!!errors.service_start}
-                helperText={errors.service_start?.message}
-              />
-            </div>
-            <div>
-              <TextField
-                label="Service End Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
-                required
-                fullWidth
-                {...register("service_end")}
-                error={!!errors.service_end}
-                helperText={errors.service_end?.message}
-              />
-            </div>
-            <div>
-              <TextField
-                label="Adoption Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
-                required
-                fullWidth
-                {...register("adoption_date")}
-                error={!!errors.adoption_date}
-                helperText={errors.adoption_date?.message}
-              />
-            </div>
-            <div>
-              <TextField
-                label="Handlers Count"
-                margin="normal"
-                type="number"
-                required
-                fullWidth
-                {...register("handlers_count")}
-                error={!!errors.handlers_count}
-                helperText={errors.handlers_count?.message}
-              />
-            </div>
+            <Box sx={{ width: "100%" }}>
+              <Stepper alternativeLabel>
+                {steps.map((label) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            </Box>
           </DialogContent>
           <DialogActions>
             <Button type="submit" variant="contained">
@@ -423,7 +417,7 @@ const Dog = () => {
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
-      </Dialog>
+      </Dialog> */}
       <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
         <DialogTitle id="alert-dialog-title">Suspend</DialogTitle>
         <DialogContent>

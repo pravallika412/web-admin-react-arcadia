@@ -10,8 +10,21 @@ const GET_ADMIN = gql`
         wallet_address
       }
       role
+      first_name
+      last_name
+      profile_image
+      merchant_address
     }
   }
 `;
 
-export { GET_ADMIN };
+const UPDATE_PROFILE = gql`
+  mutation updateAdminProfile($input: UpdateAdminDto!) {
+    updateAdminProfile(updateAdminDto: $input) {
+      success
+      message
+    }
+  }
+`;
+
+export { GET_ADMIN, UPDATE_PROFILE };
