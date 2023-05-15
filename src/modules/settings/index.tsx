@@ -1,17 +1,43 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Box, Button, Card, CardContent, CardHeader, CardMedia, Divider, Grid, IconButton, Tab, Tabs, TextField, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardMedia,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  Skeleton,
+  Snackbar,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { SyntheticEvent, useEffect, useState } from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { GET_ADMIN, UPDATE_PROFILE } from "../../shared/graphQL/settings/queries";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import Alert from "@mui/material/Alert";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
+
+type Severity = "success" | "error" | "warning";
 
 const useStyles = makeStyles({
   card: {
@@ -60,11 +86,16 @@ function a11yProps(index: number) {
 
 const Settings = () => {
   const theme = useTheme();
+  const [loading, setLoading] = useState(true);
   const classes = useStyles();
   const [value, setValue] = useState(0);
   const [file, setFile] = useState([]);
   const [uploadFile, setUploadFile] = useState(null);
   const [presignedURL, setPresignedURL] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [openProfileStatus, setOpenProfileStatus] = React.useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
   const [updateProfile, { data: updateProfileData }] = useMutation(UPDATE_PROFILE);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
@@ -77,6 +108,11 @@ const Settings = () => {
 
   useEffect(() => {
     if (updateProfileData) {
+      console.log(updateProfileData);
+      setOpenProfileStatus(true);
+      // setSnackbarMessage(updateProfileData.message);
+      // setOpenSnackbar(true);
+      // setSnackbarSeverity(updateProfileData.success ? "success" : "error");
       refetch();
     }
   }, [updateProfileData]);
@@ -94,6 +130,7 @@ const Settings = () => {
         profileImage: data.profile_image,
       };
       reset(initial_values);
+      setLoading(false);
     }
   }, [getAdminData, reset]);
 
@@ -124,6 +161,10 @@ const Settings = () => {
     setValue(newValue);
   };
 
+  const handleProfileClose = () => {
+    setOpenProfileStatus(false);
+  };
+
   const onSubmit = (data) => {
     const payload = {
       firstName: data.firstName,
@@ -145,113 +186,160 @@ const Settings = () => {
     setPresignedURL(uploadFile.split("?")[0]);
   };
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
   return (
-    <Grid container justifyContent="end" alignItems="center" sx={{ ms: 2, mt: 2 }}>
-      <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader title="Settings" />
-            <Divider />
-            <CardContent>
-              <Box sx={{ width: "100%" }}>
-                <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">
-                  <Tab label="My Profile" {...a11yProps(0)} />
-                  <Tab label="Change Password" {...a11yProps(1)} />
-                  <Tab label="Notifications" {...a11yProps(2)} />
-                  {/* <Tab label="Wallet" {...a11yProps(3)} /> */}
-                  <Tab label="Transaction History" {...a11yProps(4)} />
-                </Tabs>
-                <TabPanel value={value} index={0}>
-                  <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+    <>
+      <Grid container justifyContent="end" alignItems="center" sx={{ ms: 2, mt: 2 }}>
+        <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
+          <Grid item xs={12}>
+            <Card>
+              <CardHeader title="Settings" />
+              <Divider />
+              <CardContent>
+                <Box sx={{ width: "100%" }}>
+                  <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">
+                    <Tab label="My Profile" {...a11yProps(0)} />
+                    <Tab label="Change Password" {...a11yProps(1)} />
+                    <Tab label="Notifications" {...a11yProps(2)} />
+                    {/* <Tab label="Wallet" {...a11yProps(3)} /> */}
+                    <Tab label="Transaction History" {...a11yProps(4)} />
+                  </Tabs>
+                  <TabPanel value={value} index={0}>
+                    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+                      <Grid container>
+                        <Grid item xs={6} md={7}>
+                          <>
+                            <Typography variant="h4">My Profile</Typography>
+                            <Grid container spacing={2}>
+                              <Grid item xs={6} md={6}>
+                                {loading ? (
+                                  <Skeleton variant="text" width="100%" height={70} />
+                                ) : (
+                                  <TextField label="First Name" {...register("firstName")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                                )}
+                              </Grid>
+                              <Grid item xs={6} md={6}>
+                                {loading ? (
+                                  <Skeleton variant="text" width="100%" height={70} />
+                                ) : (
+                                  <TextField label="Last Name" {...register("lastName")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                                )}
+                              </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={12}>
+                              {loading ? (
+                                <Skeleton variant="text" width="100%" height={70} />
+                              ) : (
+                                <TextField label="Email Address" {...register("email")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                              )}
+                            </Grid>
+                            <Grid item xs={12} md={12}>
+                              {loading ? (
+                                <Skeleton variant="text" width="100%" height={70} />
+                              ) : (
+                                <TextField label="Wallet Address" {...register("walletAddress")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                              )}
+                            </Grid>
+                            <Grid item xs={12} md={12}>
+                              {loading ? (
+                                <Skeleton variant="text" width="100%" height={70} />
+                              ) : (
+                                <TextField label="Merchant Address" {...register("merchantAddress")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                              )}
+                            </Grid>
+                          </>
+                        </Grid>
+                        <Grid item xs={6} md={5}>
+                          <Card className={classes.card}>
+                            {presignedURL ? (
+                              <>
+                                <CardMedia className={classes.media} image={presignedURL} />
+                                <IconButton
+                                  component="label"
+                                  sx={{
+                                    position: "absolute",
+                                    top: "10%",
+                                    left: "90%",
+                                    transform: "translate(-50%, -50%)",
+                                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                                    "&:hover": {
+                                      background: theme.colors.primary.lighter,
+                                    },
+                                  }}
+                                  color="inherit"
+                                  htmlFor="profileImageInput"
+                                  size="large"
+                                >
+                                  <CloudUploadIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                                  <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
+                                </IconButton>
+                              </>
+                            ) : (
+                              <div>
+                                <IconButton
+                                  component="label"
+                                  sx={{
+                                    "&:hover": {
+                                      background: theme.colors.primary.lighter,
+                                    },
+                                    color: theme.palette.primary.main,
+                                  }}
+                                  color="inherit"
+                                  htmlFor="profileImageInput"
+                                  size="large"
+                                >
+                                  <CloudUploadIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                                  <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
+                                </IconButton>
+                              </div>
+                            )}
+                          </Card>
+                        </Grid>
+                      </Grid>
+                      <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Button variant="contained" type="submit">
+                          Update
+                        </Button>
+                      </Grid>
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value={value} index={1}>
                     <Grid container>
-                      <Grid item xs={6} md={7}>
-                        <Typography variant="h4">My Profile</Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6} md={6}>
-                            <TextField label="First Name" {...register("firstName")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
-                          </Grid>
-                          <Grid item xs={6} md={6}>
-                            <TextField label="Last Name" {...register("lastName")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth></TextField>
-                          </Grid>
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                          <TextField label="Email Address" {...register("email")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                          <TextField label="Wallet Address" {...register("email")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                          <TextField label="Merchant Address" {...register("merchantAddress")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
-                        </Grid>
-                      </Grid>
-                      <Grid item xs={6} md={5}>
-                        <Card className={classes.card}>
-                          {presignedURL ? (
-                            <>
-                              <CardMedia className={classes.media} image={presignedURL} />
-                              <IconButton
-                                component="label"
-                                sx={{
-                                  position: "absolute",
-                                  top: "10%",
-                                  left: "90%",
-                                  transform: "translate(-50%, -50%)",
-                                  backgroundColor: "rgba(255, 255, 255, 0.8)",
-                                  "&:hover": {
-                                    background: theme.colors.primary.lighter,
-                                  },
-                                }}
-                                color="inherit"
-                                htmlFor="profileImageInput"
-                                size="large"
-                              >
-                                <CloudUploadIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                                <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
-                              </IconButton>
-                            </>
-                          ) : (
-                            <div>
-                              <IconButton
-                                component="label"
-                                sx={{
-                                  "&:hover": {
-                                    background: theme.colors.primary.lighter,
-                                  },
-                                  color: theme.palette.primary.main,
-                                }}
-                                color="inherit"
-                                htmlFor="profileImageInput"
-                                size="large"
-                              >
-                                <CloudUploadIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                                <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
-                              </IconButton>
-                            </div>
-                          )}
-                        </Card>
-                      </Grid>
+                      <Typography variant="h4">Change Password</Typography>
+                      <TextField label="Current Password" margin="normal" fullWidth />
+                      <TextField label="New Password" margin="normal" fullWidth />
+                      <TextField label="Confirm Password" margin="normal" fullWidth />
                     </Grid>
-                    <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
-                      <Button variant="contained" type="submit">
-                        Update
-                      </Button>
-                    </Grid>
-                  </Box>
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                  <Grid container>
-                    <Typography variant="h4">Change Password</Typography>
-                    <TextField label="Current Password" margin="normal" fullWidth />
-                    <TextField label="New Password" margin="normal" fullWidth />
-                    <TextField label="Confirm Password" margin="normal" fullWidth />
-                  </Grid>
-                </TabPanel>
-              </Box>
-            </CardContent>
-          </Card>
+                  </TabPanel>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+      <Dialog open={openProfileStatus} onClose={handleProfileClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogContent>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <CheckCircleOutlineIcon color="primary" sx={{ fontSize: 60, m: 2 }} />
+            <DialogContentText id="alert-dialog-description">Profile Updated Successfully</DialogContentText>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleProfileClose}>close</Button>
+        </DialogActions>
+      </Dialog>
+      {/* <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+        <Alert severity={snackbarSeverity as Severity} sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar> */}
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { Box, alpha, Stack, lighten, Divider, IconButton, Tooltip, styled, useTheme } from "@mui/material";
+import { Box, alpha, Stack, lighten, Divider, IconButton, Tooltip, styled, useTheme, Snackbar } from "@mui/material";
 import MenuTwoToneIcon from "@mui/icons-material/MenuTwoTone";
 import { SidebarContext } from "../../../shared/contexts/SidebarContext";
 import CloseTwoToneIcon from "@mui/icons-material/CloseTwoTone";

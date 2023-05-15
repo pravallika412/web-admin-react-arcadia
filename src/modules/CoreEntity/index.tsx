@@ -160,6 +160,9 @@ const CoreEntity = () => {
 
   const MyComponent = () => (
     <>
+      <Grid item xs={12}>
+        <TextField label="Collection Name" margin="normal" value={getCoreEntityData && getCoreEntityData.retrieveCoreEntity.product_table_name} disabled fullWidth />
+      </Grid>
       {coreEntityFields &&
         coreEntityFields.map((field, index) => {
           const datatype = datatypesMap[field.dataType];
@@ -208,7 +211,7 @@ const CoreEntity = () => {
                   Collection
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  {isCoreEntity ? (
+                  {!isCoreEntity ? (
                     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                       <TextField
                         label="Collection Name"
