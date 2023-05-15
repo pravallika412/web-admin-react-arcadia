@@ -27,4 +27,13 @@ const UPDATE_PROFILE = gql`
   }
 `;
 
-export { GET_ADMIN, UPDATE_PROFILE };
+const CHANGE_PASSWORD = gql`
+  mutation ChangeAdminPassword($input: ChangeAdminPasswordDto!) {
+    ChangeAdminPassword(changeAdminPasswordDto: $input) {
+      success
+      message
+    }
+  }
+`;
+
+export { GET_ADMIN, UPDATE_PROFILE, CHANGE_PASSWORD };

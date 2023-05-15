@@ -1,16 +1,27 @@
 import { gql } from "@apollo/client";
 
 const GET_SPONSORS = gql`
-  {
-    allSponsors(page: 0) {
-      id
-      name
-      email
-      walletAddress
-      status
-      planName
-      tvl
-      createdAt
+  query GetSponsorListByBrand($input1: PageDto!, $input2: SortDto!) {
+    GetSponsorListByBrand(getSponsorListPageDto: $input1, getSponsorListSortDto: $input2) {
+      subscribedSponsors {
+        _id
+        sponsor {
+          _id
+          email
+          name
+          profile_picture
+          walletAddress
+          createdAt
+          tvl
+        }
+        subscription_end_date
+        status
+        planDetails {
+          _id
+          name
+        }
+      }
+      totalCount
     }
   }
 `;
