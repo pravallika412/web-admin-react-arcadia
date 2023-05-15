@@ -5,36 +5,28 @@ import Label from "../../shared/components/Label";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 170 },
-  { id: "email", label: "Email", minWidth: 170 },
-  { id: "walletAddress", label: "Wallet Address", minWidth: 170 },
-  { id: "planName", label: "Plan", minWidth: 170 },
-  { id: "createdAt", label: "Created At", type: "date", minWidth: 170 },
-  { id: "status", label: "Status", minWidth: 170 },
-  { id: "tvl", label: "TVL", minWidth: 170 },
+  { _id: 1, id: "name", subtype: "sponsor", label: "Name", minWidth: "auto" },
+  { _id: 2, id: "email", subtype: "sponsor", label: "Email", minWidth: "auto" },
+  { _id: 3, id: "walletAddress", subtype: "sponsor", label: "Wallet Address", minWidth: "auto" },
+  { _id: 4, id: "name", subtype: "planDetails", label: "Plan", minWidth: "auto" },
+  { _id: 5, id: "createdAt", subtype: "sponsor", label: "Created At", type: "date", minWidth: "auto" },
+  { _id: 6, id: "status", label: "Status", minWidth: "auto" },
+  { _id: 7, id: "tvl", subtype: "sponsor", label: "TVL", minWidth: "auto" },
 ];
-
-// need to remove later
-const client = new ApolloClient({
-  uri: "http://localhost:3000/graphql",
-  cache: new InMemoryCache(),
-});
 
 const Sponsor = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const getAllSponsors = client.query({
-    query: GET_SPONSORS,
-  });
+  const [getSponsors, { data: getAllSponsors, refetch }] = useLazyQuery(GET_SPONSORS);
 
-  const getSponsorData = async () => {
-    setProducts((await getAllSponsors).data.allSponsors);
-  };
+  useEffect(() => {
+    getSponsors({ variables: { input1: {}, input2: {} } });
+  }, []);
 
   useEffect(() => {
     if (getAllSponsors) {
-      getSponsorData();
+      setProducts(getAllSponsors.GetSponsorListByBrand.subscribedSponsors);
     }
   }, [getAllSponsors]);
 
@@ -43,7 +35,7 @@ const Sponsor = () => {
     const year = date.getFullYear();
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
     const day = ("0" + date.getDate()).slice(-2);
-    const formattedDate = `${year}-${month}-${day}`;
+    const formattedDate = `${day}-${month}-${year}`;
     return formattedDate;
   };
 
@@ -96,7 +88,7 @@ const Sponsor = () => {
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                  <TableCell key={column._id} style={{ minWidth: column.minWidth }}>
                     {column.label}
                   </TableCell>
                 ))}
@@ -106,12 +98,41 @@ const Sponsor = () => {
               {products.length > 0 ? (
                 products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
                   return (
-                    <TableRow hover tabIndex={-1} key={product.id}>
+                    <TableRow hover tabIndex={-1} key={product._id}>
                       {columns.map((column) => {
                         const value = product[column.id];
+                        const subValue = column.subtype && product[column.subtype][column.id];
                         return (
-                          <TableCell key={column.id}>
-                            {column.type === "date" ? formatDate(value) : column.id === "tvl" ? "$" + value : column.id === "status" ? getStatusLabel(value) : value}
+                          <TableCell key={column._id}>
+                            {column.subtype ? (
+                              column.type === "date" ? (
+                                formatDate(subValue)
+                              ) : column.id === "tvl" ? (
+                                "$" + (subValue ? subValue : 0)
+                              ) : column.id === "walletAddress" ? (
+                                subValue.slice(0, 3) + "*******" + subValue.slice(-3)
+                              ) : column.id === "name" && column.subtype === "planDetails" ? (
+                                <div>
+                                  {subValue}
+                                  <span style={{ display: "block", fontSize: 10 }}>{formatDate(product["subscription_end_date"])}</span>
+                                </div>
+                              ) : column.id === "name" && column.subtype === "sponsor" ? (
+                                <>
+                                  {product[column.subtype]["profile_picture"] ? (
+                                    <img src={product[column.subtype]["profile_picture"]} style={{ width: "20px", height: "20px" }} alt="description" />
+                                  ) : (
+                                    ""
+                                  )}
+                                  <span>{subValue}</span>
+                                </>
+                              ) : (
+                                subValue
+                              )
+                            ) : column.id === "status" ? (
+                              getStatusLabel(value)
+                            ) : (
+                              value
+                            )}
                           </TableCell>
                         );
                       })}

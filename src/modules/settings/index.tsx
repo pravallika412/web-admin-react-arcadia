@@ -30,6 +30,7 @@ import { GET_ADMIN, UPDATE_PROFILE } from "../../shared/graphQL/settings/queries
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Alert from "@mui/material/Alert";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ChangePassword from "./changePassword";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,7 +101,13 @@ const Settings = () => {
   const [updateProfile, { data: updateProfileData }] = useMutation(UPDATE_PROFILE);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
-  const { control, register, handleSubmit, reset } = useForm();
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     getAdmin();
@@ -221,7 +228,24 @@ const Settings = () => {
                                 {loading ? (
                                   <Skeleton variant="text" width="100%" height={70} />
                                 ) : (
-                                  <TextField label="First Name" {...register("firstName")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                                  <TextField
+                                    label="First Name"
+                                    {...register("firstName", {
+                                      pattern: {
+                                        value: /^[A-Za-z][A-Za-z\s]*$/,
+                                        message: "Please enter valid name",
+                                      },
+                                      maxLength: {
+                                        value: 15,
+                                        message: "Max length exceeded",
+                                      },
+                                    })}
+                                    margin="normal"
+                                    InputLabelProps={{ shrink: true }}
+                                    fullWidth
+                                    error={!!errors.firstName}
+                                    helperText={errors?.firstName?.message}
+                                  />
                                 )}
                               </Grid>
                               <Grid item xs={6} md={6}>
@@ -310,12 +334,7 @@ const Settings = () => {
                     </Box>
                   </TabPanel>
                   <TabPanel value={value} index={1}>
-                    <Grid container>
-                      <Typography variant="h4">Change Password</Typography>
-                      <TextField label="Current Password" margin="normal" fullWidth />
-                      <TextField label="New Password" margin="normal" fullWidth />
-                      <TextField label="Confirm Password" margin="normal" fullWidth />
-                    </Grid>
+                    <ChangePassword />
                   </TabPanel>
                 </Box>
               </CardContent>
@@ -326,7 +345,7 @@ const Settings = () => {
       <Dialog open={openProfileStatus} onClose={handleProfileClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
         <DialogContent>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <CheckCircleOutlineIcon color="primary" sx={{ fontSize: 60, m: 2 }} />
+            <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, m: 2 }} />
             <DialogContentText id="alert-dialog-description">Profile Updated Successfully</DialogContentText>
           </Box>
         </DialogContent>
