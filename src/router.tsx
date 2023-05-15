@@ -6,6 +6,7 @@ import SidebarLayout from "./layouts/SidebarLayout";
 import BaseLayout from "./layouts/BaseLayout";
 
 import SuspenseLoader from "./shared/components/SuspenseLoader";
+import AddDog from "./modules/Dog/addDog";
 
 const Loader = (Component) => (props) =>
   (
@@ -80,6 +81,10 @@ const routes: RouteObject[] = [
       {
         path: "dog",
         element: <Dog />,
+      },
+      {
+        path: "dog/addDog",
+        element: <AddDog />,
       },
       {
         path: "core-entity",
