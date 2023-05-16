@@ -88,7 +88,17 @@ const DogBasicDetails = ({ fields }) => {
     const fieldValue = formData[fieldName] || "";
 
     switch (dataType) {
-      case 1: // String
+      case 1:
+        return (
+          <TextField
+            key={fieldName}
+            placeholder={fieldName}
+            {...register(fieldName)}
+            style={{ width: "100%", resize: "none" }}
+            value={fieldValue}
+            onChange={(e) => handleInputChange(fieldName, e.target.value)}
+          />
+        );
       case 2: // Number
         return (
           <TextField
