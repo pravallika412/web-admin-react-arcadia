@@ -5,6 +5,10 @@ import {
   CardContent,
   CardHeader,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
   Divider,
   FormControl,
   Grid,
@@ -27,6 +31,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import { makeStyles } from "@mui/styles";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -71,9 +76,10 @@ const CoreEntity = () => {
   const [value, setValue] = useState(0);
   const [isCoreEntity, setIsCoreEntity] = useState(false);
   const [dataTypesEntity, setDataTypesEntity] = useState([]);
+  const [openEntity, setOpenEntity] = useState(false);
   const [coreEntityFields, setCoreEntityFields] = useState([]);
   const [getDataTypes, { data: getAllDataTypes }] = useLazyQuery(GET_DATATYPES);
-  const [getCoreEntity, { data: getCoreEntityData }] = useLazyQuery(GET_COREENTITY);
+  const [getCoreEntity, { data: getCoreEntityData, refetch }] = useLazyQuery(GET_COREENTITY);
   const [createEntity, { data: createEntityData }] = useMutation(CREATE_ENTITY);
   const [text, setText] = useState("");
   const [words, setWords] = useState([]);
@@ -98,9 +104,23 @@ const CoreEntity = () => {
   }, []);
 
   useEffect(() => {
+    if (createEntityData) {
+      setOpenEntity(true);
+      refetch();
+    }
+  }, [createEntityData]);
+
+  useEffect(() => {
     if (getCoreEntityData) {
-      setCoreEntityFields(JSON.parse(getCoreEntityData.retrieveCoreEntity.product_schema));
-      setIsCoreEntity(true);
+      console.log("test");
+      if (getCoreEntityData.retrieveCoreEntity.product_schema) {
+        console.log("test");
+        setCoreEntityFields(JSON.parse(getCoreEntityData.retrieveCoreEntity.product_schema));
+        setIsCoreEntity(true);
+      } else {
+        setCoreEntityFields([]);
+        setIsCoreEntity(false);
+      }
     }
   }, [getCoreEntityData]);
 
@@ -115,16 +135,17 @@ const CoreEntity = () => {
   };
 
   const onSubmit = (data) => {
+    console.log(words);
     console.log(data);
     const initialFields = [
       { fieldName: "name", dataType: 1, data: "" },
-      { fieldName: "photo_url", dataType: 7, data: "" },
+      { fieldName: "image", dataType: 7, data: "" },
       { fieldName: "status", dataType: 5, data: ["active", "inactive"] },
     ];
     data.fields.push(...initialFields);
     data.fields.forEach((e) => {
       if (e.dataType == 5 && typeof e.data == "string") {
-        e.data = e.data.split(",");
+        e.data = words;
       }
     });
     const payload = {
@@ -157,6 +178,10 @@ const CoreEntity = () => {
     acc[datatype.order] = datatype;
     return acc;
   }, {});
+
+  const handleEntityClose = () => {
+    setOpenEntity(false);
+  };
 
   const MyComponent = () => (
     <>
@@ -195,155 +220,168 @@ const CoreEntity = () => {
   );
 
   return (
-    <Grid container justifyContent="end" alignItems="center" sx={{ ms: 2, mt: 2 }}>
-      <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader title="Core Entity" />
-            <Divider />
-            <CardContent>
-              <Box sx={{ width: "100%" }}>
-                <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">
-                  <Tab label="Collection" {...a11yProps(0)} />
-                  <Tab label="Entity" {...a11yProps(1)} />
-                </Tabs>
-                <TabPanel value={value} index={0}>
-                  Collection
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                  {!isCoreEntity ? (
-                    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-                      <TextField
-                        label="Collection Name"
-                        name="collectionName"
-                        margin="normal"
-                        required
-                        fullWidth
-                        {...register("collectionName", {
-                          required: {
-                            value: true,
-                            message: "Collection Name is required",
-                          },
-                          pattern: {
-                            value: /^[A-Za-z][A-Za-z\s]*$/,
-                            message: "Please enter valid collection name",
-                          },
-                          maxLength: {
-                            value: 15,
-                            message: "Max length exceeded",
-                          },
-                        })}
-                        error={!!errors.collectionName}
-                        helperText={errors?.collectionName?.message}
-                      />
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <TextField label="Entity Name" margin="normal" value="name" disabled fullWidth />
+    <>
+      <Grid container justifyContent="end" alignItems="center" sx={{ ms: 2, mt: 2 }}>
+        <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
+          <Grid item xs={12}>
+            <Card>
+              <CardHeader title="Core Entity" />
+              <Divider />
+              <CardContent>
+                <Box sx={{ width: "100%" }}>
+                  <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">
+                    <Tab label="Collection" {...a11yProps(0)} />
+                    <Tab label="Entity" {...a11yProps(1)} />
+                  </Tabs>
+                  <TabPanel value={value} index={0}>
+                    Collection
+                  </TabPanel>
+                  <TabPanel value={value} index={1}>
+                    {!isCoreEntity ? (
+                      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+                        <TextField
+                          label="Collection Name"
+                          name="collectionName"
+                          margin="normal"
+                          required
+                          fullWidth
+                          {...register("collectionName", {
+                            required: {
+                              value: true,
+                              message: "Collection Name is required",
+                            },
+                            pattern: {
+                              value: /^[A-Za-z][A-Za-z\s]*$/,
+                              message: "Please enter valid collection name",
+                            },
+                            maxLength: {
+                              value: 15,
+                              message: "Max length exceeded",
+                            },
+                          })}
+                          error={!!errors.collectionName}
+                          helperText={errors?.collectionName?.message}
+                        />
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField label="Entity Name" margin="normal" value="name" disabled fullWidth />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField label="Entity Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                          </Grid>
                         </Grid>
-                        <Grid item xs={6}>
-                          <TextField label="Entity Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField label="Entity Name" margin="normal" value="photo_url" disabled fullWidth />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField label="Entity Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                          </Grid>
                         </Grid>
-                      </Grid>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <TextField label="Entity Name" margin="normal" value="photo_url" disabled fullWidth />
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField label="Entity Name" margin="normal" value="status" disabled fullWidth />
+                          </Grid>
+                          <Grid item xs={5}>
+                            <TextField label="Entity Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                          </Grid>
+                          <Grid item xs={1}>
+                            <Button sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: "", data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                              Add
+                            </Button>
+                          </Grid>
                         </Grid>
-                        <Grid item xs={6}>
-                          <TextField label="Entity Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
-                        </Grid>
-                      </Grid>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <TextField label="Entity Name" margin="normal" value="status" disabled fullWidth />
-                        </Grid>
-                        <Grid item xs={5}>
-                          <TextField label="Entity Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
-                        </Grid>
-                        <Grid item xs={1}>
-                          <Button sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: "", data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
-                            Add
-                          </Button>
-                        </Grid>
-                      </Grid>
-                      {fields.map((field, index) => (
-                        <div key={field.id}>
-                          <Grid container spacing={2} my={1}>
-                            <Grid item xs={6}>
-                              <TextField label="Entity Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
-                            </Grid>
-                            <Grid item xs={5}>
-                              {/* <Select label="Entity Type" variant="outlined" defaultValue="" fullWidth {...register(`fields.${index}.dataType`)}>
+                        {fields.map((field, index) => (
+                          <div key={field.id}>
+                            <Grid container spacing={2} my={1}>
+                              <Grid item xs={6}>
+                                <TextField label="Entity Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
+                              </Grid>
+                              <Grid item xs={5}>
+                                {/* <Select label="Entity Type" variant="outlined" defaultValue="" fullWidth {...register(`fields.${index}.dataType`)}>
                                 {dataTypesEntity.map((option) => (
                                   <MenuItem key={option.order} value={option.order}>
                                     {option.name}
                                   </MenuItem>
                                 ))}
                               </Select> */}
-                              <Controller
-                                name={`fields.${index}.dataType`}
-                                control={control} // assuming you have `control` from useForm()
-                                defaultValue=""
-                                render={({ field }) => (
-                                  <FormControl variant="outlined" fullWidth>
-                                    <InputLabel id={`fields-${index}-label`}>Entity Type</InputLabel>
-                                    <Select labelId={`fields-${index}-label`} label="Entity Type" {...field}>
-                                      {dataTypesEntity.map((option) => (
-                                        <MenuItem key={option.order} value={option.order}>
-                                          {option.name}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-                                  </FormControl>
-                                )}
-                              />
-                            </Grid>
-                            {watch(`fields.${index}.dataType`) === 5 && (
-                              <Grid item xs={11} md={11}>
-                                <TextField
-                                  label="Enter text"
-                                  fullWidth
-                                  value={text}
-                                  InputProps={{
-                                    startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
-                                  }}
-                                  {...register(`fields.${index}.data`)}
-                                  onChange={handleChangeEnumType}
-                                  onKeyDown={handleKeyDown}
+                                <Controller
+                                  name={`fields.${index}.dataType`}
+                                  control={control} // assuming you have `control` from useForm()
+                                  defaultValue=""
+                                  render={({ field }) => (
+                                    <FormControl variant="outlined" fullWidth>
+                                      <InputLabel id={`fields-${index}-label`}>Entity Type</InputLabel>
+                                      <Select labelId={`fields-${index}-label`} label="Entity Type" {...field}>
+                                        {dataTypesEntity.map((option) => (
+                                          <MenuItem key={option.order} value={option.order}>
+                                            {option.name}
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </FormControl>
+                                  )}
                                 />
                               </Grid>
-                            )}
-                            <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
-                              <IconButton
-                                sx={{
-                                  "&:hover": { background: theme.colors.error.lighter },
-                                  color: theme.palette.error.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={() => remove(index)}
-                              >
-                                <DeleteTwoToneIcon fontSize="small" />
-                              </IconButton>
+                              {watch(`fields.${index}.dataType`) === 5 && (
+                                <Grid item xs={11} md={11}>
+                                  <TextField
+                                    label="Enter text"
+                                    fullWidth
+                                    value={text}
+                                    InputProps={{
+                                      startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                                    }}
+                                    {...register(`fields.${index}.data`)}
+                                    onChange={handleChangeEnumType}
+                                    onKeyDown={handleKeyDown}
+                                  />
+                                </Grid>
+                              )}
+                              <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                                <IconButton
+                                  sx={{
+                                    "&:hover": { background: theme.colors.error.lighter },
+                                    color: theme.palette.error.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => remove(index)}
+                                >
+                                  <DeleteTwoToneIcon fontSize="small" />
+                                </IconButton>
+                              </Grid>
                             </Grid>
-                          </Grid>
-                        </div>
-                      ))}
-                      <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
-                        <Button variant="contained" type="submit">
-                          Create
-                        </Button>
-                      </Grid>
-                    </Box>
-                  ) : (
-                    <MyComponent />
-                  )}
-                </TabPanel>
-              </Box>
-            </CardContent>
-          </Card>
+                          </div>
+                        ))}
+                        <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
+                          <Button variant="contained" type="submit">
+                            Create
+                          </Button>
+                        </Grid>
+                      </Box>
+                    ) : (
+                      <MyComponent />
+                    )}
+                  </TabPanel>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+      <Dialog open={openEntity} onClose={handleEntityClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogContent>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, m: 2 }} />
+            <DialogContentText id="alert-dialog-description">Entity created successfully</DialogContentText>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEntityClose}>close</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 export default CoreEntity;

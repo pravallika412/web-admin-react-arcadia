@@ -39,7 +39,6 @@ const columns = [
   { id: "name", label: "Name", minWidth: 170 },
   { id: "email", label: "Email", minWidth: 170 },
   { id: "handling_products_count", label: "Product Count", minWidth: 170 },
-  { id: "joining_date", label: "Joining Date", type: "date", minWidth: 170 },
   { id: "createdAt", label: "Created At", type: "date", minWidth: 170 },
   { id: "status", label: "Status", minWidth: 170 },
   { id: "action", label: "Action", minWidth: 170 },
@@ -113,8 +112,6 @@ const Handler = () => {
     let payload = {
       name: data.name,
       email: data.email,
-      password: data.password,
-      joiningDate: joiningDate.getFullYear() + "-" + (joiningDate.getMonth() + 1) + "-" + joiningDate.getDate(),
       status: data.status,
     };
     if (isEditing) {
@@ -362,77 +359,6 @@ const Handler = () => {
               />
             </div>
 
-            <div>
-              <TextField
-                {...register(
-                  "password",
-                  !isEditing
-                    ? {
-                        required: {
-                          value: true,
-                          message: "Password is required",
-                        },
-                        pattern: {
-                          value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
-                          message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
-                        },
-                        minLength: {
-                          value: 8,
-                          message: "Password must be 8 characters long",
-                        },
-                      }
-                    : {}
-                )}
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                id="password"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                error={!!errors.password}
-                helperText={errors?.password?.message}
-              />
-            </div>
-            <div>
-              <Controller
-                name="joiningDate"
-                control={control}
-                defaultValue={null}
-                rules={
-                  !isEditing
-                    ? {
-                        required: "Joining Date is required",
-                        validate: (value) => {
-                          const date = new Date(value).getTime();
-                          if (isNaN(date)) {
-                            return "Invalid date format";
-                          } else if (date == 0) {
-                            return "Please enter joining date";
-                          }
-                        },
-                      }
-                    : {}
-                }
-                render={({ field: { onChange, value } }) => (
-                  <DatePicker
-                    label="Joining Date"
-                    value={value}
-                    onChange={(date) => onChange(formatDate(date))}
-                    renderInput={(params) => <TextField {...params} margin="normal" fullWidth error={Boolean(errors?.joiningDate)} helperText={errors?.joiningDate?.message} />}
-                  />
-                )}
-              />
-            </div>
             <div>
               {isEditing && (
                 <Controller

@@ -13,15 +13,15 @@ const GET_HANDLERS = gql`
   query listHandlers($input: PageDto!) {
     listHandlers(listHandlerDto: $input) {
       handlers {
-        id
         email
         name
         status
         handling_products_count
-        joining_date
         device_id
         brand
         createdAt
+        profile_image
+        handler_ID
       }
       totalCount
     }
