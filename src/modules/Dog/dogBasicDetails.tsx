@@ -9,11 +9,26 @@ const DogBasicDetails = ({ fields }) => {
   const [formData, setFormData] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fieldFiles, setFieldFiles] = useState({});
-  const [presignedUrls, setPresignedUrls] = useState([]);
+  const [presignedUrls, setPresignedUrls] = useState({
+    image: [
+      // Your image presignedUrls here...
+    ],
+    gallery: [
+      // Your gallery presignedUrls here...
+    ],
+  });
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   // const { handleSubmit, control, register, reset } = useForm();
-  const { register } = useFormContext();
+  const { register, setValue } = useFormContext();
+
+  useEffect(() => {
+    if (presignedUrls) {
+      console.log(presignedUrls);
+      setValue("image", presignedUrls.image);
+      setValue("gallery", presignedUrls.gallery);
+    }
+  }, [presignedUrls]);
 
   const handleInputChange = (fieldName, value) => {
     setFormData((prevFormData) => ({
@@ -107,16 +122,16 @@ const DogBasicDetails = ({ fields }) => {
 
       case 5: // Enum
         return (
-          <TextField
-            key={fieldName}
-            label={fieldName}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            {...register(fieldName)}
-            value={fieldValue}
-            onChange={(e) => handleInputChange(fieldName, e.target.value)}
-          />
+          <FormControl variant="outlined" margin="normal" fullWidth>
+            <InputLabel id={fieldName + "-label"}>{fieldName}</InputLabel>
+            <Select labelId={fieldName + "-label"} key={fieldName} label={fieldName} {...register(fieldName)} value={fieldValue} onChange={(e) => handleInputChange(fieldName, e.target.value)}>
+              {data.map((option, index) => (
+                <MenuItem key={index} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         );
 
       case 6: // Textarea

@@ -27,14 +27,14 @@ const _renderStepContent = (step, register, control) => {
       return <DogBasicDetails fields={fields} />;
     case 1:
       return <DogOtherDetails />;
-    case 2:
-      return <PreviewDetails />;
+    // case 2:
+    //   return <PreviewDetails />;
     default:
       return <div>Not Found</div>;
   }
 };
 
-const steps = ["Basic Information", "Other Information", "Preview"];
+const steps = ["Basic Information", "Other Information"];
 
 const AddDog = () => {
   const [activeStep, setActiveStep] = useState(0);

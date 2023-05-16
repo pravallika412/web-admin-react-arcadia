@@ -115,7 +115,6 @@ const Settings = () => {
 
   useEffect(() => {
     if (updateProfileData) {
-      console.log(updateProfileData);
       setOpenProfileStatus(true);
       // setSnackbarMessage(updateProfileData.message);
       // setOpenSnackbar(true);

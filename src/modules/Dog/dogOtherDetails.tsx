@@ -17,7 +17,7 @@ const DogOtherDetails = () => {
   const [medicalPresignedUrls, setMedicalPresignedUrls] = useState([]);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "services",
@@ -80,10 +80,22 @@ const DogOtherDetails = () => {
   };
 
   useEffect(() => {
-    if (awardPresignedUrls || medicalPresignedUrls) {
-      console.log(awardPresignedUrls, medicalPresignedUrls);
+    if (awardPresignedUrls) {
+      console.log(awardPresignedUrls);
+      awardFields.forEach((field, index) => {
+        setValue(`awards[${index}].awardsLinks`, [awardPresignedUrls[index]]);
+      });
     }
-  }, [awardPresignedUrls, medicalPresignedUrls]);
+  }, [awardPresignedUrls]);
+
+  useEffect(() => {
+    if (medicalPresignedUrls) {
+      console.log(medicalPresignedUrls);
+      medicalFields.forEach((field, index) => {
+        setValue(`medicals[${index}].reportLinks`, [medicalPresignedUrls[index]]);
+      });
+    }
+  }, [medicalPresignedUrls]);
 
   return (
     <Container component="main">
