@@ -5,18 +5,12 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
 
-const DogBasicDetails = ({ fields }) => {
+const DogBasicDetails = ({ fields, onDateFieldsChange }) => {
   const [formData, setFormData] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fieldFiles, setFieldFiles] = useState({});
-  const [presignedUrls, setPresignedUrls] = useState({
-    image: [
-      // Your image presignedUrls here...
-    ],
-    gallery: [
-      // Your gallery presignedUrls here...
-    ],
-  });
+  const [formattedDates, setFormattedDates] = useState({});
+  const [presignedUrls, setPresignedUrls] = useState({ image: "" });
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   // const { handleSubmit, control, register, reset } = useForm();
@@ -24,13 +18,24 @@ const DogBasicDetails = ({ fields }) => {
 
   useEffect(() => {
     if (presignedUrls) {
-      console.log(presignedUrls);
       setValue("image", presignedUrls.image);
-      setValue("gallery", presignedUrls.gallery);
     }
   }, [presignedUrls]);
 
-  const handleInputChange = (fieldName, value) => {
+  useEffect(() => {
+    onDateFieldsChange(formattedDates);
+  }, [formattedDates]);
+
+  const handleInputChange = (fieldName, value, fieldType?) => {
+    let formattedValue = value;
+
+    if (fieldType === 3) {
+      setFormattedDates((prevDates) => ({
+        ...prevDates,
+        [fieldName]: new Date(value).toISOString(),
+      }));
+    }
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       [fieldName]: value,
@@ -76,8 +81,7 @@ const DogBasicDetails = ({ fields }) => {
     try {
       const uploadedUrls = await Promise.all(uploadPromises);
       setPresignedUrls((prevUrls) => ({ ...prevUrls, [fieldName]: uploadedUrls }));
-      console.log(presignedUrls);
-      console.log("All files uploaded successfully");
+      setValue(fieldName, [uploadedUrls]);
     } catch (error) {
       console.error("Error uploading files:", error);
     }
@@ -89,16 +93,6 @@ const DogBasicDetails = ({ fields }) => {
 
     switch (dataType) {
       case 1:
-        return (
-          <TextField
-            key={fieldName}
-            placeholder={fieldName}
-            {...register(fieldName)}
-            style={{ width: "100%", resize: "none" }}
-            value={fieldValue}
-            onChange={(e) => handleInputChange(fieldName, e.target.value)}
-          />
-        );
       case 2: // Number
         return (
           <TextField
@@ -114,7 +108,19 @@ const DogBasicDetails = ({ fields }) => {
         );
 
       case 3: // Date
-        return <TextField key={fieldName} label={fieldName} type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth {...register(fieldName)} />;
+        return (
+          <TextField
+            key={fieldName}
+            label={fieldName}
+            type="date"
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
+            margin="normal"
+            fullWidth
+            {...register(fieldName)}
+            onChange={(e) => handleInputChange(fieldName, e.target.value, 3)}
+          />
+        );
 
       case 4: // Boolean
         return (
@@ -169,15 +175,7 @@ const DogBasicDetails = ({ fields }) => {
               <InputLabel shrink>{fieldName}</InputLabel>
               <input type="file" multiple onChange={handleFileSelect} style={{ marginTop: 16 }} />
             </FormControl> */}
-            <TextField
-              label={fieldName}
-              margin="normal"
-              fullWidth
-              {...register(fieldName, { onChange: (e) => handleFileSelect(e, fieldName, 8) })}
-              type="file"
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ multiple: true }}
-            />
+            <TextField label={fieldName} margin="normal" fullWidth onChange={(e) => handleFileSelect(e, fieldName, 8)} type="file" InputLabelProps={{ shrink: true }} inputProps={{ multiple: true }} />
           </>
         );
 

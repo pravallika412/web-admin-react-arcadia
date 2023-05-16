@@ -95,7 +95,7 @@ const Settings = () => {
   const [presignedURL, setPresignedURL] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [openProfileStatus, setOpenProfileStatus] = React.useState(false);
+  const [openProfileStatus, setOpenProfileStatus] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
   const [updateProfile, { data: updateProfileData }] = useMutation(UPDATE_PROFILE);

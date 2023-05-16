@@ -15,12 +15,13 @@ const DogOtherDetails = () => {
   const [presignedUrls, setPresignedUrls] = useState([]);
   const [awardPresignedUrls, setAwardPresignedUrls] = useState([]);
   const [medicalPresignedUrls, setMedicalPresignedUrls] = useState([]);
+  const [otherPresignedUrls, setOtherPresignedUrls] = useState([]);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   const { control, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "services",
+    name: "history",
   });
   const { fields: awardFields, append: appendAward } = useFieldArray({
     control,
@@ -28,7 +29,7 @@ const DogOtherDetails = () => {
   });
   const { fields: medicalFields, append: appendMedicals } = useFieldArray({
     control,
-    name: "medicals",
+    name: "reports",
   });
   const { fields: otherFields, append: appendOthers } = useFieldArray({
     control,
@@ -46,8 +47,7 @@ const DogOtherDetails = () => {
   };
 
   const generatePresignedUrls = async (sectionIndex: Number) => {
-    const fields = sectionIndex === 0 ? awardFields : medicalFields;
-    const presignedUrlsStateSetter = sectionIndex === 0 ? setAwardPresignedUrls : setMedicalPresignedUrls;
+    const presignedUrlsStateSetter = sectionIndex === 0 ? setAwardPresignedUrls : sectionIndex === 1 ? setMedicalPresignedUrls : setOtherPresignedUrls;
     const uploadPromises = selectedFiles.map(async (file) => {
       const signedUrlDto = {
         fileName: file.name,
@@ -92,10 +92,19 @@ const DogOtherDetails = () => {
     if (medicalPresignedUrls) {
       console.log(medicalPresignedUrls);
       medicalFields.forEach((field, index) => {
-        setValue(`medicals[${index}].reportLinks`, [medicalPresignedUrls[index]]);
+        setValue(`reports[${index}].reportLinks`, [medicalPresignedUrls[index]]);
       });
     }
   }, [medicalPresignedUrls]);
+
+  useEffect(() => {
+    if (otherPresignedUrls) {
+      console.log(otherPresignedUrls);
+      medicalFields.forEach((field, index) => {
+        setValue(`others[${index}].documentLinks`, [otherPresignedUrls[index]]);
+      });
+    }
+  }, [otherPresignedUrls]);
 
   return (
     <Container component="main">
@@ -105,7 +114,7 @@ const DogOtherDetails = () => {
           <Typography variant="h5" sx={{ mb: 2 }}>
             Dog Story
           </Typography>
-          <Controller name="description" control={control} render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} fullWidth />} />
+          <Controller name="story" control={control} render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} fullWidth />} />
         </Box>
         <Box marginTop={2}>
           <Box display="flex" justifyContent="space-between">
@@ -120,25 +129,25 @@ const DogOtherDetails = () => {
           {fields.map((item, index) => (
             <Grid container key={item.id || index}>
               <Controller
-                name={`services[${index}].serviceName` as any}
+                name={`history[${index}].title` as any}
                 control={control}
                 render={({ field }) => <TextField {...field} label="Service Name" variant="outlined" margin="normal" fullWidth />}
               />
 
               <Controller
-                name={`services[${index}].joinedOn` as any}
+                name={`history[${index}].fromDate` as any}
                 control={control}
                 render={({ field }) => <TextField {...field} label="Joined On" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
               />
 
               <Controller
-                name={`services[${index}].retiredOn` as any}
+                name={`history[${index}].toDate` as any}
                 control={control}
                 render={({ field }) => <TextField {...field} label="Retired On" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
               />
 
               <Controller
-                name={`services[${index}].description` as any}
+                name={`history[${index}].description` as any}
                 control={control}
                 render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} margin="normal" fullWidth />}
               />
@@ -157,16 +166,17 @@ const DogOtherDetails = () => {
           </Box>
           {awardFields.map((item, index) => (
             <Grid container key={item.id || index}>
-              <Controller
-                name={`awards[${index}].awardName` as any}
-                control={control}
-                render={({ field }) => <TextField {...field} label="Award Name" variant="outlined" margin="normal" fullWidth />}
-              />
+              <Controller name={`awards[${index}].title` as any} control={control} render={({ field }) => <TextField {...field} label="Award Name" variant="outlined" margin="normal" fullWidth />} />
 
               <Controller
-                name={`awards[${index}].awardDate` as any}
+                name={`awards[${index}].fromDate` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Award Date" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
+                render={({ field }) => <TextField {...field} label="Award start Date" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
+              />
+              <Controller
+                name={`awards[${index}].toDate` as any}
+                control={control}
+                render={({ field }) => <TextField {...field} label="Award end Date" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
               />
 
               <Box
@@ -202,12 +212,23 @@ const DogOtherDetails = () => {
           </Box>
           {medicalFields.map((item, index) => (
             <Grid container key={item.id || index}>
-              <Controller name={`medicals[${index}].title` as any} control={control} render={({ field }) => <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth />} />
+              <Controller name={`reports[${index}].title` as any} control={control} render={({ field }) => <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth />} />
 
               <Controller
-                name={`medicals[${index}].shortDescription` as any}
+                name={`reports[${index}].fromDate` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Short Description" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
+                render={({ field }) => <TextField {...field} label="Award start Date" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
+              />
+              <Controller
+                name={`reports[${index}].toDate` as any}
+                control={control}
+                render={({ field }) => <TextField {...field} label="Award end Date" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
+              />
+
+              <Controller
+                name={`reports[${index}].description` as any}
+                control={control}
+                render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} margin="normal" fullWidth />}
               />
 
               <Box
@@ -243,12 +264,12 @@ const DogOtherDetails = () => {
           </Box>
           {otherFields.map((item, index) => (
             <Grid container key={item.id || index}>
-              <Controller name={`others[${index}].title` as any} control={control} render={({ field }) => <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth />} />
+              <Controller name={`others[${index}].documentType` as any} control={control} render={({ field }) => <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth />} />
 
               <Controller
-                name={`others[${index}].shortDescription` as any}
+                name={`others[${index}].description` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Short Description" type="date" variant="outlined" InputLabelProps={{ shrink: true }} margin="normal" fullWidth />}
+                render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} margin="normal" fullWidth />}
               />
 
               <Box

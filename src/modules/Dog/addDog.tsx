@@ -21,19 +21,6 @@ const fields = [
   { fieldName: "color", dataType: 1, data: "" },
 ];
 
-const _renderStepContent = (step, register, control) => {
-  switch (step) {
-    case 0:
-      return <DogBasicDetails fields={fields} />;
-    case 1:
-      return <DogOtherDetails />;
-    // case 2:
-    //   return <PreviewDetails />;
-    default:
-      return <div>Not Found</div>;
-  }
-};
-
 const steps = ["Basic Information", "Other Information"];
 
 const AddDog = () => {
@@ -41,36 +28,55 @@ const AddDog = () => {
   const [completed, setCompleted] = useState<{
     [k: number]: boolean;
   }>({});
+  const [dateFields, setDateFields] = useState({});
+  const handleDateFieldsChange = (updatedDateFields) => {
+    setDateFields(updatedDateFields);
+  };
 
+  const _renderStepContent = (step, register, control) => {
+    switch (step) {
+      case 0:
+        return <DogBasicDetails fields={fields} onDateFieldsChange={handleDateFieldsChange} />;
+      case 1:
+        return <DogOtherDetails />;
+      // case 2:
+      //   return <PreviewDetails />;
+      default:
+        return <div>Not Found</div>;
+    }
+  };
   const methods = useForm({
     defaultValues: {
-      services: [
+      history: [
         {
-          serviceName: "",
-          joinedOn: "",
-          retiredOn: "",
+          title: "",
+          fromDate: "",
+          toDate: "",
           description: "",
         },
       ],
       awards: [
         {
-          awardName: "",
-          awardDate: "",
-          uploadMedia: "",
+          title: "",
+          fromDate: "",
+          toDate: "",
+          awardsLinks: "",
         },
       ],
-      medicals: [
+      reports: [
         {
           title: "",
-          shortDescription: "",
-          uploadMedia: "",
+          fromDate: "",
+          toDate: "",
+          description: "",
+          reportLinks: [],
         },
       ],
       others: [
         {
-          title: "",
-          shortDescription: "",
-          uploadMedia: "",
+          documentType: "",
+          documentName: "",
+          documentLinks: [],
         },
       ],
       description: "",
@@ -92,6 +98,15 @@ const AddDog = () => {
 
   const onSubmit = (data) => {
     console.log(data);
+    let dataToSubmit = { ...data };
+
+    // Iterate over dateFields and convert the dates to ISO string
+    Object.keys(dateFields).forEach((dateField) => {
+      if (dataToSubmit[dateField]) {
+        dataToSubmit[dateField] = new Date(dataToSubmit[dateField]).toISOString();
+      }
+    });
+    console.log(dataToSubmit);
   };
 
   return (
