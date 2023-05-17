@@ -21,7 +21,7 @@ const Sponsor = () => {
   const [getSponsors, { data: getAllSponsors, refetch }] = useLazyQuery(GET_SPONSORS);
 
   useEffect(() => {
-    getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: {} } });
+    getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: {}, input3: {} } });
   }, [page, rowsPerPage]);
 
   useEffect(() => {
@@ -29,6 +29,21 @@ const Sponsor = () => {
       setProducts(getAllSponsors.GetSponsorListByBrand.subscribedSponsors);
     }
   }, [getAllSponsors]);
+
+  const formatTimestamp = (dateToFormat) => {
+    if (dateToFormat) {
+      const date = new Date(dateToFormat * 1000);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      const formattedDate = `${year}-${month}-${day}`;
+      return formattedDate;
+    } else {
+      return "";
+    }
+  };
 
   const formatDate = (dateToFormat) => {
     if (dateToFormat) {
@@ -88,7 +103,7 @@ const Sponsor = () => {
           return (
             <div>
               {subValue}
-              <span style={{ display: "block", fontSize: 10 }}>{formatDate(product["subscription_end_date"])}</span>
+              <span style={{ display: "block", fontSize: 10 }}>{formatTimestamp(product["subscription_end_date"])}</span>
             </div>
           );
         }

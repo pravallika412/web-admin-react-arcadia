@@ -1,6 +1,8 @@
+import { useMutation } from "@apollo/client";
 import { Box, Button, Grid, Paper, Step, StepButton, StepLabel, Stepper } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { CREATE_PRODUCT } from "../../shared/graphQL/dog/queries";
 import DogBasicDetails from "./dogBasicDetails";
 import DogOtherDetails from "./dogOtherDetails";
 import PreviewDetails from "./preview";
@@ -21,19 +23,6 @@ const fields = [
   { fieldName: "color", dataType: 1, data: "" },
 ];
 
-const _renderStepContent = (step, register, control) => {
-  switch (step) {
-    case 0:
-      return <DogBasicDetails fields={fields} />;
-    case 1:
-      return <DogOtherDetails />;
-    // case 2:
-    //   return <PreviewDetails />;
-    default:
-      return <div>Not Found</div>;
-  }
-};
-
 const steps = ["Basic Information", "Other Information"];
 
 const AddDog = () => {
@@ -41,36 +30,57 @@ const AddDog = () => {
   const [completed, setCompleted] = useState<{
     [k: number]: boolean;
   }>({});
+  const [dateFields, setDateFields] = useState({});
+  const [createProduct, { data: createProductData }] = useMutation(CREATE_PRODUCT);
 
+  const handleDateFieldsChange = (updatedDateFields) => {
+    setDateFields(updatedDateFields);
+  };
+
+  const _renderStepContent = (step, register, control) => {
+    switch (step) {
+      case 0:
+        return <DogBasicDetails fields={fields} onDateFieldsChange={handleDateFieldsChange} />;
+      case 1:
+        return <DogOtherDetails />;
+      // case 2:
+      //   return <PreviewDetails />;
+      default:
+        return <div>Not Found</div>;
+    }
+  };
   const methods = useForm({
     defaultValues: {
-      services: [
+      history: [
         {
-          serviceName: "",
-          joinedOn: "",
-          retiredOn: "",
+          title: "",
+          fromDate: "",
+          toDate: "",
           description: "",
         },
       ],
       awards: [
         {
-          awardName: "",
-          awardDate: "",
-          uploadMedia: "",
+          title: "",
+          fromDate: "",
+          toDate: "",
+          awardsLinks: "",
         },
       ],
-      medicals: [
+      reports: [
         {
           title: "",
-          shortDescription: "",
-          uploadMedia: "",
+          fromDate: "",
+          toDate: "",
+          description: "",
+          reportLinks: [],
         },
       ],
       others: [
         {
-          title: "",
-          shortDescription: "",
-          uploadMedia: "",
+          documentType: "",
+          documentName: "",
+          documentLinks: [],
         },
       ],
       description: "",
@@ -92,6 +102,74 @@ const AddDog = () => {
 
   const onSubmit = (data) => {
     console.log(data);
+    let originalData = { ...data };
+
+    // Iterate over dateFields and convert the dates to ISO string
+    Object.keys(dateFields).forEach((dateField) => {
+      if (originalData[dateField]) {
+        originalData[dateField] = new Date(originalData[dateField]).toISOString();
+      }
+    });
+    console.log(originalData);
+
+    const productData = JSON.stringify([
+      { name: originalData.name },
+      { image: originalData.image[0] },
+      { status: originalData.status },
+      { age: Number(originalData.age) },
+      { dob: originalData.dob },
+      { adoption_date: originalData.adoption_date },
+      { rest_date: originalData.rest_date },
+      { gallery: originalData.gallery[0] },
+      { breed: originalData.breed },
+      { height: originalData.height },
+      { weight: originalData.weight },
+      { color: originalData.color },
+      { gender: originalData.gender },
+    ]);
+    const story = originalData.story;
+
+    const history = originalData.history.map((entry) => ({
+      title: entry.title,
+      fromDate: entry.fromDate,
+      toDate: entry.toDate,
+      description: entry.description,
+    }));
+    const awards = originalData.awards.map((entry) => ({
+      title: entry.title,
+      fromDate: entry.fromDate,
+      toDate: entry.toDate,
+      awardsLinks: entry.awardsLinks.filter((link) => link !== null),
+    }));
+    const reports = originalData.reports.map((entry) => ({
+      title: entry.title,
+      fromDate: entry.fromDate,
+      toDate: entry.toDate,
+      description: entry.description,
+      reportLinks: entry.reportLinks.filter((link) => link !== null),
+    }));
+    const others = originalData.others.map((entry) => ({
+      documentType: entry.documentType,
+      documentName: entry.documentName,
+      documentLinks: entry.documentLinks.filter((link) => link !== null),
+    }));
+
+    // Combine all formatted data
+    const formattedData1 = {
+      productData,
+      story,
+      history,
+      awards,
+      reports,
+      others,
+    };
+
+    console.log(formattedData1);
+    createProduct({
+      variables: {
+        input: formattedData1,
+      },
+    });
   };
 
   return (

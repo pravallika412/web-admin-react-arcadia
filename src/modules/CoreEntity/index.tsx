@@ -112,9 +112,7 @@ const CoreEntity = () => {
 
   useEffect(() => {
     if (getCoreEntityData) {
-      console.log("test");
       if (getCoreEntityData.retrieveCoreEntity.product_schema) {
-        console.log("test");
         setCoreEntityFields(JSON.parse(getCoreEntityData.retrieveCoreEntity.product_schema));
         setIsCoreEntity(true);
       } else {
@@ -135,8 +133,6 @@ const CoreEntity = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(words);
-    console.log(data);
     const initialFields = [
       { fieldName: "name", dataType: 1, data: "" },
       { fieldName: "image", dataType: 7, data: "" },

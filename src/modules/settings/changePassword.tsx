@@ -4,8 +4,9 @@ import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CHANGE_PASSWORD } from "../../shared/graphQL/settings/queries";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircleOutline";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const ChangePassword = () => {
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -135,15 +136,20 @@ const ChangePassword = () => {
         </Grid>
       </Box>
       <Dialog open={openChangePasswordStatus} onClose={handleChangePasswordClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <DialogContent>
+        <Box display="flex" justifyContent="flex-end" p={1}>
+          <IconButton edge="end" color="primary" onClick={handleChangePasswordClose} aria-label="close">
+            <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ width: 324, height: 240 }}>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, m: 2 }} />
-            <DialogContentText id="alert-dialog-description">Password Changed Successfully</DialogContentText>
+            <CheckCircleIcon color="success" sx={{ fontSize: 60, m: 2 }} />
+            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+              <strong> Password Changed Successfully</strong>
+            </DialogContentText>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleChangePasswordClose}>close</Button>
-        </DialogActions>
       </Dialog>
     </>
   );
