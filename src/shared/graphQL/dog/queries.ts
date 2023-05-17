@@ -1,8 +1,8 @@
 import gql from "graphql-tag";
 
 const CREATE_PRODUCT = gql`
-  mutation addProduct($input: AddProductDto!) {
-    addProduct(addProductDto: $input) {
+  mutation createProduct($input: CreateProductDto!) {
+    createProduct(createProductDto: $input) {
       success
       message
     }

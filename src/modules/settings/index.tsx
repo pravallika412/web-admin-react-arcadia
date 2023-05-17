@@ -29,7 +29,8 @@ import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { GET_ADMIN, UPDATE_PROFILE } from "../../shared/graphQL/settings/queries";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Alert from "@mui/material/Alert";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import ChangePassword from "./changePassword";
 
 interface TabPanelProps {
@@ -342,15 +343,23 @@ const Settings = () => {
         </Grid>
       </Grid>
       <Dialog open={openProfileStatus} onClose={handleProfileClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <DialogContent>
+        <Box display="flex" justifyContent="flex-end" p={1}>
+          <IconButton edge="end" color="primary" onClick={handleProfileClose} aria-label="close">
+            <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ width: 324, height: 240 }}>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, m: 2 }} />
-            <DialogContentText id="alert-dialog-description">Profile Updated Successfully</DialogContentText>
+            <CheckCircleIcon color="success" sx={{ fontSize: 70, m: 2 }} />
+            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+              <strong>Profile Updated Successfully</strong>
+            </DialogContentText>
           </Box>
         </DialogContent>
-        <DialogActions>
+        {/* <DialogActions>
           <Button onClick={handleProfileClose}>close</Button>
-        </DialogActions>
+        </DialogActions> */}
       </Dialog>
       {/* <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
         <Alert severity={snackbarSeverity as Severity} sx={{ width: "100%" }}>
