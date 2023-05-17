@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { Avatar, Box, Button, Divider, Hidden, lighten, List, ListItem, ListItemText, Popover, Typography } from "@mui/material";
 
@@ -51,7 +51,7 @@ function HeaderUserbox() {
     avatar: "/static/images/avatars/1.jpg",
     jobtitle: "Admin",
   };
-
+  const navigate = useNavigate();
   const ref = useRef<any>(null);
   const [isOpen, setOpen] = useState<boolean>(false);
 
@@ -64,6 +64,7 @@ function HeaderUserbox() {
   };
   const logout = () => {
     window.localStorage.clear();
+    navigate("/");
     // client.resetStore()
   };
 
