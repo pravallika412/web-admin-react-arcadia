@@ -20,6 +20,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -88,6 +89,7 @@ function a11yProps(index: number) {
 
 const Settings = () => {
   const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true);
   const classes = useStyles();
   const [value, setValue] = useState(0);
@@ -252,7 +254,24 @@ const Settings = () => {
                                 {loading ? (
                                   <Skeleton variant="text" width="100%" height={70} />
                                 ) : (
-                                  <TextField label="Last Name" {...register("lastName")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                                  <TextField
+                                    label="Last Name"
+                                    {...register("lastName", {
+                                      pattern: {
+                                        value: /^[A-Za-z][A-Za-z\s]*$/,
+                                        message: "Please enter valid name",
+                                      },
+                                      maxLength: {
+                                        value: 15,
+                                        message: "Max length exceeded",
+                                      },
+                                    })}
+                                    margin="normal"
+                                    InputLabelProps={{ shrink: true }}
+                                    fullWidth
+                                    error={!!errors.lastName}
+                                    helperText={errors?.lastName?.message}
+                                  />
                                 )}
                               </Grid>
                             </Grid>
@@ -342,8 +361,8 @@ const Settings = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Dialog open={openProfileStatus} onClose={handleProfileClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <Box display="flex" justifyContent="flex-end" p={1}>
+      <Dialog open={openProfileStatus} fullScreen={fullScreen} onClose={handleProfileClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <Box display="flex" justifyContent="flex-end" p={1} sx={{ overflow: "hidden" }}>
           <IconButton edge="end" color="primary" onClick={handleProfileClose} aria-label="close">
             <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
           </IconButton>

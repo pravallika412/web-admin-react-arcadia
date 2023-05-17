@@ -7,8 +7,10 @@ import { CHANGE_PASSWORD } from "../../shared/graphQL/settings/queries";
 import CheckCircleIcon from "@mui/icons-material/CheckCircleOutline";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { useNavigate } from "react-router";
 
 const ChangePassword = () => {
+  const navigate = useNavigate();
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -42,7 +44,9 @@ const ChangePassword = () => {
 
   const handleChangePasswordClose = () => {
     setOpenChangePasswordStatus(false);
+    localStorage.clear();
     reset();
+    navigate("/");
   };
 
   return (
@@ -136,7 +140,7 @@ const ChangePassword = () => {
         </Grid>
       </Box>
       <Dialog open={openChangePasswordStatus} onClose={handleChangePasswordClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <Box display="flex" justifyContent="flex-end" p={1}>
+        <Box display="flex" justifyContent="flex-end" p={1} sx={{ overflow: "hidden" }}>
           <IconButton edge="end" color="primary" onClick={handleChangePasswordClose} aria-label="close">
             <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
           </IconButton>
