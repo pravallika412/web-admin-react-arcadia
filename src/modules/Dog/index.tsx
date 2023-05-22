@@ -25,6 +25,9 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Typography,
+  Grid,
+  useTheme,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -39,6 +42,10 @@ import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { DatePicker } from "@mui/lab";
 import { Link, Route, Routes } from "react-router-dom";
 import AddDog from "./addDog";
+import Label from "../../shared/components/Label";
+import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 
 const useStyles = makeStyles({
   root: {
@@ -54,104 +61,14 @@ const useStyles = makeStyles({
 });
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 170 },
-  { id: "service", label: "Service", minWidth: 170 },
-  { id: "status", label: "Status", minWidth: 170 },
-  { id: "handlers_count", label: "Handlers Count", minWidth: 170 },
-  { id: "breed_name", label: "Breed Name", minWidth: 170 },
+  { id: "name", label: "Dog's Name", minWidth: 170 },
+  { id: "createdAt", label: "Created On", minWidth: 170 },
+  { id: "status", label: "Dog's status", minWidth: 170 },
   { id: "action", label: "Action" },
 ];
 
-const datatypes = [
-  {
-    order: 1,
-    name: "String",
-    fieldType: "Text",
-  },
-  {
-    order: 2,
-    name: "Number",
-    fieldType: "Text",
-  },
-  {
-    order: 3,
-    name: "Date",
-    fieldType: "DatePicker",
-  },
-  {
-    order: 4,
-    name: "Boolean",
-    fieldType: "Select",
-  },
-  {
-    order: 5,
-    name: "Enum",
-    fieldType: "Text(comma-separated)",
-  },
-  {
-    order: 6,
-    name: "Textarea",
-    fieldType: "Textarea",
-  },
-  {
-    order: 7,
-    name: "File",
-    fieldType: "File",
-  },
-  {
-    order: 8,
-    name: "Files",
-    fieldType: "Files",
-  },
-];
-const data = [
-  { fieldName: "name", dataType: 1, data: "" },
-  { fieldName: "dob", dataType: 3, data: "" },
-  { fieldName: "adoption_date", dataType: 3, data: "" },
-  { fieldName: "rest_date", dataType: 3, data: "" },
-  { fieldName: "service", dataType: 5, data: ["army", "navy"] },
-  {
-    fieldName: "service_start",
-    dataType: 3,
-    data: "",
-  },
-  {
-    fieldName: "service_end",
-    dataType: 3,
-    data: "",
-  },
-  {
-    fieldName: "photo_url",
-    dataType: 7,
-    data: "",
-  },
-  {
-    fieldName: "gallery",
-    dataType: 8,
-    data: "",
-  },
-  {
-    fieldName: "medals",
-    dataType: 8,
-    data: "",
-  },
-  {
-    fieldName: "medical_reports",
-    dataType: 8,
-    data: "",
-  },
-  {
-    fieldName: "status",
-    dataType: 5,
-    data: ["active", "inactive"],
-  },
-  {
-    fieldName: "Profile_status",
-    dataType: 5,
-    data: ["sleeping", "playing"],
-  },
-];
 const Dog = () => {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState([]);
   const [openDelete, setOpenDelete] = useState(false);
@@ -161,12 +78,9 @@ const Dog = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const [suspendId, setSuspendId] = useState(null);
-  const [createHandler, { data: createHandlerData }] = useMutation(CREATE_PRODUCT);
-  const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_PRODUCT);
-  const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_PRODUCT);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteProduct, { data: deleteProductData }] = useMutation(DELETE_PRODUCT);
   const [getProducts, { data: getAllProducts, refetch }] = useLazyQuery(GET_PRODUCTS);
-  const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   const {
     control,
@@ -187,72 +101,16 @@ const Dog = () => {
     }));
   };
 
-  const getFieldComponent = (field) => {
-    const fieldType = datatypes.find((type) => type.order === field.dataType).fieldType;
-    const fieldName = field.fieldName;
-    const fieldValue = formData[fieldName] || "";
-
-    switch (fieldType) {
-      case "Text":
-        return <TextField label={fieldName} value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)} />;
-      // case "DatePicker":
-      //   return <DatePicker label={fieldName} value={fieldValue} onChange={(date) => handleChange(fieldName, date)} />;
-      case "Select":
-        const options = field.data;
-        return (
-          <Select label={fieldName} value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)}>
-            {options.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </Select>
-        );
-      case "Text(comma-separated)":
-        const enumOptions = field.data;
-        return <TextField label={fieldName} value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)} helperText={`Choose one of these options: ${enumOptions.join(", ")}`} />;
-      case "Textarea":
-        return <TextareaAutosize value={fieldValue} onChange={(e) => handleChange(fieldName, e.target.value)} />;
-      case "Checkbox":
-        return <FormControlLabel control={<Checkbox />} label={fieldName} checked={fieldValue} />;
-      default:
-        return null;
-    }
-  };
-
   useEffect(() => {
-    getProducts({ variables: { input: {} } });
+    getProducts({ variables: { input: { pageDto: {} } } });
   }, []);
 
   useEffect(() => {
     if (getAllProducts) {
-      setProducts(getAllProducts.listProducts.products);
+      console.log(JSON.parse(getAllProducts.retrieveProductsList.productsDataList));
+      setProducts(JSON.parse(getAllProducts.retrieveProductsList.productsDataList));
     }
   }, [getAllProducts]);
-
-  useEffect(() => {
-    if (createHandlerData) {
-      refetch();
-    }
-  }, [createHandlerData]);
-
-  useEffect(() => {
-    if (updateHandlerData) {
-      refetch();
-    }
-  }, [updateHandlerData]);
-
-  useEffect(() => {
-    if (deleteHandlerData) {
-      refetch();
-    }
-  }, [deleteHandlerData]);
-
-  useEffect(() => {
-    if (createPresignedUrl) {
-      setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
-    }
-  }, [createPresignedUrl]);
 
   useEffect(() => {
     if (uploadFile) {
@@ -283,12 +141,14 @@ const Dog = () => {
   };
 
   const handleDelete = () => {
-    deleteHandler({ variables: { id: { id: suspendId } } });
+    deleteProduct({ variables: { id: { id: deleteId } } });
     setOpenDelete(false);
+    refetch();
   };
 
-  const handleSuspendClick = (row) => {
-    setSuspendId(row.id);
+  const handleDeleteClick = (row) => {
+    console.log(row._id);
+    setDeleteId(row._id);
     setOpenDelete(true);
   };
 
@@ -314,31 +174,114 @@ const Dog = () => {
     setPage(0);
   };
 
-  const handleFileChange = (event: any) => {
-    event.preventDefault();
-    setFile(event.target.files[0]);
-    let payload = {
-      fileName: event.target.files[0].name,
-      fileType: event.target.files[0].type,
-      filePath: "sponsor",
-    };
-    generatePresignedUrl({ variables: { input: payload } });
+  const formatDate = (dateToFormat) => {
+    if (dateToFormat) {
+      const date = new Date(dateToFormat);
+      const year = date.getFullYear();
+      const month = ("0" + (date.getMonth() + 1)).slice(-2);
+      const day = ("0" + date.getDate()).slice(-2);
+      const formattedDate = `${day}-${month}-${year}`;
+      return formattedDate;
+    } else {
+      return "";
+    }
+  };
+
+  type Color = "error" | "info" | "secondary" | "primary" | "warning" | "success";
+  const getStatusLabel = (status: "active" | "inactive" | "suspended" | "atheaven" | "adopted"): JSX.Element => {
+    console.log(status);
+    let color = "";
+    let text = "";
+    switch (status) {
+      case "active":
+        text = "Active";
+        color = "info";
+        break;
+      case "inactive":
+        text = "Inactive";
+        color = "secondary";
+        break;
+      case "suspended":
+        text = "Suspended";
+        color = "error";
+        break;
+      case "atheaven":
+        text = "At Heaven";
+        color = "error";
+        break;
+      case "adopted":
+        text = "Adopted";
+        color = "success";
+        break;
+      default:
+        color = "warning";
+        text = "Inactive";
+        break;
+    }
+    return <Label color={color as Color}>{text}</Label>;
+  };
+
+  const renderColumn = (column, product, value) => {
+    switch (column.id) {
+      case "name":
+        return (
+          <div style={{ display: "flex" }}>
+            {product["image"] ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
+                  borderRadius: "50%",
+                  padding: "2px",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <img src={product["image"]} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt="profile" />
+              </div>
+            ) : (
+              ""
+            )}
+            <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
+              <strong>{value ? value : ""}</strong>
+            </div>
+          </div>
+        );
+      case "status":
+        return getStatusLabel(value);
+      case "createdAt":
+        return formatDate(value);
+      default:
+        return value;
+    }
   };
 
   return (
     <Container component="main">
-      <Link to="/dog/addDog">
-        <Button onClick={handleOpen} sx={{ margin: 1 }} variant="contained">
-          Add Dog
-        </Button>
-      </Link>
+      <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
+        <Grid item>
+          <Typography variant="h3" component="h3" gutterBottom>
+            List of Dogs
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Link to="/dog/addDog">
+            <Button sx={{ my: 2 }} variant="contained" onClick={handleOpen} startIcon={<AddTwoToneIcon fontSize="small" />}>
+              Add Dog
+            </Button>
+          </Link>
+        </Grid>
+      </Grid>
+
       <Paper>
         <TableContainer>
           <Table aria-label="Product table">
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                  <TableCell key={column.id} style={{ minWidth: column.minWidth, textTransform: "none" }}>
                     {column.label}
                   </TableCell>
                 ))}
@@ -348,22 +291,40 @@ const Dog = () => {
               {products.length > 0 ? (
                 products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
                   return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={product.id}>
+                    <TableRow hover role="checkbox" tabIndex={-1} key={product._id}>
                       {columns.map((column) => {
-                        const value = product[column.id];
+                        const value = product[column.id] ? product[column.id] : "";
                         return (
                           <TableCell key={column.id}>
                             {column.id === "action" ? (
                               <>
-                                <IconButton onClick={() => handleEditClick(product)}>
-                                  <EditIcon />
+                                <IconButton
+                                  sx={{
+                                    "&:hover": {
+                                      background: theme.colors.primary.lighter,
+                                    },
+                                    color: theme.palette.primary.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => handleEditClick(product)}
+                                >
+                                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
                                 </IconButton>
-                                <IconButton onClick={() => handleSuspendClick(product)}>
-                                  <DeleteIcon />
+                                <IconButton
+                                  sx={{
+                                    "&:hover": { background: theme.colors.error.lighter },
+                                    color: theme.palette.error.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => handleDeleteClick(product)}
+                                >
+                                  <DeleteTwoToneIcon fontSize="small" />
                                 </IconButton>
                               </>
                             ) : (
-                              value
+                              renderColumn(column, product, value)
                             )}
                           </TableCell>
                         );
@@ -391,33 +352,6 @@ const Dog = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      {/* <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
-        <DialogTitle id="scroll-dialog-title">{isEditing ? "Update Handler" : "Create Handler"}</DialogTitle>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: 500 }}>
-          <DialogContent>
-            <div>
-              {data.map((field) => (
-                <div key={field.fieldName}>{getFieldComponent(field)}</div>
-              ))}
-            </div>
-            <Box sx={{ width: "100%" }}>
-              <Stepper alternativeLabel>
-                {steps.map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button type="submit" variant="contained">
-              Submit
-            </Button>
-            <Button onClick={handleClose}>Cancel</Button>
-          </DialogActions>
-        </Box>
-      </Dialog> */}
       <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
         <DialogTitle id="alert-dialog-title">Suspend</DialogTitle>
         <DialogContent>

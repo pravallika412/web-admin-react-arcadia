@@ -1,5 +1,5 @@
 import { ApolloClient, InMemoryCache, useLazyQuery } from "@apollo/client";
-import { Container, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
+import { Box, Container, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import Label from "../../shared/components/Label";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
@@ -14,21 +14,79 @@ const columns = [
   { _id: 7, id: "tvl", subtype: "sponsor", label: "TVL", minWidth: "auto" },
 ];
 
+const sponsorshipStatus = [
+  {
+    id: "all",
+    name: "All",
+  },
+  {
+    id: "active",
+    name: "Active",
+  },
+  {
+    id: "inactive",
+    name: "Inactive",
+  },
+];
+const subscriptionStatus = [
+  {
+    id: "all",
+    name: "All",
+  },
+  {
+    id: "Basic Plan",
+    name: "Basic Plan",
+  },
+  {
+    id: "Premium Plan",
+    name: "Premium Plan",
+  },
+  {
+    id: "Platinum Plan",
+    name: "Platinum Plan",
+  },
+];
+
 const Sponsor = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [filters, setFilters] = useState({
+    status: null,
+    plan: null,
+  });
   const [getSponsors, { data: getAllSponsors, refetch }] = useLazyQuery(GET_SPONSORS);
 
   useEffect(() => {
-    getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: {}, input3: {} } });
-  }, [page, rowsPerPage]);
+    getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: {}, input3: { status: filters.status, plan: filters.plan } } });
+  }, [page, rowsPerPage, filters]);
 
   useEffect(() => {
     if (getAllSponsors) {
       setProducts(getAllSponsors.GetSponsorListByBrand.subscribedSponsors);
     }
   }, [getAllSponsors]);
+
+  const handleStatusChange = (e: any, type: string): void => {
+    console.log(e.target.value);
+    let value = null;
+
+    if (e.target.value !== "all") {
+      value = e.target.value;
+    }
+    if (type == "status") {
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        status: value,
+      }));
+    }
+    if (type == "plan") {
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        plan: value,
+      }));
+    }
+  };
 
   const formatTimestamp = (dateToFormat) => {
     if (dateToFormat) {
@@ -113,13 +171,13 @@ const Sponsor = () => {
               {product[column.subtype] && product[column.subtype]["profile_picture"] ? (
                 <div
                   style={{
-                    display: "flex", // Change this to flex
-                    justifyContent: "center", // Add this
-                    alignItems: "center", // Add this
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                     backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
                     borderRadius: "50%",
-                    padding: "2px", // Add this
-                    width: "50px", // Added this
+                    padding: "2px",
+                    width: "50px",
                     height: "50px",
                   }}
                 >
@@ -149,6 +207,32 @@ const Sponsor = () => {
           <Typography variant="h3" component="h3" gutterBottom>
             List of Sponsors
           </Typography>
+        </Grid>
+        <Grid sx={{ display: "flex" }}>
+          <Box width={160} sx={{ m: 1 }}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Subscription Plan</InputLabel>
+              <Select onChange={(e) => handleStatusChange(e, "plan")} label="Subscription Plan" autoWidth>
+                {subscriptionStatus.map((statusOption) => (
+                  <MenuItem key={statusOption.id} value={statusOption.id}>
+                    {statusOption.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          <Box width={170} sx={{ m: 1 }}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Sponsorhsip Status</InputLabel>
+              <Select onChange={(e) => handleStatusChange(e, "status")} label="Sponsorship Status" autoWidth>
+                {sponsorshipStatus.map((statusOption) => (
+                  <MenuItem key={statusOption.id} value={statusOption.id}>
+                    {statusOption.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Grid>
       </Grid>
 

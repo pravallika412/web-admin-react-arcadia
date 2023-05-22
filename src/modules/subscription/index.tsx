@@ -161,6 +161,7 @@ const Subscription = () => {
         price: Number(data.price),
         planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile,
         supportableProductCount: data.supportableProductCount,
+        tokenUri: "https://gateway.pinata.cloud/ipfs/Qmc9jo1vohFdHM9Nffq7gGjvDH5T3S3m5Dgfw56wDyXBw9",
       };
       updateSubscription({ variables: { input: updatePayload } });
     } else {
@@ -173,6 +174,7 @@ const Subscription = () => {
         price: Number(data.price),
         renewalNumber: 1,
         supportableProductCount: data.supportableProductCount,
+        tokenUri: "https://gateway.pinata.cloud/ipfs/Qmc9jo1vohFdHM9Nffq7gGjvDH5T3S3m5Dgfw56wDyXBw9",
       };
       createSubscription({ variables: { input: payload } });
     }

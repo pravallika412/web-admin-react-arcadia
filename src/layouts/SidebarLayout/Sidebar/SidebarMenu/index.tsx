@@ -11,6 +11,7 @@ import PetsIcon from "@mui/icons-material/Pets";
 import PersonIcon from "@mui/icons-material/Person";
 import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import CallToActionIcon from "@mui/icons-material/CallToAction";
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -188,6 +189,11 @@ function SidebarMenu() {
               <ListItem component="div">
                 <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dog" startIcon={<PetsIcon />}>
                   Dog
+                </Button>
+              </ListItem>
+              <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/posts" startIcon={<CallToActionIcon />}>
+                  Posts
                 </Button>
               </ListItem>
               <ListItem component="div">

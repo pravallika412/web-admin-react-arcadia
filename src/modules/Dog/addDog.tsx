@@ -1,7 +1,8 @@
-import { useMutation } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { Box, Button, Grid, Paper, Step, StepButton, StepLabel, Stepper } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { GET_COREENTITY } from "../../shared/graphQL/core-entity/queries";
 import { CREATE_PRODUCT } from "../../shared/graphQL/dog/queries";
 import DogBasicDetails from "./dogBasicDetails";
 import DogOtherDetails from "./dogOtherDetails";
@@ -30,8 +31,22 @@ const AddDog = () => {
   const [completed, setCompleted] = useState<{
     [k: number]: boolean;
   }>({});
+  const [coreEntityFieldsData, setCoreEntityFieldsData] = useState([]);
   const [dateFields, setDateFields] = useState({});
+  const [getCoreEntity, { data: getCoreEntityData }] = useLazyQuery(GET_COREENTITY);
   const [createProduct, { data: createProductData }] = useMutation(CREATE_PRODUCT);
+
+  useEffect(() => {
+    getCoreEntity();
+  }, []);
+
+  useEffect(() => {
+    if (getCoreEntityData) {
+      if (getCoreEntityData.retrieveCoreEntity.product_schema) {
+        setCoreEntityFieldsData(JSON.parse(getCoreEntityData.retrieveCoreEntity.product_schema));
+      }
+    }
+  }, [getCoreEntityData]);
 
   const handleDateFieldsChange = (updatedDateFields) => {
     setDateFields(updatedDateFields);
@@ -40,7 +55,7 @@ const AddDog = () => {
   const _renderStepContent = (step, register, control) => {
     switch (step) {
       case 0:
-        return <DogBasicDetails fields={fields} onDateFieldsChange={handleDateFieldsChange} />;
+        return <DogBasicDetails fields={coreEntityFieldsData} onDateFieldsChange={handleDateFieldsChange} />;
       case 1:
         return <DogOtherDetails />;
       // case 2:
@@ -92,9 +107,10 @@ const AddDog = () => {
     setActiveStep(step);
   };
 
-  const handleNext = () => {
+  const handleNext = handleSubmit((data) => {
+    console.log(data);
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+  });
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -120,7 +136,7 @@ const AddDog = () => {
       { dob: originalData.dob },
       { adoption_date: originalData.adoption_date },
       { rest_date: originalData.rest_date },
-      { gallery: originalData.gallery[0] },
+      { gallery: [originalData.image[0]] },
       { breed: originalData.breed },
       { height: originalData.height },
       { weight: originalData.weight },
@@ -139,19 +155,19 @@ const AddDog = () => {
       title: entry.title,
       fromDate: entry.fromDate,
       toDate: entry.toDate,
-      awardsLinks: entry.awardsLinks.filter((link) => link !== null),
+      awardsLinks: entry.awardsLinks ? entry.awardsLinks.filter((link) => link !== null && link !== undefined) : [],
     }));
     const reports = originalData.reports.map((entry) => ({
       title: entry.title,
       fromDate: entry.fromDate,
       toDate: entry.toDate,
       description: entry.description,
-      reportLinks: entry.reportLinks.filter((link) => link !== null),
+      reportLinks: entry.reportLinks.filter((link) => link !== null && link !== undefined),
     }));
     const others = originalData.others.map((entry) => ({
       documentType: entry.documentType,
       documentName: entry.documentName,
-      documentLinks: entry.documentLinks.filter((link) => link !== null),
+      documentLinks: entry.documentLinks.filter((link) => link !== null && link !== undefined),
     }));
 
     // Combine all formatted data

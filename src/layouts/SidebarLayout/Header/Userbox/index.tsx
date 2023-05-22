@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -9,6 +9,8 @@ import ExpandMoreTwoToneIcon from "@mui/icons-material/ExpandMoreTwoTone";
 import AccountBoxTwoToneIcon from "@mui/icons-material/AccountBoxTwoTone";
 import LockOpenTwoToneIcon from "@mui/icons-material/LockOpenTwoTone";
 import AccountTreeTwoToneIcon from "@mui/icons-material/AccountTreeTwoTone";
+import { useLazyQuery } from "@apollo/client";
+import { GET_ADMIN } from "../../../../shared/graphQL/settings/queries";
 
 const UserBoxButton = styled(Button)(
   ({ theme }) => `
@@ -46,9 +48,21 @@ const UserBoxDescription = styled(Typography)(
 );
 
 function HeaderUserbox() {
+  const [userData, setUserData] = useState({ first_name: "", profile_image: "" });
+  const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
+  useEffect(() => {
+    getAdmin();
+  }, []);
+
+  useEffect(() => {
+    if (getAdminData) {
+      setUserData(getAdminData.getAdmin);
+    }
+  }, [getAdminData]);
+
   const user = {
-    name: "Admin Name",
-    avatar: "/static/images/avatars/1.jpg",
+    name: userData.first_name,
+    avatar: userData.profile_image,
     jobtitle: "Admin",
   };
   const navigate = useNavigate();
