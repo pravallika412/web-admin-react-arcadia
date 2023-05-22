@@ -13,6 +13,7 @@ const GET_HANDLERS = gql`
   query listHandlers($input: PageDto!) {
     listHandlers(listHandlerDto: $input) {
       handlers {
+        id
         email
         name
         status

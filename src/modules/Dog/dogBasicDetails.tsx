@@ -14,7 +14,11 @@ const DogBasicDetails = ({ fields, onDateFieldsChange }) => {
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   // const { handleSubmit, control, register, reset } = useForm();
-  const { register, setValue } = useFormContext();
+  const {
+    register,
+    setValue,
+    formState: { errors },
+  } = useFormContext();
 
   useEffect(() => {
     if (presignedUrls) {
@@ -93,9 +97,34 @@ const DogBasicDetails = ({ fields, onDateFieldsChange }) => {
 
     switch (dataType) {
       case 1:
+        return (
+          <TextField
+            key={fieldName}
+            label={fieldName}
+            variant="outlined"
+            {...(register(fieldName),
+            {
+              pattern: {
+                value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
+                message: "Please enter a valid" + fieldName,
+              },
+              maxLength: {
+                value: 20,
+                message: "Max length exceeded",
+              },
+            })}
+            margin="normal"
+            fullWidth
+            value={fieldValue}
+            onChange={(e) => handleInputChange(fieldName, e.target.value)}
+            error={!!errors[fieldName]}
+            helperText={errors?.[fieldName]?.message}
+          />
+        );
       case 2: // Number
         return (
           <TextField
+            type="number"
             key={fieldName}
             label={fieldName}
             variant="outlined"

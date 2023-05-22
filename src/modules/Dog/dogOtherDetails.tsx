@@ -6,6 +6,7 @@ import { Container } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
+import { DatePicker } from "@mui/lab";
 
 const DogOtherDetails = () => {
   const [uploadFile, setUploadFile] = useState(null);
@@ -18,7 +19,12 @@ const DogOtherDetails = () => {
   const [otherPresignedUrls, setOtherPresignedUrls] = useState([]);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
-  const { control, setValue } = useFormContext();
+  const {
+    control,
+    setValue,
+    formState: { errors },
+  } = useFormContext();
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "history",
@@ -108,13 +114,26 @@ const DogOtherDetails = () => {
 
   return (
     <Container component="main">
-      {/* <Box component="form" onSubmit={handleSubmit(onSubmit)}> */}
       <Paper elevation={3} sx={{ p: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ mb: 2 }}>
             Dog Story
           </Typography>
-          <Controller name="story" control={control} render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} fullWidth />} />
+          <Controller
+            name="story"
+            control={control}
+            rules={{
+              pattern: {
+                value: /^[^\s][\s\S]*$/,
+                message: "Please enter valid story",
+              },
+              maxLength: {
+                value: 200,
+                message: "Max length exceeded",
+              },
+            }}
+            render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} fullWidth error={!!errors.story} helperText={errors?.story?.message} />}
+          />
         </Box>
         <Box marginTop={2}>
           <Box display="flex" justifyContent="space-between">
@@ -131,7 +150,27 @@ const DogOtherDetails = () => {
               <Controller
                 name={`history[${index}].title` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Service Name" variant="outlined" margin="normal" fullWidth />}
+                rules={{
+                  pattern: {
+                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                    message: "Please enter valid service name",
+                  },
+                  maxLength: {
+                    value: 30,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Service Name"
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    error={!!errors.history?.[index]?.title}
+                    helperText={errors?.history?.[index]?.title?.message}
+                  />
+                )}
               />
 
               <Controller
@@ -149,7 +188,29 @@ const DogOtherDetails = () => {
               <Controller
                 name={`history[${index}].description` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} margin="normal" fullWidth />}
+                rules={{
+                  pattern: {
+                    value: /^[^\s][\s\S]*$/,
+                    message: "Please enter valid description",
+                  },
+                  maxLength: {
+                    value: 200,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Description"
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    fullWidth
+                    error={!!errors.history?.[index]?.description}
+                    helperText={errors?.history?.[index]?.description?.message}
+                  />
+                )}
               />
             </Grid>
           ))}
@@ -166,7 +227,23 @@ const DogOtherDetails = () => {
           </Box>
           {awardFields.map((item, index) => (
             <Grid container key={item.id || index}>
-              <Controller name={`awards[${index}].title` as any} control={control} render={({ field }) => <TextField {...field} label="Award Name" variant="outlined" margin="normal" fullWidth />} />
+              <Controller
+                name={`awards[${index}].title` as any}
+                control={control}
+                rules={{
+                  pattern: {
+                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                    message: "Please enter valid award name",
+                  },
+                  maxLength: {
+                    value: 30,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField {...field} label="Award Name" variant="outlined" margin="normal" fullWidth error={!!errors.awards?.[index]?.title} helperText={errors?.awards?.[index]?.title?.message} />
+                )}
+              />
 
               <Controller
                 name={`awards[${index}].fromDate` as any}
@@ -212,7 +289,23 @@ const DogOtherDetails = () => {
           </Box>
           {medicalFields.map((item, index) => (
             <Grid container key={item.id || index}>
-              <Controller name={`reports[${index}].title` as any} control={control} render={({ field }) => <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth />} />
+              <Controller
+                name={`reports[${index}].title` as any}
+                control={control}
+                rules={{
+                  pattern: {
+                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                    message: "Please enter valid report name",
+                  },
+                  maxLength: {
+                    value: 30,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth error={!!errors.reports?.[index]?.title} helperText={errors?.reports?.[index]?.title?.message} />
+                )}
+              />
 
               <Controller
                 name={`reports[${index}].fromDate` as any}
@@ -228,7 +321,29 @@ const DogOtherDetails = () => {
               <Controller
                 name={`reports[${index}].description` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} margin="normal" fullWidth />}
+                rules={{
+                  pattern: {
+                    value: /^[^\s][\s\S]*$/,
+                    message: "Please enter valid description",
+                  },
+                  maxLength: {
+                    value: 200,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Description"
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    fullWidth
+                    error={!!errors.reports?.[index]?.description}
+                    helperText={errors?.reports?.[index]?.description?.message}
+                  />
+                )}
               />
 
               <Box
@@ -264,12 +379,58 @@ const DogOtherDetails = () => {
           </Box>
           {otherFields.map((item, index) => (
             <Grid container key={item.id || index}>
-              <Controller name={`others[${index}].documentType` as any} control={control} render={({ field }) => <TextField {...field} label="Title" variant="outlined" margin="normal" fullWidth />} />
+              <Controller
+                name={`others[${index}].documentType` as any}
+                control={control}
+                rules={{
+                  pattern: {
+                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                    message: "Please enter valid document type",
+                  },
+                  maxLength: {
+                    value: 30,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Title"
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    error={!!errors.others?.[index]?.documentType}
+                    helperText={errors?.others?.[index]?.documentType?.message}
+                  />
+                )}
+              />
 
               <Controller
                 name={`others[${index}].description` as any}
                 control={control}
-                render={({ field }) => <TextField {...field} label="Description" variant="outlined" multiline rows={4} margin="normal" fullWidth />}
+                rules={{
+                  pattern: {
+                    value: /^[^\s][\s\S]*$/,
+                    message: "Please enter valid description",
+                  },
+                  maxLength: {
+                    value: 200,
+                    message: "Max length exceeded",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Description"
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    margin="normal"
+                    fullWidth
+                    error={!!errors.others?.[index]?.description}
+                    helperText={errors?.others?.[index]?.description?.message}
+                  />
+                )}
               />
 
               <Box
@@ -293,13 +454,7 @@ const DogOtherDetails = () => {
             </Grid>
           ))}
         </Box>
-        {/* <Box marginTop={2}>
-            <Button type="submit" variant="contained" color="primary">
-              Submit
-            </Button>
-          </Box> */}
       </Paper>
-      {/* </Box> */}
     </Container>
   );
 };

@@ -10,27 +10,9 @@ const CREATE_PRODUCT = gql`
 `;
 
 const GET_PRODUCTS = gql`
-  query listProducts($input: PageDto!) {
-    listProducts(listProductDto: $input) {
-      products {
-        id
-        name
-        dob
-        adoption_date
-        rest_date
-        service
-        service_start
-        service_end
-        photo_url
-        gallery
-        medals
-        medical_report
-        status
-        profile_status
-        handlers_count
-        brand
-        breed_name
-      }
+  query retrieveProductsList($input: ProductFilterDto!) {
+    retrieveProductsList(retrieveProductsListDto: $input) {
+      productsDataList
       totalCount
     }
   }
