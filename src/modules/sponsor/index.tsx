@@ -1,5 +1,23 @@
 import { ApolloClient, InMemoryCache, useLazyQuery } from "@apollo/client";
-import { Box, Container, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
+import {
+  Box,
+  Container,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import Label from "../../shared/components/Label";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
@@ -55,7 +73,7 @@ const Sponsor = () => {
     status: null,
     plan: null,
   });
-  const [getSponsors, { data: getAllSponsors, refetch }] = useLazyQuery(GET_SPONSORS);
+  const [getSponsors, { data: getAllSponsors, loading: sponsorLoading, refetch }] = useLazyQuery(GET_SPONSORS);
 
   useEffect(() => {
     getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: {}, input3: { status: filters.status, plan: filters.plan } } });
@@ -68,7 +86,6 @@ const Sponsor = () => {
   }, [getAllSponsors]);
 
   const handleStatusChange = (e: any, type: string): void => {
-    console.log(e.target.value);
     let value = null;
 
     if (e.target.value !== "all") {
@@ -249,7 +266,13 @@ const Sponsor = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.length > 0 ? (
+              {sponsorLoading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length}>
+                    <Skeleton variant="rectangular" animation="wave" height={500} />
+                  </TableCell>
+                </TableRow>
+              ) : products.length > 0 ? (
                 products.map((product) => {
                   return (
                     <TableRow hover tabIndex={-1} key={product._id}>

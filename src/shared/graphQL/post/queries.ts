@@ -44,4 +44,15 @@ const GET_FEED = gql`
   }
 `;
 
-export { REVIEW_POST, GET_FEED };
+const GET_POST_COUNT = gql`
+  query {
+    GetPostCounts {
+      totalPosts
+      approvedPosts
+      pendingPosts
+      rejectedPosts
+    }
+  }
+`;
+
+export { REVIEW_POST, GET_FEED, GET_POST_COUNT };
