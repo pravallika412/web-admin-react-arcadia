@@ -12,6 +12,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import CallToActionIcon from "@mui/icons-material/CallToAction";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 
 const MenuWrapper = styled(Box)(
   ({ theme }) => `
@@ -172,15 +173,11 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/sponsors" startIcon={<DesignServicesTwoToneIcon />}>
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/sponsors" startIcon={<PeopleAltIcon />}>
                   Sponsor
                 </Button>
               </ListItem>
-              <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<SubscriptionsIcon />}>
-                  Subscription
-                </Button>
-              </ListItem>
+
               <ListItem component="div">
                 <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/handler" startIcon={<PersonIcon />}>
                   Handler
@@ -197,6 +194,11 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
+                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/subscription" startIcon={<SubscriptionsIcon />}>
+                  Subscription
+                </Button>
+              </ListItem>
+              <ListItem component="div">
                 <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/settings" startIcon={<SettingsIcon />}>
                   Settings
                 </Button>
@@ -204,7 +206,7 @@ function SidebarMenu() {
             </List>
           </SubMenuWrapper>
         </List>
-        <List component="div">
+        {/* <List component="div">
           <SubMenuWrapper>
             <List component="div">
               <ListItem component="div">
@@ -214,7 +216,7 @@ function SidebarMenu() {
               </ListItem>
             </List>
           </SubMenuWrapper>
-        </List>
+        </List> */}
       </MenuWrapper>
     </>
   );

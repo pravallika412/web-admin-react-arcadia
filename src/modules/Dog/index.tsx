@@ -107,7 +107,6 @@ const Dog = () => {
 
   useEffect(() => {
     if (getAllProducts) {
-      console.log(JSON.parse(getAllProducts.retrieveProductsList.productsDataList));
       setProducts(JSON.parse(getAllProducts.retrieveProductsList.productsDataList));
     }
   }, [getAllProducts]);
@@ -147,7 +146,6 @@ const Dog = () => {
   };
 
   const handleDeleteClick = (row) => {
-    console.log(row._id);
     setDeleteId(row._id);
     setOpenDelete(true);
   };
@@ -189,7 +187,6 @@ const Dog = () => {
 
   type Color = "error" | "info" | "secondary" | "primary" | "warning" | "success";
   const getStatusLabel = (status: "active" | "inactive" | "suspended" | "atheaven" | "adopted"): JSX.Element => {
-    console.log(status);
     let color = "";
     let text = "";
     switch (status) {

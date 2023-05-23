@@ -80,7 +80,6 @@ const Handler = () => {
 
   useEffect(() => {
     if (getAllHandlers) {
-      console.log(getAllHandlers.listHandlers.handlers);
       setProducts(getAllHandlers.listHandlers.handlers);
     }
   }, [getAllHandlers]);
@@ -125,7 +124,6 @@ const Handler = () => {
   };
 
   const handleEditClick = (row) => {
-    console.log(row);
     let editData = getAllHandlers.listHandlers.handlers.filter((e) => e.id === row.id)[0];
     let updatepayload = {
       name: editData.name,
