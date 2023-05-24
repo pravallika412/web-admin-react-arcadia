@@ -22,6 +22,8 @@ import {
   Grid,
   Typography,
   InputAdornment,
+  Skeleton,
+  CircularProgress,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -32,8 +34,9 @@ import Label from "../../shared/components/Label";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const columns = [
   { id: "name", label: "Name", minWidth: 170 },
@@ -57,14 +60,16 @@ const Handler = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [openDelete, setOpenDelete] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [createHandler, { data: createHandlerData }] = useMutation(CREATE_HANDLER);
-  const [updateHandler, { data: updateHandlerData }] = useMutation(UPDATE_HANDLER);
+  const [openHandlerStatus, setOpenHandlerStatus] = useState(false);
+  const [createHandler, { data: createHandlerData, loading: addHandlerLoader }] = useMutation(CREATE_HANDLER);
+  const [updateHandler, { data: updateHandlerData, loading: updateHandlerLoader }] = useMutation(UPDATE_HANDLER);
   const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_HANDLER);
-  const [getHandlers, { data: getAllHandlers, refetch }] = useLazyQuery(GET_HANDLERS);
+  const [getHandlers, { data: getAllHandlers, loading: handlerLoader, refetch }] = useLazyQuery(GET_HANDLERS);
 
   const {
     control,
@@ -86,18 +91,27 @@ const Handler = () => {
 
   useEffect(() => {
     if (createHandlerData) {
+      setOpen(false);
+      setIsDeleting(false);
+      setOpenHandlerStatus(true);
       refetch();
     }
   }, [createHandlerData]);
 
   useEffect(() => {
     if (updateHandlerData) {
+      setOpen(false);
+      setIsDeleting(false);
+      setOpenHandlerStatus(true);
       refetch();
     }
   }, [updateHandlerData]);
 
   useEffect(() => {
     if (deleteHandlerData) {
+      setIsDeleting(true);
+      setOpenDelete(false);
+      setOpenHandlerStatus(true);
       refetch();
     }
   }, [deleteHandlerData]);
@@ -119,8 +133,6 @@ const Handler = () => {
     } else {
       createHandler({ variables: { input: payload } });
     }
-
-    setOpen(false);
   };
 
   const handleEditClick = (row) => {
@@ -203,6 +215,10 @@ const Handler = () => {
     event.preventDefault();
   };
 
+  const handleHandlerStatusClose = () => {
+    setOpenHandlerStatus(false);
+  };
+
   return (
     <Container component="main">
       <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
@@ -231,7 +247,13 @@ const Handler = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.length > 0 ? (
+              {handlerLoader ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length}>
+                    <Skeleton variant="rectangular" animation="wave" height={400} />
+                  </TableCell>
+                </TableRow>
+              ) : products.length > 0 ? (
                 products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
                   return (
                     <TableRow hover tabIndex={-1} key={product.id}>
@@ -388,25 +410,60 @@ const Handler = () => {
               )}
             </div>
           </DialogContent>
+
           <DialogActions>
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" disabled={addHandlerLoader || updateHandlerLoader}>
               Submit
             </Button>
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
+          {(addHandlerLoader || updateHandlerLoader) && (
+            <CircularProgress
+              size={80}
+              sx={{
+                position: "absolute",
+                top: "40%",
+                left: "40%",
+                zIndex: 1301, // Note: Dialog has a z-index of 1300 by default in Material-UI.
+              }}
+            />
+          )}
         </Box>
       </Dialog>
       <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <DialogTitle id="alert-dialog-title">Delete</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">Are you sure you want to delete this Handler?</DialogContentText>
+        <DialogContent sx={{ width: 400, height: 300 }}>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <DeleteIcon sx={{ fontSize: 70, m: 2, color: "rgba(204, 43, 53, 1)" }} />
+            <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Delete</Typography>
+            <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
+              Are you sure you want to delete this Handler? Deleting will remove all handler details, but posts uploaded by the handler will remain.
+            </DialogContentText>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>No</Button>
-          <Button onClick={handleDelete} autoFocus>
-            Yes
+          <Button variant="outlined" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="contained" sx={{ background: "rgba(204, 43, 53, 1)" }} onClick={handleDelete} autoFocus>
+            Delete
           </Button>
         </DialogActions>
+      </Dialog>
+      <Dialog open={openHandlerStatus} onClose={handleHandlerStatusClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <Box display="flex" justifyContent="flex-end" p={1} sx={{ overflow: "hidden" }}>
+          <IconButton edge="end" color="primary" onClick={handleHandlerStatusClose} aria-label="close">
+            <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ width: 324, height: 240 }}>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <CheckCircleIcon color="success" sx={{ fontSize: 70, m: 2 }} />
+            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+              <strong>Handler {isDeleting ? "Deleted" : isEditing ? "Updated" : "Created"} Successfully</strong>
+            </DialogContentText>
+          </Box>
+        </DialogContent>
       </Dialog>
     </Container>
   );
