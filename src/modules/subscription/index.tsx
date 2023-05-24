@@ -21,6 +21,10 @@ import {
   Grid,
   Typography,
   InputAdornment,
+  Skeleton,
+  CircularProgress,
+  DialogContentText,
+  Backdrop,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -30,6 +34,8 @@ import { CREATE_SUBSCRIPTION, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../sha
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const useStyles = makeStyles({
   root: {
@@ -65,10 +71,11 @@ const Subscription = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const [createSubscription, { data: createSub }] = useMutation(CREATE_SUBSCRIPTION);
-  const [updateSubscription, { data: updateSub }] = useMutation(UPDATE_PLAN);
+  const [openPlanStatus, setOpenPlanStatus] = useState(false);
+  const [createSubscription, { data: createSub, loading: addPlanLoader }] = useMutation(CREATE_SUBSCRIPTION);
+  const [updateSubscription, { data: updateSub, loading: updatePlanLoader }] = useMutation(UPDATE_PLAN);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
-  const [getPlans, { data: getAllPlans, refetch }] = useLazyQuery(GET_PLANS);
+  const [getPlans, { data: getAllPlans, loading: planLoader, refetch }] = useLazyQuery(GET_PLANS);
   const [getPlan, { data: getPlanById }] = useLazyQuery(GET_PLAN);
 
   const {
@@ -132,12 +139,16 @@ const Subscription = () => {
 
   useEffect(() => {
     if (createSub) {
+      setOpen(false);
+      setOpenPlanStatus(true);
       refetch();
     }
   }, [createSub]);
 
   useEffect(() => {
     if (updateSub) {
+      setOpen(false);
+      setOpenPlanStatus(true);
       refetch();
     }
   }, [updateSub]);
@@ -178,8 +189,6 @@ const Subscription = () => {
       };
       createSubscription({ variables: { input: payload } });
     }
-
-    setOpen(false);
   };
 
   const handleEditClick = (row) => {
@@ -223,6 +232,10 @@ const Subscription = () => {
     setPage(0);
   };
 
+  const handlePlanStatusClose = () => {
+    setOpenPlanStatus(false);
+  };
+
   return (
     <Container component="main">
       <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
@@ -250,7 +263,13 @@ const Subscription = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.length > 0 ? (
+              {planLoader ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length}>
+                    <Skeleton variant="rectangular" animation="wave" height={400} />
+                  </TableCell>
+                </TableRow>
+              ) : products.length > 0 ? (
                 products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={product._id}>
@@ -428,12 +447,39 @@ const Subscription = () => {
             </div>
           </DialogContent>
           <DialogActions>
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" disabled={addPlanLoader || updatePlanLoader}>
               Submit
             </Button>
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
+        {(addPlanLoader || updatePlanLoader) && (
+          <CircularProgress
+            size={80}
+            sx={{
+              position: "absolute",
+              top: "40%",
+              left: "40%",
+              zIndex: 1301, // Note: Dialog has a z-index of 1300 by default in Material-UI.
+            }}
+          />
+        )}
+      </Dialog>
+      <Dialog open={openPlanStatus} onClose={handlePlanStatusClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <Box display="flex" justifyContent="flex-end" p={1} sx={{ overflow: "hidden" }}>
+          <IconButton edge="end" color="primary" onClick={handlePlanStatusClose} aria-label="close">
+            <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ width: 324, height: 240 }}>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <CheckCircleIcon color="success" sx={{ fontSize: 70, m: 2 }} />
+            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+              <strong>Plan {isEditing ? "Updated" : "Created"} Successfully</strong>
+            </DialogContentText>
+          </Box>
+        </DialogContent>
       </Dialog>
     </Container>
   );

@@ -28,11 +28,12 @@ import React, { SyntheticEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { GET_ADMIN, UPDATE_PROFILE } from "../../shared/graphQL/settings/queries";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import Alert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ChangePassword from "./changePassword";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -98,6 +99,7 @@ const Settings = () => {
   const [presignedURL, setPresignedURL] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [loadingImage, setLoadingImage] = useState(false);
   const [openProfileStatus, setOpenProfileStatus] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
@@ -157,6 +159,7 @@ const Settings = () => {
 
   const handleFileChange = (event: any) => {
     event.preventDefault();
+    setLoadingImage(true);
     setFile(event.target.files[0]);
     let payload = {
       fileName: event.target.files[0].name,
@@ -192,6 +195,7 @@ const Settings = () => {
         "Content-Type": data.type,
       },
     });
+    setLoadingImage(false);
     setPresignedURL(uploadFile.split("?")[0]);
   };
 
@@ -300,7 +304,9 @@ const Settings = () => {
                         </Grid>
                         <Grid item xs={6} md={5}>
                           <Card className={classes.card}>
-                            {presignedURL ? (
+                            {loadingImage ? (
+                              <CircularProgress />
+                            ) : presignedURL ? (
                               <>
                                 <CardMedia className={classes.media} image={presignedURL} />
                                 <IconButton
@@ -319,7 +325,7 @@ const Settings = () => {
                                   htmlFor="profileImageInput"
                                   size="large"
                                 >
-                                  <CloudUploadIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                                  <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
                                   <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
                                 </IconButton>
                               </>
@@ -337,7 +343,7 @@ const Settings = () => {
                                   htmlFor="profileImageInput"
                                   size="large"
                                 >
-                                  <CloudUploadIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                                  <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
                                   <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
                                 </IconButton>
                               </div>
@@ -346,7 +352,7 @@ const Settings = () => {
                         </Grid>
                       </Grid>
                       <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
-                        <Button variant="contained" type="submit">
+                        <Button variant="contained" type="submit" disabled={loadingImage}>
                           Update
                         </Button>
                       </Grid>
@@ -376,15 +382,7 @@ const Settings = () => {
             </DialogContentText>
           </Box>
         </DialogContent>
-        {/* <DialogActions>
-          <Button onClick={handleProfileClose}>close</Button>
-        </DialogActions> */}
       </Dialog>
-      {/* <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
-        <Alert severity={snackbarSeverity as Severity} sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar> */}
     </>
   );
 };
