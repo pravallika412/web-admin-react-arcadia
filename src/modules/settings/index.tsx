@@ -34,7 +34,9 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ChangePassword from "./changePassword";
 import CircularProgress from "@mui/material/CircularProgress";
+import Web3 from "web3";
 
+const web3 = new Web3();
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -112,6 +114,8 @@ const Settings = () => {
     handleSubmit,
     reset,
     formState: { errors },
+    setError,
+    clearErrors,
   } = useForm();
 
   useEffect(() => {
@@ -181,10 +185,24 @@ const Settings = () => {
     const payload = {
       firstName: data.firstName,
       lastName: data.lastName,
-      profileImage: presignedURL ? presignedURL : "",
-      merchantAddress: data.merchantAddress,
+      profileImage: null,
+      merchantAddress: data.merchantAddress ? web3.utils.toChecksumAddress(data.merchantAddress) : null,
     };
+    console.log(payload);
     updateProfile({ variables: { input: payload } });
+  };
+
+  const handleAddressChange = (event) => {
+    console.log(event.target.value);
+    const address = event.target.value;
+    if (!web3.utils.isAddress(address) && address) {
+      setError("merchantAddress", {
+        type: "manual",
+        message: "Invalid Ethereum address",
+      });
+    } else {
+      clearErrors("merchantAddress");
+    }
   };
 
   const uploadImageFn = async (url, data) => {
@@ -297,7 +315,15 @@ const Settings = () => {
                               {loading ? (
                                 <Skeleton variant="text" width="100%" height={70} />
                               ) : (
-                                <TextField label="Merchant Address" {...register("merchantAddress")} margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
+                                <TextField
+                                  label="Merchant Address"
+                                  {...register("merchantAddress", { onChange: (e) => handleAddressChange(e) })}
+                                  margin="normal"
+                                  InputLabelProps={{ shrink: true }}
+                                  fullWidth
+                                  error={!!errors.merchantAddress}
+                                  helperText={errors?.merchantAddress?.message}
+                                />
                               )}
                             </Grid>
                           </>

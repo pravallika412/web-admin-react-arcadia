@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import NProgress from "nprogress";
 import { Box, CircularProgress } from "@mui/material";
 
-function SuspenseLoader() {
+function SuspenseLoader(props) {
   useEffect(() => {
     NProgress.start();
 
@@ -15,7 +15,7 @@ function SuspenseLoader() {
     <Box
       sx={{
         position: "fixed",
-        left: "10%",
+        left: props.left,
         top: 0,
         width: "100%",
         height: "100%",
