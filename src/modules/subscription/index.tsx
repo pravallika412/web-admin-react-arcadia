@@ -194,6 +194,7 @@ const Subscription = () => {
   };
 
   const handleEditClick = (row) => {
+    console.log(row);
     let payload = {
       planId: row._id,
     };
@@ -205,7 +206,12 @@ const Subscription = () => {
       price: editData.default_price.price,
       supportableProductCount: editData.default_price.supportable_product_count,
     };
-    const descriptions = JSON.parse(editData.description);
+    let descriptions;
+    try {
+      descriptions = JSON.parse(editData.description);
+    } catch (error) {
+      descriptions = [editData.description];
+    }
     initial_values.descriptions = []; // Initialize descriptions array
     descriptions.forEach((description) => {
       initial_values.descriptions.push({ description }); // Append each description to the array
