@@ -37,6 +37,7 @@ import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SuspenseLoader from "../../shared/components/SuspenseLoader";
 
 const columns = [
   { id: "name", label: "Name", minWidth: 170 },
@@ -417,17 +418,7 @@ const Handler = () => {
             </Button>
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
-          {(addHandlerLoader || updateHandlerLoader) && (
-            <CircularProgress
-              size={80}
-              sx={{
-                position: "absolute",
-                top: "40%",
-                left: "40%",
-                zIndex: 1301, // Note: Dialog has a z-index of 1300 by default in Material-UI.
-              }}
-            />
-          )}
+          {(addHandlerLoader || updateHandlerLoader) && <SuspenseLoader left="0%" />}
         </Box>
       </Dialog>
       <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">

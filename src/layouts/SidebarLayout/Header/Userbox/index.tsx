@@ -116,18 +116,6 @@ function HeaderUserbox() {
             <UserBoxDescription variant="body2">{user.jobtitle}</UserBoxDescription>
           </UserBoxText>
         </MenuUserBox>
-        <Divider sx={{ mb: 0 }} />
-        <List sx={{ p: 1 }} component="nav">
-          <ListItem button to="/" component={NavLink}>
-            <AccountBoxTwoToneIcon fontSize="small" />
-            <ListItemText primary="My Profile" />
-          </ListItem>
-          <ListItem button to="/" component={NavLink}>
-            <AccountTreeTwoToneIcon fontSize="small" />
-            <ListItemText primary="Account Settings" />
-          </ListItem>
-        </List>
-        <Divider />
         <Box sx={{ m: 1 }}>
           <Button color="primary" onClick={logout} fullWidth>
             <LockOpenTwoToneIcon sx={{ mr: 1 }} />

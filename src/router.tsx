@@ -10,7 +10,7 @@ import AddDog from "./modules/Dog/addDog";
 
 const Loader = (Component) => (props) =>
   (
-    <Suspense fallback={<SuspenseLoader />}>
+    <Suspense fallback={<SuspenseLoader left="10%" />}>
       <Component {...props} />
     </Suspense>
   );

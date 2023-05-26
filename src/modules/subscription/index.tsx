@@ -1,4 +1,4 @@
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import {
   MenuItem,
   TextField,
@@ -36,6 +36,8 @@ import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SuspenseLoader from "../../shared/components/SuspenseLoader";
 
 const useStyles = makeStyles({
   root: {
@@ -51,12 +53,11 @@ const useStyles = makeStyles({
 });
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 170 },
-  { id: "description", label: "Description", minWidth: 170 },
-  { id: "plan_image", label: "Plan Image", minWidth: 170 },
-  { id: "default_price", subid: "price", label: "Price", minWidth: 170 },
-  // { id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
-  { id: "action", label: "Action" },
+  { _id: 1, id: "name", label: "Name", minWidth: 170 },
+  { _id: 2, id: "plan_image", label: "Plan Image", minWidth: 170 },
+  { _id: 3, id: "default_price", subid: "price", label: "Price", minWidth: 170 },
+  { _id: 4, id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
+  { _id: 5, id: "action", label: "Action" },
 ];
 
 const Subscription = () => {
@@ -84,7 +85,20 @@ const Subscription = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      descriptions: [{ description: "" }],
+      planImage: "",
+      price: "",
+      name: "",
+      supportableProductCount: "",
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "descriptions",
+  });
 
   useEffect(() => {
     if (createPresignedUrl && !isEditing) {
@@ -115,27 +129,7 @@ const Subscription = () => {
     if (getAllPlans) {
       setProducts(getAllPlans.GetPlans);
     }
-    if (selectedData) {
-      getPlan({ variables: { input: selectedData } });
-    }
-  }, [getAllPlans, selectedData]);
-
-  useEffect(() => {
-    if (getPlanById) {
-      let data = getPlanById.GetPlan;
-      let initial_values = {
-        name: data.name,
-        description: data.description,
-        recurring: data.default_price.recurring ? "yes" : "no",
-        renewalPeriod: data.default_price.renewal_period,
-        planImage: data.plan_image,
-        price: data.default_price.price,
-        renewalNumber: data.default_price.renewal_number,
-        supportableProductCount: data.default_price.supportable_product_count,
-      };
-      reset(initial_values);
-    }
-  }, [getPlanById, reset]);
+  }, [getAllPlans]);
 
   useEffect(() => {
     if (createSub) {
@@ -167,10 +161,18 @@ const Subscription = () => {
     if (isEditing) {
       let updatePayload = {
         planId: selectedData.planId,
+        description: JSON.stringify(data.descriptions.map((item) => item.description)),
         name: data.name,
-        description: data.description,
         price: Number(data.price),
-        planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile,
+        planImage: uploadFileEdit
+          ? uploadFileEdit.includes("?")
+            ? uploadFileEdit.split("?")[0]
+            : uploadFileEdit
+          : uploadFile
+          ? uploadFile.includes("?")
+            ? uploadFile.split("?")[0]
+            : uploadFile
+          : uploadFile,
         supportableProductCount: data.supportableProductCount,
         tokenUri: "https://gateway.pinata.cloud/ipfs/Qmc9jo1vohFdHM9Nffq7gGjvDH5T3S3m5Dgfw56wDyXBw9",
       };
@@ -178,7 +180,7 @@ const Subscription = () => {
     } else {
       let payload = {
         name: data.name,
-        description: data.description,
+        description: JSON.stringify(data.descriptions.map((item) => item.description)),
         recurring: true,
         planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
         renewalPeriod: "month",
@@ -195,6 +197,20 @@ const Subscription = () => {
     let payload = {
       planId: row._id,
     };
+    let editData = getAllPlans.GetPlans.filter((e) => e._id === row._id)[0];
+    let initial_values = {
+      name: editData.name,
+      descriptions: [],
+      planImage: editData.plan_image,
+      price: editData.default_price.price,
+      supportableProductCount: editData.default_price.supportable_product_count,
+    };
+    const descriptions = JSON.parse(editData.description);
+    initial_values.descriptions = []; // Initialize descriptions array
+    descriptions.forEach((description) => {
+      initial_values.descriptions.push({ description }); // Append each description to the array
+    });
+    reset(initial_values);
     setIsEditing(true);
     setSelectedData(payload);
     setOpen(true);
@@ -220,7 +236,7 @@ const Subscription = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedData(null);
-    reset();
+    reset({ descriptions: [{ description: "" }] });
   };
 
   const handleChangePage = (event, newPage) => {
@@ -256,7 +272,7 @@ const Subscription = () => {
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
+                  <TableCell key={column._id} style={{ minWidth: column.minWidth }}>
                     {column.label}
                   </TableCell>
                 ))}
@@ -276,7 +292,7 @@ const Subscription = () => {
                       {columns.map((column) => {
                         const value = product[column.id];
                         return (
-                          <TableCell key={column.id}>
+                          <TableCell key={column._id}>
                             {column.id === "plan_image" ? (
                               <img src={value} alt="Plan Image" className={classes.image} />
                             ) : column.id === "default_price" ? (
@@ -355,23 +371,44 @@ const Subscription = () => {
             </div>
 
             <div>
-              <Controller
-                name="description"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: "Description is required",
-                  pattern: {
-                    value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                    message: "Please enter a valid Description",
-                  },
-                  maxLength: {
-                    value: 50,
-                    message: "Max length exceeded",
-                  },
-                }}
-                render={({ field }) => <TextField {...field} label="Plan Description" margin="normal" fullWidth error={!!errors.description} helperText={errors?.description?.message} />}
-              />
+              {console.log(fields)}
+              {fields.map((item, index) => (
+                <div key={item.id} style={{ display: "flex", alignItems: "center" }}>
+                  <Controller
+                    control={control}
+                    name={`descriptions.${index}.description`}
+                    defaultValue=""
+                    rules={{
+                      required: "Description is required",
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Plan Description"
+                        margin="normal"
+                        fullWidth
+                        error={!!errors.descriptions?.[index]?.description}
+                        helperText={errors.descriptions?.[index]?.description?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton onClick={() => remove(index)}>
+                                <DeleteIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              ))}
+
+              <Button onClick={() => append({ description: "" })}>Add New Item</Button>
             </div>
 
             <div>
@@ -453,18 +490,9 @@ const Subscription = () => {
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
-        {(addPlanLoader || updatePlanLoader) && (
-          <CircularProgress
-            size={80}
-            sx={{
-              position: "absolute",
-              top: "40%",
-              left: "40%",
-              zIndex: 1301, // Note: Dialog has a z-index of 1300 by default in Material-UI.
-            }}
-          />
-        )}
+        {(addPlanLoader || updatePlanLoader) && <SuspenseLoader left="0%" />}
       </Dialog>
+
       <Dialog open={openPlanStatus} onClose={handlePlanStatusClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
         <Box display="flex" justifyContent="flex-end" p={1} sx={{ overflow: "hidden" }}>
           <IconButton edge="end" color="primary" onClick={handlePlanStatusClose} aria-label="close">
