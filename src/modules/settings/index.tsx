@@ -188,12 +188,10 @@ const Settings = () => {
       profileImage: null,
       merchantAddress: data.merchantAddress ? web3.utils.toChecksumAddress(data.merchantAddress) : null,
     };
-    console.log(payload);
     updateProfile({ variables: { input: payload } });
   };
 
   const handleAddressChange = (event) => {
-    console.log(event.target.value);
     const address = event.target.value;
     if (!web3.utils.isAddress(address) && address) {
       setError("merchantAddress", {
