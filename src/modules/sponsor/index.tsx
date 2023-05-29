@@ -203,9 +203,15 @@ const Sponsor = () => {
               ) : (
                 ""
               )}
-              <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
-                <strong>{subValue ? subValue : ""}</strong>
-              </div>
+              {subValue ? (
+                <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
+                  <strong>{subValue}</strong>
+                </div>
+              ) : (
+                <div style={{ alignItems: "center", paddingLeft: "10px" }}>
+                  <strong>{"N/A"}</strong>
+                </div>
+              )}
             </div>
           );
         }
@@ -213,7 +219,7 @@ const Sponsor = () => {
       case "status":
         return getStatusLabel(value);
       default:
-        return subValue;
+        return subValue ? subValue : "N/A";
     }
   };
 

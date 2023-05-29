@@ -6,7 +6,7 @@ import InputBase from "@mui/material/InputBase";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { debounce } from "lodash";
 
-const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch }) => {
+const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch, searchFilter }) => {
   const [searchValue, setSearchValue] = useState("");
   const [visibleData, setVisibleData] = useState([]);
 
@@ -49,8 +49,7 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
 
   return (
     <TableContainer component={Paper}>
-      <Toolbar sx={{ justifyContent: "start" }}>
-        <div />
+      <Toolbar sx={{ justifyContent: "space-between" }}>
         <Box sx={{ m: 2 }}>
           <InputBase
             placeholder="Search…"
@@ -71,6 +70,7 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </Box>
+        {searchFilter}
       </Toolbar>
 
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
