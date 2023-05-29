@@ -29,6 +29,7 @@
     "graphql": "^16.6.0",
     "history": "5.3.0",
     "json-graphql-server": "^2.3.2",
+    "lodash": "^4.17.21",
     "nprogress": "0.2.0",
     "numeral": "2.0.6",
     "path": "^0.12.7",

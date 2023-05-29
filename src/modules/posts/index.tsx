@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Card,
+  CardContent,
   CardMedia,
   Container,
   Dialog,
@@ -30,6 +31,10 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import Label from "../../shared/components/Label";
+import DialogComponent from "../../shared/components/Dialog";
+import Transaction from "../../assets/images/personwaiting.gif";
+import TransactionSubmitted from "../../assets/images/clock.gif";
+import { makeStyles } from "@mui/styles";
 
 const columns = [
   { id: "product", label: "Name of the dog", minWidth: 170 },
@@ -45,7 +50,74 @@ const postStatuses1 = [
   { status: "Rejected Posts", count: 0, color: "#FFF5F5", borderColor: "#E6313C", countColor: "#E6313C" },
 ];
 
+const useStyles = makeStyles({
+  carouselContainer: {
+    width: 420,
+    height: 280,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  media: {
+    objectFit: "contain",
+    width: "100%",
+    height: "100%",
+  },
+  carouselSlide: {
+    width: "420px !important", // Set the desired width here
+  },
+});
+
+const GasFeeDialogContent = ({ gasFees }) => {
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center">
+      <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction History</Typography>
+      <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
+        <img src={Transaction} alt="GIF Image" />
+        <Typography sx={{ fontSize: "18px", fontWeight: 500, color: "rgba(3, 96, 161, 1)" }}>Waiting for Confirmation.</Typography>
+        <Typography sx={{ fontSize: "16px", fontWeight: 700 }}>Gas Fee - {gasFees} Matic</Typography>
+      </DialogContentText>
+    </Box>
+  );
+};
+
+const GasFeeDialogActions = ({ handleClose, handlePostTransaction }) => {
+  return (
+    <Box>
+      <Button onClick={handleClose} color="primary">
+        Reject
+      </Button>
+      <Button onClick={handlePostTransaction} color="primary">
+        Confirm
+      </Button>
+    </Box>
+  );
+};
+
+const TransactionDialogContent = () => {
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center">
+      <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
+        <img src={TransactionSubmitted} alt="GIF Image" />
+        <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction Submitted</Typography>
+        <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>Your transaction will be updated in a short period of time.</Typography>
+      </DialogContentText>
+    </Box>
+  );
+};
+
+const TransactionDialogActions = ({ handleTransactionHash }) => {
+  return (
+    <Box>
+      <Button onClick={handleTransactionHash} color="primary">
+        View Transaction
+      </Button>
+    </Box>
+  );
+};
+
 const Posts = () => {
+  const classes = useStyles();
   const [products, setProducts] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -55,14 +127,20 @@ const Posts = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [gasFees, setGasFees] = useState("");
+  const [transactionHash, setTransactionHash] = useState("");
+  const [postStatus, setPostStatus] = useState("");
+  const [openApprovalModal, setOpenApprovalModal] = useState(false);
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const [updatePost, { data: updatePostData }] = useMutation(REVIEW_POST);
   const [getFeed, { data: getFeedData, loading: feedLoading, refetch: refetchFeed }] = useLazyQuery(GET_FEED);
   const [getPostCount, { data: getPostCountData, loading: countLoading, refetch: refetchPostCount }] = useLazyQuery(GET_POST_COUNT);
 
   useEffect(() => {
-    getFeed({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage } } } });
+    getFeed({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage }, search: searchValue } } });
     getPostCount();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, searchValue]);
 
   useEffect(() => {
     if (getFeedData) {
@@ -86,8 +164,21 @@ const Posts = () => {
 
   useEffect(() => {
     if (updatePostData) {
-      refetchFeed();
-      refetchPostCount();
+      if (updatePostData.reviewPost?.gasFees) {
+        setGasFees(parseFloat(updatePostData.reviewPost.gasFees).toFixed(4));
+        setOpenApprovalModal(true);
+      } else if (updatePostData.reviewPost?.gasFees == null) {
+        if (postStatus === "approved") {
+          setOpenApprovalModal(false);
+          setTransactionHash(updatePostData.reviewPost?.transaction_hash);
+          setOpenTransactionModal(true);
+          refetchFeed();
+          refetchPostCount();
+        } else if (postStatus === "rejected") {
+          refetchFeed();
+          refetchPostCount();
+        }
+      }
     }
   }, [updatePostData]);
 
@@ -97,7 +188,7 @@ const Posts = () => {
   };
 
   const handleClose = () => {
-    setSelectedProduct(null);
+    // setSelectedProduct(null);
     setOpenDialog(false);
   };
 
@@ -107,9 +198,23 @@ const Posts = () => {
   };
 
   const handleApproval = async (data) => {
-    updatePost({ variables: { input: { id: selectedProduct._id, status: data, rejectReason: data == "rejected" ? reason : null } } });
+    setPostStatus(data);
+    updatePost({ variables: { input: { id: selectedProduct._id, status: data, getGasFees: data == "approved" ? true : false, rejectReason: data == "rejected" ? reason : null } } });
     handleClose(); // close the dialog
     handleCloseRejectDialog();
+  };
+
+  const handlePostTransaction = () => {
+    updatePost({ variables: { input: { id: selectedProduct._id, status: "approved", getGasFees: false } } });
+  };
+
+  const handleTransactionHash = () => {
+    const url = `https://polygonscan.com/tx/${transactionHash}`;
+    window.open(url, "_blank");
+  };
+
+  const handleSearch = (value) => {
+    setSearchValue(value);
   };
 
   const handleCloseRejectDialog = () => {
@@ -120,6 +225,13 @@ const Posts = () => {
     setReason(event.target.value);
   };
 
+  const handleCloseGasFee = () => {
+    setOpenApprovalModal(false);
+  };
+
+  const handleCloseTransaction = () => {
+    setOpenTransactionModal(false);
+  };
   const formatDate = (dateToFormat) => {
     if (dateToFormat) {
       const date = new Date(dateToFormat);
@@ -252,6 +364,7 @@ const Posts = () => {
           totalRows={totalCount}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
+          onSearch={handleSearch}
         ></SharedTable>
       </Container>
       {selectedProduct && (
@@ -315,24 +428,19 @@ const Posts = () => {
                   )}
                 </DialogActions>
               </Box>
-              <Box sx={{ flexGrow: 1, width: 400, height: 200 }}>
-                <Carousel showThumbs={false}>
-                  {selectedProduct.post_gallery.map((media, index) =>
-                    media.mime_type.startsWith("image") ? (
-                      <div key={index}>
-                        <img src={media.url} alt={selectedProduct.productData.name} />
-                      </div>
+              <Carousel showThumbs={false} className={classes.carouselSlide}>
+                {selectedProduct.post_gallery.map((item, index) => (
+                  <div key={index} className={classes.carouselContainer}>
+                    {item.mime_type.includes("image") ? (
+                      <img src={item.url} alt={`Image ${index}`} className={classes.media} />
+                    ) : item.mime_type.includes("video") ? (
+                      <video src={item.url} className={classes.media} controls />
                     ) : (
-                      <div key={index}>
-                        <video controls>
-                          <source src={media.url} type={media.mime_type} />
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    )
-                  )}
-                </Carousel>
-              </Box>
+                      <span>Unsupported media type</span>
+                    )}
+                  </div>
+                ))}
+              </Carousel>
             </Box>
           </DialogContent>
         </Dialog>
@@ -370,6 +478,22 @@ const Posts = () => {
           </Box>
         </DialogActions>
       </Dialog>
+      <DialogComponent
+        open={openApprovalModal}
+        width={448}
+        height={520}
+        handleClose={handleCloseGasFee}
+        content={<GasFeeDialogContent gasFees={gasFees} />}
+        actions={<GasFeeDialogActions handleClose={handleCloseGasFee} handlePostTransaction={handlePostTransaction} />}
+      />
+      <DialogComponent
+        open={openTransactionModal}
+        width={401}
+        height={514}
+        handleClose={handleCloseTransaction}
+        content={<TransactionDialogContent />}
+        actions={<TransactionDialogActions handleTransactionHash={handleTransactionHash} />}
+      />
     </>
   );
 };

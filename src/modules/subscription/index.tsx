@@ -194,7 +194,6 @@ const Subscription = () => {
   };
 
   const handleEditClick = (row) => {
-    console.log(row);
     let payload = {
       planId: row._id,
     };
@@ -377,7 +376,6 @@ const Subscription = () => {
             </div>
 
             <div>
-              {console.log(fields)}
               {fields.map((item, index) => (
                 <div key={item.id} style={{ display: "flex", alignItems: "center" }}>
                   <Controller

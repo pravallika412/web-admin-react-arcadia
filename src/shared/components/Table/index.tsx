@@ -4,8 +4,9 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { debounce } from "lodash";
 
-const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader }) => {
+const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch }) => {
   const [searchValue, setSearchValue] = useState("");
   const [visibleData, setVisibleData] = useState([]);
 
@@ -22,9 +23,9 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
     onRowsPerPageChange(newRowsPerPage);
   };
 
-  const handleSearchChange = (event) => {
-    setSearchValue(event.target.value);
-  };
+  const handleSearchChange = debounce((value) => {
+    onSearch(value);
+  }, 500);
 
   const updateVisibleData = () => {
     const startIndex = page * rowsPerPage;
@@ -67,8 +68,7 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
                 </IconButton>
               </InputAdornment>
             }
-            value={searchValue}
-            onChange={handleSearchChange}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </Box>
       </Toolbar>
@@ -98,7 +98,7 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
                 <Skeleton variant="rectangular" animation="wave" height={400} />
               </TableCell>
             </TableRow>
-          ) : (
+          ) : visibleData.length > 0 ? (
             visibleData.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {columns.map((column, index) => (
@@ -106,6 +106,12 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
                 ))}
               </TableRow>
             ))
+          ) : (
+            <TableRow>
+              <TableCell align="center" colSpan={6}>
+                No results found!
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>

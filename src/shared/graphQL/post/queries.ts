@@ -5,6 +5,8 @@ const REVIEW_POST = gql`
     reviewPost(reviewPostDto: $input) {
       success
       message
+      gasFees
+      transaction_hash
     }
   }
 `;
