@@ -35,6 +35,7 @@ import DialogComponent from "../../shared/components/Dialog";
 import Transaction from "../../assets/images/personwaiting.gif";
 import TransactionSubmitted from "../../assets/images/clock.gif";
 import { makeStyles } from "@mui/styles";
+import SuspenseLoader from "../../shared/components/SuspenseLoader";
 
 const columns = [
   { id: "product", label: "Name of the dog", minWidth: 170 },
@@ -48,6 +49,25 @@ const postStatuses1 = [
   { status: "Approved Posts", count: 0, color: "#F6FFFC", borderColor: "#2D9972", countColor: "#2D9972" },
   { status: "Pending Posts", count: 0, color: "#FFF9EE", borderColor: "#EE8212", countColor: "#EE8212" },
   { status: "Rejected Posts", count: 0, color: "#FFF5F5", borderColor: "#E6313C", countColor: "#E6313C" },
+];
+
+const postStatus = [
+  {
+    id: "all",
+    name: "All",
+  },
+  {
+    id: "approved",
+    name: "Approved",
+  },
+  {
+    id: "pending",
+    name: "Pending",
+  },
+  {
+    id: "rejected",
+    name: "Rejected",
+  },
 ];
 
 const useStyles = makeStyles({
@@ -81,13 +101,13 @@ const GasFeeDialogContent = ({ gasFees }) => {
   );
 };
 
-const GasFeeDialogActions = ({ handleClose, handlePostTransaction }) => {
+const GasFeeDialogActions = ({ handleClose, handlePostTransaction, updateLoading }) => {
   return (
-    <Box>
-      <Button onClick={handleClose} color="primary">
+    <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", m: 2 }}>
+      <Button onClick={handleClose} color="error" variant="outlined">
         Reject
       </Button>
-      <Button onClick={handlePostTransaction} color="primary">
+      <Button onClick={handlePostTransaction} color="primary" variant="contained" disabled={updateLoading}>
         Confirm
       </Button>
     </Box>
@@ -108,10 +128,27 @@ const TransactionDialogContent = () => {
 
 const TransactionDialogActions = ({ handleTransactionHash }) => {
   return (
-    <Box>
-      <Button onClick={handleTransactionHash} color="primary">
+    <Box sx={{ display: "flex", width: "100%", m: 2 }}>
+      <Button onClick={handleTransactionHash} color="primary" variant="contained">
         View Transaction
       </Button>
+    </Box>
+  );
+};
+
+const SearchFilter = ({ handleStatusChange }) => {
+  return (
+    <Box width={160} sx={{ m: 1 }}>
+      <FormControl fullWidth variant="outlined">
+        <InputLabel>Post Status</InputLabel>
+        <Select onChange={(e) => handleStatusChange(e)} label="Post Status" autoWidth>
+          {postStatus.map((statusOption) => (
+            <MenuItem key={statusOption.id} value={statusOption.id}>
+              {statusOption.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     </Box>
   );
 };
@@ -133,14 +170,17 @@ const Posts = () => {
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [updatePost, { data: updatePostData }] = useMutation(REVIEW_POST);
+  const [filters, setFilters] = useState({
+    feedStatus: null,
+  });
+  const [updatePost, { data: updatePostData, loading: updateLoading }] = useMutation(REVIEW_POST);
   const [getFeed, { data: getFeedData, loading: feedLoading, refetch: refetchFeed }] = useLazyQuery(GET_FEED);
   const [getPostCount, { data: getPostCountData, loading: countLoading, refetch: refetchPostCount }] = useLazyQuery(GET_POST_COUNT);
 
   useEffect(() => {
-    getFeed({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage }, search: searchValue } } });
+    getFeed({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage }, search: searchValue, feedStatus: filters.feedStatus } } });
     getPostCount();
-  }, [page, rowsPerPage, searchValue]);
+  }, [page, rowsPerPage, searchValue, filters]);
 
   useEffect(() => {
     if (getFeedData) {
@@ -245,6 +285,15 @@ const Posts = () => {
     }
   };
 
+  const handleStatusChange = (e: any): void => {
+    const value = e.target.value === "all" ? null : e.target.value;
+    console.log(value);
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      feedStatus: value,
+    }));
+  };
+
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
@@ -265,7 +314,7 @@ const Posts = () => {
         color = "success";
         break;
       case "pending":
-        text = "Waiting";
+        text = "Pending";
         color = "secondary";
         break;
       case "rejected":
@@ -280,51 +329,65 @@ const Posts = () => {
     return <Label color={color as Color}>{text}</Label>;
   };
 
-  const formattedData = products.map((row) => ({
-    product: (
-      <>
-        <div style={{ display: "flex" }}>
-          {row.productData.image ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
-                borderRadius: "50%",
-                padding: "2px",
-                width: "50px",
-                height: "50px",
-              }}
-            >
-              <img src={row.productData.image} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt={row.productData.name} />
+  const formattedData = products.map((row) => {
+    let imageUrl = row.productData.image || "";
+
+    if (imageUrl.includes("?")) {
+      imageUrl = imageUrl.split("?")[0];
+    }
+
+    return {
+      product: (
+        <>
+          <div style={{ display: "flex" }}>
+            {imageUrl ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
+                  borderRadius: "50%",
+                  padding: "2px",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <img src={imageUrl} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt={row.productData.name} />
+              </div>
+            ) : (
+              ""
+            )}
+            <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
+              <strong>{row.productData.name}</strong>
+              <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product}</Typography>
             </div>
-          ) : (
-            ""
-          )}
-          <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
-            <strong>{row.productData.name}</strong>
-            <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product}</Typography>
           </div>
-        </div>
-      </>
-    ),
-    handler: (
-      <>
-        <strong>{row.handlerData.name}</strong>
-        <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.handler}</Typography>
-      </>
-    ),
-    createdAt: formatDate(row.createdAt),
-    status: getStatusLabel(row.status),
-    action: (
-      <Tooltip title="View">
-        <IconButton onClick={() => handleClickOpen(row)}>
-          <VisibilityIcon />
-        </IconButton>
-      </Tooltip>
-    ),
-  }));
+        </>
+      ),
+      handler: (
+        <>
+          {row.handlerData.name != "Handler Deleted" ? (
+            <>
+              <strong>{row.handlerData.name}</strong>
+              <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.handler}</Typography>
+            </>
+          ) : (
+            <Label color="error">{"Account Removed"}</Label>
+          )}
+        </>
+      ),
+      createdAt: formatDate(row.createdAt),
+      status: getStatusLabel(row.status),
+      action: (
+        <Tooltip title="View">
+          <IconButton onClick={() => handleClickOpen(row)}>
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+      ),
+    };
+  });
 
   return (
     <>
@@ -355,6 +418,7 @@ const Posts = () => {
             ))}
           </Grid>
         </Grid>
+        {updateLoading && <SuspenseLoader left={10} />}
         <SharedTable
           columns={columns}
           data={formattedData}
@@ -365,6 +429,7 @@ const Posts = () => {
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
           onSearch={handleSearch}
+          searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
         ></SharedTable>
       </Container>
       {selectedProduct && (
@@ -384,7 +449,6 @@ const Posts = () => {
             <Box sx={{ display: "flex", flexDirection: "row" }}>
               <Box sx={{ width: 648, m: 2 }}>
                 <TextField
-                  autoFocus
                   margin="dense"
                   id="description"
                   value={selectedProduct.caption}
@@ -401,7 +465,7 @@ const Posts = () => {
                   <TextField
                     margin="dense"
                     id="rejectionReason"
-                    value={selectedProduct?.rejectionReason}
+                    value={selectedProduct?.admin_feedback}
                     label="Reason for Rejection"
                     type="text"
                     fullWidth
@@ -460,10 +524,10 @@ const Posts = () => {
           <FormControl fullWidth sx={{ m: 1 }}>
             <InputLabel>Reason for Rejection</InputLabel>
             <Select value={reason} onChange={handleChangeReason} label="Reason for Rejection">
-              <MenuItem value="low-quality">Low-quality content</MenuItem>
-              <MenuItem value="offensive">Offensive or inaccurate content</MenuItem>
-              <MenuItem value="plagiarism">Plagiarism on the post</MenuItem>
-              <MenuItem value="inappropriate">Inappropriate description</MenuItem>
+              <MenuItem value="Low-quality content">Low-quality content</MenuItem>
+              <MenuItem value="Offensive or inaccurate content">Offensive or inaccurate content</MenuItem>
+              <MenuItem value="Plagiarism on the post">Plagiarism on the post</MenuItem>
+              <MenuItem value="Inappropriate description">Inappropriate description</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
@@ -484,7 +548,7 @@ const Posts = () => {
         height={520}
         handleClose={handleCloseGasFee}
         content={<GasFeeDialogContent gasFees={gasFees} />}
-        actions={<GasFeeDialogActions handleClose={handleCloseGasFee} handlePostTransaction={handlePostTransaction} />}
+        actions={<GasFeeDialogActions handleClose={handleCloseGasFee} handlePostTransaction={handlePostTransaction} updateLoading={updateLoading} />}
       />
       <DialogComponent
         open={openTransactionModal}
