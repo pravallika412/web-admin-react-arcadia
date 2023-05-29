@@ -185,7 +185,7 @@ const Settings = () => {
     const payload = {
       firstName: data.firstName,
       lastName: data.lastName,
-      profileImage: null,
+      profileImage: presignedURL ? presignedURL : null,
       merchantAddress: data.merchantAddress ? web3.utils.toChecksumAddress(data.merchantAddress) : null,
     };
     updateProfile({ variables: { input: payload } });
