@@ -12,6 +12,7 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
+  FormHelperText,
   Grid,
   IconButton,
   InputLabel,
@@ -117,8 +118,8 @@ const GasFeeDialogActions = ({ handleClose, handlePostTransaction, updateLoading
 const TransactionDialogContent = () => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
+      <img src={TransactionSubmitted} alt="GIF Image" />
       <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
-        <img src={TransactionSubmitted} alt="GIF Image" />
         <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction Submitted</Typography>
         <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>Your transaction will be updated in a short period of time.</Typography>
       </DialogContentText>
@@ -129,7 +130,7 @@ const TransactionDialogContent = () => {
 const TransactionDialogActions = ({ handleTransactionHash }) => {
   return (
     <Box sx={{ display: "flex", width: "100%", m: 2 }}>
-      <Button onClick={handleTransactionHash} color="primary" variant="contained">
+      <Button onClick={handleTransactionHash} color="primary" variant="contained" sx={{ width: "100%" }}>
         View Transaction
       </Button>
     </Box>
@@ -170,6 +171,7 @@ const Posts = () => {
   const [openApprovalModal, setOpenApprovalModal] = useState(false);
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [errors, setErrors] = useState({ reason: null });
   const [filters, setFilters] = useState({
     feedStatus: null,
   });
@@ -238,6 +240,10 @@ const Posts = () => {
   };
 
   const handleApproval = async (data) => {
+    if (!reason && data === "rejected") {
+      setErrors({ ...errors, reason: { message: "Please select a reason for rejection." } });
+      return;
+    }
     setPostStatus(data);
     updatePost({ variables: { input: { id: selectedProduct._id, status: data, getGasFees: data == "approved" ? true : false, rejectReason: data == "rejected" ? reason : null } } });
     handleClose(); // close the dialog
@@ -249,7 +255,7 @@ const Posts = () => {
   };
 
   const handleTransactionHash = () => {
-    const url = `https://polygonscan.com/tx/${transactionHash}`;
+    const url = `https://mumbai.polygonscan.com/tx/${transactionHash}`;
     window.open(url, "_blank");
   };
 
@@ -259,10 +265,12 @@ const Posts = () => {
 
   const handleCloseRejectDialog = () => {
     setOpenRejectDialog(false);
+    setErrors({ ...errors, reason: null });
   };
 
   const handleChangeReason = (event) => {
     setReason(event.target.value);
+    setErrors({ ...errors, reason: null });
   };
 
   const handleCloseGasFee = () => {
@@ -430,8 +438,11 @@ const Posts = () => {
           onRowsPerPageChange={handleRowsPerPageChange}
           onSearch={handleSearch}
           searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
+          searchFilterVisible={true}
+          selectableRows={false}
         ></SharedTable>
       </Container>
+
       {selectedProduct && (
         <Dialog
           open={openDialog}
@@ -509,6 +520,7 @@ const Posts = () => {
           </DialogContent>
         </Dialog>
       )}
+
       <Dialog
         open={openRejectDialog}
         onClose={handleCloseRejectDialog}
@@ -519,29 +531,34 @@ const Posts = () => {
           },
         }}
       >
-        <DialogTitle>Reject Post</DialogTitle>
-        <DialogContent>
+        <DialogTitle>Reject of Reject</DialogTitle>
+        <DialogContent sx={{ overflow: "hidden" }}>
           <FormControl fullWidth sx={{ m: 1 }}>
-            <InputLabel>Reason for Rejection</InputLabel>
-            <Select value={reason} onChange={handleChangeReason} label="Reason for Rejection">
+            <InputLabel>Reason of Rejection</InputLabel>
+            <Select value={reason} onChange={handleChangeReason} label="Reason for Rejection" error={!!errors.reason}>
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
               <MenuItem value="Low-quality content">Low-quality content</MenuItem>
               <MenuItem value="Offensive or inaccurate content">Offensive or inaccurate content</MenuItem>
               <MenuItem value="Plagiarism on the post">Plagiarism on the post</MenuItem>
               <MenuItem value="Inappropriate description">Inappropriate description</MenuItem>
             </Select>
+            {errors.reason && <FormHelperText error={!!errors.reason}>{errors.reason.message}</FormHelperText>}
           </FormControl>
         </DialogContent>
         <DialogActions>
           <Box display="flex" justifyContent="space-between" width="100%">
-            <Button onClick={handleCloseRejectDialog} color="primary">
+            <Button onClick={handleCloseRejectDialog} color="primary" variant="outlined">
               Cancel
             </Button>
-            <Button color="primary" onClick={() => handleApproval("rejected")}>
+            <Button color="primary" onClick={() => handleApproval("rejected")} variant="contained">
               Save
             </Button>
           </Box>
         </DialogActions>
       </Dialog>
+
       <DialogComponent
         open={openApprovalModal}
         width={448}

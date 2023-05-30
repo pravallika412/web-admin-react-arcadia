@@ -25,4 +25,33 @@ const GET_SPONSORS = gql`
     }
   }
 `;
-export { GET_SPONSORS };
+
+const GET_SPONSORS_DETAILS = gql`
+  query GetSponsorSubscriptionDetails($input: SponsorSubscriptionDto!) {
+    GetSponsorSubscriptionDetails(sponsorSubscriptionDto: $input) {
+      _id
+      sponsor {
+        _id
+        email
+        name
+        profile_picture
+        walletAddress
+        status
+        tvl
+        device_id
+        stripe_customer_id
+        createdAt
+        updatedAt
+      }
+      subscription_start_date
+      subscription_end_date
+      status
+      planDetails {
+        _id
+        name
+      }
+    }
+  }
+`;
+
+export { GET_SPONSORS, GET_SPONSORS_DETAILS };
