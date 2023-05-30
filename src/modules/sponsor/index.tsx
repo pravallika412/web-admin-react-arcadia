@@ -237,12 +237,12 @@ const Sponsor = () => {
           </div>
         </div>
       ),
-      email: data.sponsor.email ? data.sponsor.email : "N/A",
-      walletAddress: data.sponsor.walletAddress ? data.sponsor.walletAddress.slice(0, 3) + "*******" + data.sponsor.walletAddress.slice(-4) : "",
+      email: data.sponsor?.email ? data.sponsor.email : "N/A",
+      walletAddress: data.sponsor?.walletAddress ? data.sponsor?.walletAddress.slice(0, 3) + "*******" + data.sponsor.walletAddress.slice(-4) : "",
       status: getStatusLabel(data.status),
       plan_name: (
         <>
-          {data.planDetails.name ? data.planDetails.name : "N/A"}
+          {data.planDetails && data.planDetails?.name ? data.planDetails?.name : "N/A"}
           <span style={{ display: "block", fontSize: 10 }}>{formatTimestamp(data.subscription_end_date)}</span>
         </>
       ),
