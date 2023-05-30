@@ -412,7 +412,9 @@ const Subscription = () => {
                 </div>
               ))}
 
-              <Button onClick={() => append({ description: "" })}>Add New Item</Button>
+              <Button onClick={() => append({ description: "" })} sx={{ fontSize: 13, fontWeight: 400 }} color="secondary" startIcon={<AddTwoToneIcon fontSize="small" />}>
+                Add New Item
+              </Button>
             </div>
 
             <div>
