@@ -109,7 +109,7 @@ const Sponsor = () => {
   const [getSponsors, { data: getAllSponsors, loading: sponsorLoading, refetch }] = useLazyQuery(GET_SPONSORS);
 
   useEffect(() => {
-    getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: {}, input3: { status: filters.status, plan: filters.plan } } });
+    getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: { sortBy: "sponsor.createdAt", sortOrder: -1 }, input3: { status: filters.status, plan: filters.plan } } });
   }, [page, rowsPerPage, filters]);
 
   useEffect(() => {
@@ -242,62 +242,14 @@ const Sponsor = () => {
       status: getStatusLabel(data.status),
       plan_name: (
         <>
-          {data.planDetails.name}
+          {data.planDetails.name ? data.planDetails.name : "N/A"}
           <span style={{ display: "block", fontSize: 10 }}>{formatTimestamp(data.subscription_end_date)}</span>
         </>
       ),
       createdAt: formatDate(data.sponsor.createdAt),
-      tvl: "$" + (data.sponsor.tvl ? data.sponsor.tvl : 0),
+      tvl: "$" + (data.sponsor.tvl ? parseFloat(data.sponsor.tvl).toFixed(2) : 0),
     };
   });
-
-  // const renderColumn = (column, subValue, product, value) => {
-  //   switch (column.id) {
-  //     case "tvl":
-  //       return "$" + (subValue ? subValue : 0);
-  //     case "walletAddress":
-  //       return subValue ? subValue.slice(0, 3) + "*******" + subValue.slice(-4) : "";
-  //     case "name":
-  //       if (column.subtype === "planDetails") {
-  //         return (
-  //           <div>
-  //             {subValue}
-  //             <span style={{ display: "block", fontSize: 10 }}>{formatTimestamp(product["subscription_end_date"])}</span>
-  //           </div>
-  //         );
-  //       }
-  //       if (column.subtype === "sponsor") {
-  //         return (
-  //           <div style={{ display: "flex", alignItems: "center" }}>
-  //             {product[column.subtype] && product[column.subtype]["profile_picture"] ? (
-  //               <div
-  //                 style={{
-  //                   display: "flex",
-  //                   justifyContent: "center",
-  //                   alignItems: "center",
-  //                   backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
-  //                   borderRadius: "50%",
-  //                   padding: "2px",
-  //                   width: "50px",
-  //                   height: "50px",
-  //                 }}
-  //               >
-  //                 <img src={product[column.subtype]["profile_picture"]} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt="description" />
-  //               </div>
-  //             ) : null}
-  //             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingLeft: "10px" }}>
-  //               <strong>{subValue || "N/A"}</strong>
-  //             </div>
-  //           </div>
-  //         );
-  //       }
-  //       return subValue;
-  //     case "status":
-  //       return getStatusLabel(value);
-  //     default:
-  //       return subValue ? subValue : "N/A";
-  //   }
-  // };
 
   return (
     <Container component="main">
