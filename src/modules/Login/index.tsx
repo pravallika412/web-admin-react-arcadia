@@ -133,6 +133,11 @@ export default function SignIn() {
               error={!!errors.password}
               helperText={errors?.password?.message}
             />
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <Typography variant="body2" color="textSecondary">
+                Forget password?
+              </Typography>
+            </Box>
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Sign In
             </Button>

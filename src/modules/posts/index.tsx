@@ -37,6 +37,7 @@ import Transaction from "../../assets/images/personwaiting.gif";
 import TransactionSubmitted from "../../assets/images/clock.gif";
 import { makeStyles } from "@mui/styles";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const columns = [
   { id: "product", label: "Name of the dog", minWidth: 170 },
@@ -80,12 +81,18 @@ const useStyles = makeStyles({
     alignItems: "center",
   },
   media: {
-    objectFit: "contain",
+    objectFit: "cover",
     width: "100%",
     height: "100%",
   },
   carouselSlide: {
     width: "420px !important", // Set the desired width here
+    "& .carousel.carousel-slider .control-arrow:hover": {
+      background: "none",
+    },
+    "& .carousel.carousel-slider": {
+      borderRadius: 5,
+    },
   },
 });
 
@@ -93,7 +100,7 @@ const GasFeeDialogContent = ({ gasFees }) => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
       <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction History</Typography>
-      <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
+      <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600, textAlign: "center" }}>
         <img src={Transaction} alt="GIF Image" />
         <Typography sx={{ fontSize: "18px", fontWeight: 500, color: "rgba(3, 96, 161, 1)" }}>Waiting for Confirmation.</Typography>
         <Typography sx={{ fontSize: "16px", fontWeight: 700 }}>Gas Fee - {gasFees} Matic</Typography>
@@ -118,8 +125,8 @@ const GasFeeDialogActions = ({ handleClose, handlePostTransaction, updateLoading
 const TransactionDialogContent = () => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
-      <img src={TransactionSubmitted} alt="GIF Image" />
-      <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
+      <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600, textAlign: "center" }}>
+        <img src={TransactionSubmitted} alt="GIF Image" />
         <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction Submitted</Typography>
         <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>Your transaction will be updated in a short period of time.</Typography>
       </DialogContentText>
@@ -257,6 +264,7 @@ const Posts = () => {
   const handleTransactionHash = () => {
     const url = `https://mumbai.polygonscan.com/tx/${transactionHash}`;
     window.open(url, "_blank");
+    setOpenTransactionModal(false);
   };
 
   const handleSearch = (value) => {
@@ -449,16 +457,37 @@ const Posts = () => {
           onClose={handleClose}
           PaperProps={{
             style: {
-              width: "1215",
+              width: "1057",
               maxWidth: "100%",
-              height: 472, // Ensure it does not exceed screen width
+              height: 446, // Ensure it does not exceed screen width
             },
           }}
         >
-          <DialogTitle id="form-dialog-title">Details of Post</DialogTitle>
-          <DialogContent sx={{ width: 1215 }}>
+          <DialogTitle id="form-dialog-title">
+            <Box display="flex" justifyContent="space-between" sx={{ mt: 1 }} alignItems="center">
+              <Typography sx={{ fontSize: "20px", fontWeight: 700 }}>Details of Post</Typography>
+
+              <IconButton edge="end" color="primary" onClick={handleClose} aria-label="close">
+                <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent sx={{ width: 1057 }}>
             <Box sx={{ display: "flex", flexDirection: "row" }}>
-              <Box sx={{ width: 648, m: 2 }}>
+              <Carousel infiniteLoop={true} autoPlay={true} showThumbs={false} className={classes.carouselSlide} showStatus={false} interval={5000} showArrows={true}>
+                {selectedProduct.post_gallery.map((item, index) => (
+                  <div key={index} className={classes.carouselContainer}>
+                    {item.mime_type.includes("image") ? (
+                      <img src={item.url} alt={`Image ${index}`} className={classes.media} />
+                    ) : item.mime_type.includes("video") ? (
+                      <video src={item.url} className={classes.media} controls />
+                    ) : (
+                      <span>Unsupported media type</span>
+                    )}
+                  </div>
+                ))}
+              </Carousel>
+              <Box sx={{ width: 648, mx: 2 }}>
                 <TextField
                   margin="dense"
                   id="description"
@@ -488,34 +517,16 @@ const Posts = () => {
                 <DialogActions>
                   {selectedProduct.status !== "approved" && selectedProduct.status !== "rejected" && (
                     <Box display="flex" justifyContent="space-between" width="100%">
-                      <Button variant="outlined" onClick={handleClose} color="primary">
-                        Cancel
+                      <Button variant="outlined" color="error" sx={{ mr: 1 }} onClick={handleOpenRejectDialog}>
+                        Reject
                       </Button>
-                      <Box>
-                        <Button variant="outlined" color="error" sx={{ mr: 1 }} onClick={handleOpenRejectDialog}>
-                          Reject
-                        </Button>
-                        <Button variant="contained" onClick={() => handleApproval("approved")} color="success">
-                          Approve
-                        </Button>
-                      </Box>
+                      <Button variant="contained" onClick={() => handleApproval("approved")} color="success">
+                        Approve
+                      </Button>
                     </Box>
                   )}
                 </DialogActions>
               </Box>
-              <Carousel showThumbs={false} className={classes.carouselSlide}>
-                {selectedProduct.post_gallery.map((item, index) => (
-                  <div key={index} className={classes.carouselContainer}>
-                    {item.mime_type.includes("image") ? (
-                      <img src={item.url} alt={`Image ${index}`} className={classes.media} />
-                    ) : item.mime_type.includes("video") ? (
-                      <video src={item.url} className={classes.media} controls />
-                    ) : (
-                      <span>Unsupported media type</span>
-                    )}
-                  </div>
-                ))}
-              </Carousel>
             </Box>
           </DialogContent>
         </Dialog>
@@ -548,7 +559,7 @@ const Posts = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Box display="flex" justifyContent="space-between" width="100%">
+          <Box display="flex" justifyContent="space-between" width="100%" sx={{ m: 2 }}>
             <Button onClick={handleCloseRejectDialog} color="primary" variant="outlined">
               Cancel
             </Button>
