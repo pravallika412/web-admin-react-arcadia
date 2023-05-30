@@ -233,7 +233,7 @@ const Sponsor = () => {
             </div>
           ) : null}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingLeft: "10px" }}>
-            <strong>{data.sponsor.name || "N/A"}</strong>
+            {data.sponsor && data.sponsor.name ? <strong>{data.sponsor.name}</strong> : <strong>N/A</strong>}
           </div>
         </div>
       ),
