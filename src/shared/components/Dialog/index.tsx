@@ -19,7 +19,7 @@ const DialogComponent = (props) => {
           <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
         </IconButton>
       </Box>
-      <DialogContent>{content}</DialogContent>
+      <DialogContent sx={{ overflow: "hidden" }}>{content}</DialogContent>
       <DialogActions>{actions}</DialogActions>
     </Dialog>
   );

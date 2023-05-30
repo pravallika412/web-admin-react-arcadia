@@ -5,12 +5,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { debounce } from "lodash";
+import { Link, useNavigate } from "react-router-dom";
 
-const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch, searchFilter }) => {
+const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch, searchFilter, searchFilterVisible, selectableRows }) => {
   const [searchValue, setSearchValue] = useState("");
   const [visibleData, setVisibleData] = useState([]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
+    console.log(data);
     updateVisibleData();
   }, [data, page, rowsPerPage, searchValue]);
 
@@ -24,7 +28,7 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
   };
 
   const handleSearchChange = debounce((value) => {
-    onSearch(value);
+    onSearch && onSearch(value);
   }, 500);
 
   const updateVisibleData = () => {
@@ -47,28 +51,58 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
     setVisibleData(slicedData);
   };
 
+  const renderRowCells = (row) => {
+    return columns.map((column, index) => {
+      const cellValue = row[column.id];
+      return (
+        <TableCell key={index}>
+          {selectableRows ? (
+            <Link to={`/details/${row.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+              {cellValue}
+            </Link>
+          ) : (
+            // Render non-clickable cells
+            cellValue
+          )}
+        </TableCell>
+      );
+    });
+  };
+
+  const handleRowClick = (row) => {
+    if (selectableRows) {
+      // Handle row selection here
+      console.log("Selected Row:", row);
+      navigate(`/details/${row.id}`);
+    }
+  };
+
   return (
     <TableContainer component={Paper}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Box sx={{ m: 2 }}>
-          <InputBase
-            placeholder="Search…"
-            sx={{
-              border: "1px solid #CCCCCC",
-              borderRadius: "6px",
-              width: "170px",
-              height: "36px",
-            }}
-            inputProps={{ "aria-label": "search" }}
-            startAdornment={
-              <InputAdornment position="start">
-                <IconButton>
-                  <SearchIcon color="info" />
-                </IconButton>
-              </InputAdornment>
-            }
-            onChange={(e) => handleSearchChange(e.target.value)}
-          />
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {searchFilterVisible && (
+            <Box sx={{ m: 2 }}>
+              <InputBase
+                placeholder="Search…"
+                sx={{
+                  border: "1px solid #CCCCCC",
+                  borderRadius: "6px",
+                  width: "170px",
+                  height: "36px",
+                }}
+                inputProps={{ "aria-label": "search" }}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <IconButton>
+                      <SearchIcon color="info" />
+                    </IconButton>
+                  </InputAdornment>
+                }
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </Box>
+          )}
         </Box>
         {searchFilter}
       </Toolbar>
@@ -100,7 +134,12 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
             </TableRow>
           ) : visibleData.length > 0 ? (
             visibleData.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
+              // <TableRow key={rowIndex}>
+              //   {columns.map((column, index) => (
+              //     <TableCell key={index}>{row[column.id]}</TableCell>
+              //   ))}
+              // </TableRow>
+              <TableRow key={rowIndex} onClick={() => handleRowClick(row)} style={selectableRows ? { cursor: "pointer" } : {}}>
                 {columns.map((column, index) => (
                   <TableCell key={index}>{row[column.id]}</TableCell>
                 ))}
