@@ -38,6 +38,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import axios from "axios";
 
 const useStyles = makeStyles({
   root: {
@@ -61,6 +62,8 @@ const columns = [
 ];
 
 const Subscription = () => {
+  const pinata_api_key = process.env.PINATA_API_KEY;
+  const pinata_secret_api_key = process.env.PINATA_API_SECRET_KEY;
   const theme = useTheme();
   const classes = useStyles();
   const [file, setFile] = useState([]);
@@ -71,6 +74,7 @@ const Subscription = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
+  const [iPFSFile, setIPFSFile] = useState("");
   const [selectedData, setSelectedData] = useState(null);
   const [openPlanStatus, setOpenPlanStatus] = useState(false);
   const [createSubscription, { data: createSub, loading: addPlanLoader }] = useMutation(CREATE_SUBSCRIPTION);
@@ -157,7 +161,56 @@ const Subscription = () => {
     });
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
+    const responseimg = await axios.get(
+      uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile ? (uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile) : uploadFile,
+      {
+        responseType: "arraybuffer",
+      }
+    );
+
+    const formData = new FormData();
+    formData.append("file", new Blob([responseimg.data]));
+
+    const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        pinata_api_key: pinata_api_key,
+        pinata_secret_api_key: pinata_secret_api_key,
+      },
+    });
+
+    setIPFSFile(response.data.IpfsHash);
+    let data1 = JSON.stringify({
+      pinataContent: {
+        description: data.descriptions.map((item) => item.description).join(", "),
+        external_url: "https://dev.d50w243ncde5q.amplifyapp.com/",
+        image: `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`,
+        name: data.name,
+        attributes: [
+          {
+            trait_type: "price",
+            value: Number(data.price),
+          },
+          {
+            trait_type: "supportableProductCount",
+            value: data.supportableProductCount,
+          },
+        ],
+      },
+    });
+    let config = {
+      method: "post",
+      url: "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+      headers: {
+        "Content-Type": "application/json",
+        pinata_api_key: pinata_api_key,
+        pinata_secret_api_key: pinata_secret_api_key,
+      },
+      data: data1,
+    };
+
+    const res = await axios(config);
     if (isEditing) {
       let updatePayload = {
         planId: selectedData.planId,
@@ -174,7 +227,7 @@ const Subscription = () => {
             : uploadFile
           : uploadFile,
         supportableProductCount: data.supportableProductCount,
-        tokenUri: "https://gateway.pinata.cloud/ipfs/Qmc9jo1vohFdHM9Nffq7gGjvDH5T3S3m5Dgfw56wDyXBw9",
+        tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };
       updateSubscription({ variables: { input: updatePayload } });
     } else {
@@ -187,7 +240,7 @@ const Subscription = () => {
         price: Number(data.price),
         renewalNumber: 1,
         supportableProductCount: data.supportableProductCount,
-        tokenUri: "https://gateway.pinata.cloud/ipfs/Qmc9jo1vohFdHM9Nffq7gGjvDH5T3S3m5Dgfw56wDyXBw9",
+        tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };
       createSubscription({ variables: { input: payload } });
     }
@@ -221,7 +274,7 @@ const Subscription = () => {
     setOpen(true);
   };
 
-  const handleFileChange = (event: any) => {
+  const handleFileChange = async (event: any) => {
     event.preventDefault();
     setFile(event.target.files[0]);
     let payload = {

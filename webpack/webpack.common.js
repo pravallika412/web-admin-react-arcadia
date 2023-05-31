@@ -86,6 +86,8 @@ module.exports = {
     new webpack.DefinePlugin({
       "process.env": {
         API_BASE_URL: JSON.stringify(process.env.API_BASE_URL),
+        PINATA_API_KEY: JSON.stringify(process.env.PINATA_API_KEY),
+        PINATA_API_SECRET_KEY: JSON.stringify(process.env.PINATA_API_SECRET_KEY),
       },
     }),
   ],
