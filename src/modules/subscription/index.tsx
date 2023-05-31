@@ -74,7 +74,9 @@ const Subscription = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
+  const [iPFSLoader, setIPFSLoader] = useState(false);
   const [iPFSFile, setIPFSFile] = useState("");
+  const [presignedLoader, setPresignedLoader] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [openPlanStatus, setOpenPlanStatus] = useState(false);
   const [createSubscription, { data: createSub, loading: addPlanLoader }] = useMutation(CREATE_SUBSCRIPTION);
@@ -138,6 +140,7 @@ const Subscription = () => {
   useEffect(() => {
     if (createSub) {
       setOpen(false);
+      setIPFSLoader(false);
       setOpenPlanStatus(true);
       refetch();
     }
@@ -146,6 +149,7 @@ const Subscription = () => {
   useEffect(() => {
     if (updateSub) {
       setOpen(false);
+      setIPFSLoader(false);
       setOpenPlanStatus(true);
       refetch();
     }
@@ -159,9 +163,11 @@ const Subscription = () => {
         "Content-Type": data.type,
       },
     });
+    setPresignedLoader(false);
   };
 
   const onSubmit = async (data) => {
+    setIPFSLoader(true);
     const responseimg = await axios.get(
       uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile ? (uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile) : uploadFile,
       {
@@ -282,6 +288,7 @@ const Subscription = () => {
       fileType: event.target.files[0].type,
       filePath: "sponsor",
     };
+    setPresignedLoader(true);
     generatePresignedUrl({ variables: { input: payload } });
   };
 
@@ -549,7 +556,7 @@ const Subscription = () => {
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
-        {(addPlanLoader || updatePlanLoader) && <SuspenseLoader left="0%" />}
+        {(iPFSLoader || presignedLoader) && <SuspenseLoader left="0%" />}
       </Dialog>
 
       <Dialog open={openPlanStatus} onClose={handlePlanStatusClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
