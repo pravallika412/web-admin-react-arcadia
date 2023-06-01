@@ -303,7 +303,6 @@ const Posts = () => {
 
   const handleStatusChange = (e: any): void => {
     const value = e.target.value === "all" ? null : e.target.value;
-    console.log(value);
     setFilters((prevFilters) => ({
       ...prevFilters,
       feedStatus: value,
