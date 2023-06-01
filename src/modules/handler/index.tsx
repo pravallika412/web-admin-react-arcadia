@@ -24,6 +24,7 @@ import {
   InputAdornment,
   Skeleton,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -38,12 +39,14 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import SharedTable from "../../shared/components/Table";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useNavigate } from "react-router";
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 170 },
-  { id: "email", label: "Email", minWidth: 170 },
-  { id: "handling_products_count", label: "Product Count", minWidth: 170 },
-  { id: "createdAt", label: "Created At", type: "date", minWidth: 170 },
+  { id: "name", label: "Handler Name", minWidth: 170 },
+  { id: "email", label: "Email Address", minWidth: 170 },
+  { id: "createdAt", label: "Created On", minWidth: 170 },
   { id: "status", label: "Status", minWidth: 170 },
   { id: "action", label: "Action", minWidth: 170 },
 ];
@@ -59,11 +62,12 @@ const Handler = () => {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [totalCount, setTotalCount] = useState(0);
   const [openDelete, setOpenDelete] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [openHandlerStatus, setOpenHandlerStatus] = useState(false);
@@ -71,6 +75,7 @@ const Handler = () => {
   const [updateHandler, { data: updateHandlerData, loading: updateHandlerLoader }] = useMutation(UPDATE_HANDLER);
   const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_HANDLER);
   const [getHandlers, { data: getAllHandlers, loading: handlerLoader, refetch }] = useLazyQuery(GET_HANDLERS);
+  const navigate = useNavigate();
 
   const {
     control,
@@ -87,6 +92,7 @@ const Handler = () => {
   useEffect(() => {
     if (getAllHandlers) {
       setProducts(getAllHandlers.listHandlers.handlers);
+      setTotalCount(getAllHandlers.listHandlers.totalCount);
     }
   }, [getAllHandlers]);
 
@@ -151,6 +157,7 @@ const Handler = () => {
   };
 
   const handleDeleteClick = (row) => {
+    console.log(row);
     setDeleteId(row.id);
     setOpenDelete(true);
   };
@@ -168,13 +175,19 @@ const Handler = () => {
     reset();
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handlePageChange = (newPage) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleRowsPerPageChange = (rowperpage) => {
+    const newRowsPerPage = parseInt(rowperpage, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0); // Reset page when changing rows per page
+  };
+
+  const handleRowClick = (id) => {
+    console.log(id);
+    navigate(`/handlerdetails/${id}`);
   };
 
   const formatDate = (dateToFormat) => {
@@ -210,15 +223,65 @@ const Handler = () => {
     return <Label color={color as Color}>{text}</Label>;
   };
 
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleClickOpen = (product) => {
+    console.log(product);
   };
 
   const handleHandlerStatusClose = () => {
     setOpenHandlerStatus(false);
   };
+
+  const formattedData = products.map((row) => {
+    let imageUrl = row.profile_image || "";
+
+    if (imageUrl.includes("?")) {
+      imageUrl = imageUrl.split("?")[0];
+    }
+
+    return {
+      id: row.id,
+      name: (
+        <>
+          <div style={{ display: "flex" }}>
+            {imageUrl ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
+                  borderRadius: "50%",
+                  padding: "2px",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <img src={imageUrl} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt={row.name} />
+              </div>
+            ) : (
+              ""
+            )}
+            <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
+              <strong>{row.name ? row.name : "N/A"}</strong>
+              <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product}</Typography>
+            </div>
+          </div>
+        </>
+      ),
+      email: row.email ? row.email : "",
+      createdAt: formatDate(row.createdAt),
+      status: row.status ? getStatusLabel(row.status) : "",
+      action: (
+        <>
+          <Tooltip title="View">
+            <IconButton onClick={() => handleClickOpen(row)}>
+              <VisibilityIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+        </>
+      ),
+    };
+  });
 
   return (
     <Container component="main">
@@ -235,99 +298,21 @@ const Handler = () => {
         </Grid>
       </Grid>
 
-      <Paper>
-        <TableContainer>
-          <Table aria-label="Product table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell key={column.id} style={{ minWidth: column.minWidth }}>
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {handlerLoader ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length}>
-                    <Skeleton variant="rectangular" animation="wave" height={400} />
-                  </TableCell>
-                </TableRow>
-              ) : products.length > 0 ? (
-                products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                  return (
-                    <TableRow hover tabIndex={-1} key={product.id}>
-                      {columns.map((column) => {
-                        const value = product[column.id];
-                        return (
-                          <TableCell key={column.id}>
-                            {column.id === "action" ? (
-                              <>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": {
-                                      background: theme.colors.primary.lighter,
-                                    },
-                                    color: theme.palette.primary.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => handleEditClick(product)}
-                                >
-                                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
-                                </IconButton>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": { background: theme.colors.error.lighter },
-                                    color: theme.palette.error.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => handleDeleteClick(product)}
-                                >
-                                  <DeleteTwoToneIcon fontSize="small" />
-                                </IconButton>
-                              </>
-                            ) : column.type === "date" ? (
-                              formatDate(value)
-                            ) : column.id === "handling_products_count" ? (
-                              value == null ? (
-                                0
-                              ) : (
-                                value
-                              )
-                            ) : column.id === "status" ? (
-                              getStatusLabel(value)
-                            ) : (
-                              value
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell align="center" colSpan={6}>
-                    No results found!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={products.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+      <SharedTable
+        columns={columns}
+        data={formattedData}
+        page={page}
+        tableBodyLoader={handlerLoader}
+        rowsPerPage={rowsPerPage}
+        totalRows={totalCount}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        searchFilter={undefined}
+        onSearch={undefined}
+        searchFilterVisible={false}
+        selectableRows={true}
+        onRowClick={handleRowClick}
+      ></SharedTable>
       <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
         <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 16px" }}>
           {isEditing ? "Update Handler" : "Create Handler"}

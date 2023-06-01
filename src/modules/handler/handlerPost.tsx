@@ -3,38 +3,32 @@ import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui
 import { useEffect, useState } from "react";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
-import { GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
+import { GET_HANDLER_FEED } from "../../shared/graphQL/handler/queries";
 
 const columns = [
-  { id: "dogName", label: "Dog's Name", minWidth: 170 },
+  { id: "postID", label: "Post ID", minWidth: 170 },
+  { id: "dogName", label: "Name of Dog", minWidth: 170 },
+  { id: "description", label: "Description", minWidth: 170 },
   { id: "createdOn", label: "Created On", minWidth: 170 },
-  { id: "dogstatus", label: "Dog's Status", minWidth: 170 },
+  { id: "status", label: "Post Status", minWidth: 170 },
 ];
 
-const dogStatus = [
+const postStatus = [
   {
     id: "all",
     name: "All",
   },
   {
-    id: "active",
-    name: "Active",
+    id: "approved",
+    name: "Approved",
   },
   {
-    id: "inactive",
-    name: "Inactive",
+    id: "pending",
+    name: "Pending",
   },
   {
-    id: "adopted",
-    name: "Adopted",
-  },
-  {
-    id: "atheaven",
-    name: "At Heaven",
-  },
-  {
-    id: "suspended",
-    name: "Suspended",
+    id: "rejected",
+    name: "Rejected",
   },
 ];
 
@@ -44,7 +38,7 @@ const SearchFilter = ({ handleStatusChange }) => {
       <FormControl fullWidth variant="outlined">
         <InputLabel>Dog Status</InputLabel>
         <Select onChange={(e) => handleStatusChange(e)} label="Post Status" autoWidth>
-          {dogStatus.map((statusOption) => (
+          {postStatus.map((statusOption) => (
             <MenuItem key={statusOption.id} value={statusOption.id}>
               {statusOption.name}
             </MenuItem>
@@ -55,29 +49,28 @@ const SearchFilter = ({ handleStatusChange }) => {
   );
 };
 
-const SupportDogs = ({ id }) => {
+const HandlerPosts = ({ id }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [searchValue, setSearchValue] = useState("");
-  const [sponsorProductData, setSponsorProductData] = useState([]);
+  const [handlerFeedData, setHandlerFeedData] = useState([]);
   const [filters, setFilters] = useState({
-    dogStatus: null,
+    feedStatus: null,
   });
 
-  const [getSponsorProductDetails, { data: getSponsorProductDetailsData, loading: sponsorProductLoading }] = useLazyQuery(GET_SPONSORS_PRODUCT_DETAILS);
+  const [getHandlerFeed, { data: getHandlerFeedData, loading: handlerFeedLoading }] = useLazyQuery(GET_HANDLER_FEED);
 
   useEffect(() => {
-    getSponsorProductDetails({ variables: { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.dogStatus }, input3: { name: searchValue } } });
+    getHandlerFeed({ variables: { input1: { id: id }, input2: { search: searchValue, feedStatus: filters.feedStatus, pageDto: { page: page + 1, limit: rowsPerPage } } } });
   }, [page, rowsPerPage, searchValue, filters]);
 
   useEffect(() => {
-    if (getSponsorProductDetailsData) {
-      const parsedProducts = JSON.parse(getSponsorProductDetailsData.SponsorProducts.products[0].products);
-      setSponsorProductData(parsedProducts);
-      setTotalCount(getSponsorProductDetailsData.SponsorProducts.totalCount);
+    if (getHandlerFeedData) {
+      setHandlerFeedData(getHandlerFeedData.RetrieveHandlerProductsFeeds.productsFeeds);
+      setTotalCount(getHandlerFeedData?.RetrieveHandlerProductsFeeds.totalCount);
     }
-  }, [getSponsorProductDetailsData]);
+  }, [getHandlerFeedData]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -97,8 +90,33 @@ const SupportDogs = ({ id }) => {
     const value = e.target.value === "all" ? null : e.target.value;
     setFilters((prevFilters) => ({
       ...prevFilters,
-      dogStatus: value,
+      feedStatus: value,
     }));
+  };
+
+  type Color = "error" | "info" | "secondary";
+  const getStatusLabel = (status: "approved" | "pending" | "rejected"): JSX.Element => {
+    let color = "";
+    let text = "";
+    switch (status) {
+      case "approved":
+        text = "Approved";
+        color = "success";
+        break;
+      case "pending":
+        text = "Pending";
+        color = "secondary";
+        break;
+      case "rejected":
+        text = "Rejected";
+        color = "error";
+        break;
+      default:
+        color = "warning";
+        text = "Inactive";
+        break;
+    }
+    return <Label color={color as Color}>{text}</Label>;
   };
 
   const formatDate = (dateToFormat) => {
@@ -114,47 +132,16 @@ const SupportDogs = ({ id }) => {
     }
   };
 
-  type Color = "error" | "info" | "secondary" | "primary" | "warning" | "success";
-  const getStatusLabel = (status: "active" | "inactive" | "suspended" | "atheaven" | "adopted"): JSX.Element => {
-    let color = "";
-    let text = "";
-    switch (status) {
-      case "active":
-        text = "Active";
-        color = "info";
-        break;
-      case "inactive":
-        text = "Inactive";
-        color = "secondary";
-        break;
-      case "suspended":
-        text = "Suspended";
-        color = "error";
-        break;
-      case "atheaven":
-        text = "At Heaven";
-        color = "error";
-        break;
-      case "adopted":
-        text = "Adopted";
-        color = "success";
-        break;
-      default:
-        color = "warning";
-        text = "Inactive";
-        break;
-    }
-    return <Label color={color as Color}>{text}</Label>;
-  };
-
-  const formattedData = sponsorProductData.map((row) => {
-    let imageUrl = row.image || "";
+  const formattedData = handlerFeedData.map((row) => {
+    console.log(handlerFeedData);
+    let imageUrl = row.product.image || "";
 
     if (imageUrl.includes("?")) {
       imageUrl = imageUrl.split("?")[0];
     }
 
     return {
+      postID: "WDF" + row._id,
       dogName: (
         <>
           <div style={{ display: "flex" }}>
@@ -177,14 +164,15 @@ const SupportDogs = ({ id }) => {
               ""
             )}
             <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
-              <strong>{row.name}</strong>
-              <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product}</Typography>
+              <strong>{row.product.name ? row.product.name : "N/A"}</strong>
+              <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product._id ? row.product._id : ""}</Typography>
             </div>
           </div>
         </>
       ),
-      createdOn: formatDate(row.createdAt),
-      dogstatus: getStatusLabel(row.status),
+      description: row.caption ? row.caption : "",
+      createdOn: row.createdAt ? formatDate(row.createdAt) : "",
+      status: row.status ? getStatusLabel(row.status) : "",
     };
   });
 
@@ -193,7 +181,7 @@ const SupportDogs = ({ id }) => {
       columns={columns}
       data={formattedData}
       page={page}
-      tableBodyLoader={sponsorProductLoading}
+      tableBodyLoader={handlerFeedLoading}
       rowsPerPage={rowsPerPage}
       totalRows={totalCount}
       onPageChange={handlePageChange}
@@ -206,4 +194,4 @@ const SupportDogs = ({ id }) => {
     />
   );
 };
-export default SupportDogs;
+export default HandlerPosts;

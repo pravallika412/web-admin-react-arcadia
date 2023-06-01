@@ -7,7 +7,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { debounce } from "lodash";
 import { Link, useNavigate } from "react-router-dom";
 
-const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch, searchFilter, searchFilterVisible, selectableRows }) => {
+const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange, onRowsPerPageChange, tableBodyLoader, onSearch, searchFilter, searchFilterVisible, selectableRows, onRowClick }) => {
   const [searchValue, setSearchValue] = useState("");
   const [visibleData, setVisibleData] = useState([]);
 
@@ -50,27 +50,13 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
     setVisibleData(slicedData);
   };
 
-  const renderRowCells = (row) => {
-    return columns.map((column, index) => {
-      const cellValue = row[column.id];
-      return (
-        <TableCell key={index}>
-          {selectableRows ? (
-            <Link to={`/details/${row.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-              {cellValue}
-            </Link>
-          ) : (
-            // Render non-clickable cells
-            cellValue
-          )}
-        </TableCell>
-      );
-    });
-  };
-
   const handleRowClick = (row) => {
+    // if (selectableRows) {
+    //   navigate(`/details/${row.id}`);
+    // }
+    console.log(row);
     if (selectableRows) {
-      navigate(`/details/${row.id}`);
+      onRowClick(row.id);
     }
   };
 
@@ -131,11 +117,6 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
             </TableRow>
           ) : visibleData.length > 0 ? (
             visibleData.map((row, rowIndex) => (
-              // <TableRow key={rowIndex}>
-              //   {columns.map((column, index) => (
-              //     <TableCell key={index}>{row[column.id]}</TableCell>
-              //   ))}
-              // </TableRow>
               <TableRow key={rowIndex} onClick={() => handleRowClick(row)} style={selectableRows ? { cursor: "pointer" } : {}}>
                 {columns.map((column, index) => (
                   <TableCell key={index}>{row[column.id]}</TableCell>
