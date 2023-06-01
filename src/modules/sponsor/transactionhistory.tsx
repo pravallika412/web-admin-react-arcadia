@@ -205,6 +205,7 @@ const TransactionHistory = ({ id }) => {
       searchFilter={<SearchFilter handleStatusChange={handleStatusChange} selectedPayment={filters} />}
       searchFilterVisible={false}
       selectableRows={false}
+      onRowClick={undefined}
     />
   );
 };

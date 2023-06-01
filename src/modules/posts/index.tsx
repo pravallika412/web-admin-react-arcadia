@@ -447,6 +447,7 @@ const Posts = () => {
           searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
           searchFilterVisible={true}
           selectableRows={false}
+          onRowClick={undefined}
         ></SharedTable>
       </Container>
 

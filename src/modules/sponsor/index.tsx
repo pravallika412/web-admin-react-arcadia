@@ -19,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
@@ -107,6 +108,7 @@ const Sponsor = () => {
     plan: null,
   });
   const [getSponsors, { data: getAllSponsors, loading: sponsorLoading, refetch }] = useLazyQuery(GET_SPONSORS);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: { sortBy: "sponsor.createdAt", sortOrder: -1 }, input3: { status: filters.status, plan: filters.plan } } });
@@ -202,14 +204,10 @@ const Sponsor = () => {
     return <Label color={color as Color}>{text}</Label>;
   };
 
-  // const handleChangePage = (event, newPage) => {
-  //   setPage(newPage);
-  // };
-
-  // const handleChangeRowsPerPage = (event) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
+  const handleRowClick = (id) => {
+    console.log(id);
+    navigate(`/sponsordetails/${id}`);
+  };
 
   const formattedData = products.map((data) => {
     return {
@@ -352,6 +350,7 @@ const Sponsor = () => {
         onSearch={undefined}
         searchFilterVisible={false}
         selectableRows={true}
+        onRowClick={handleRowClick}
       ></SharedTable>
     </Container>
   );

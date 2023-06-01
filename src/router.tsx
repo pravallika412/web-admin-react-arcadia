@@ -8,6 +8,7 @@ import BaseLayout from "./layouts/BaseLayout";
 import SuspenseLoader from "./shared/components/SuspenseLoader";
 import AddDog from "./modules/Dog/addDog";
 import SponsorDetailComponent from "./modules/sponsor/sponsorDetail";
+import HandlerDetailComponent from "./modules/handler/handlerDetail";
 
 const Loader = (Component) => (props) =>
   (
@@ -82,6 +83,10 @@ const routes: RouteObject[] = [
         element: <Handler />,
       },
       {
+        path: "/handlerdetails/:id",
+        element: <HandlerDetailComponent />,
+      },
+      {
         path: "dog",
         element: <Dog />,
       },
@@ -98,7 +103,7 @@ const routes: RouteObject[] = [
         element: <Sponsors />,
       },
       {
-        path: "/details/:id",
+        path: "/sponsordetails/:id",
         element: <SponsorDetailComponent />,
       },
       {
