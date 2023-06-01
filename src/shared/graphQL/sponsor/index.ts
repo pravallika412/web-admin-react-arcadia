@@ -54,4 +54,65 @@ const GET_SPONSORS_DETAILS = gql`
   }
 `;
 
-export { GET_SPONSORS, GET_SPONSORS_DETAILS };
+const GET_SPONSORS_PRODUCT_DETAILS = gql`
+  query SponsorProducts($input: SponsorSubscriptionDto!, $input1: PageDto!, $input2: Filter!, $input3: SearchDto!) {
+    SponsorProducts(sponsorSubscriptionDto: $input, pageDto: $input1, filterDto: $input2, searchDto: $input3) {
+      products {
+        _id
+        sponsor
+        brand
+        product_collection_name
+        products
+        sponsor_products_count
+      }
+      totalCount
+    }
+  }
+`;
+
+const GET_SPONSORS_STRIPE_DETAILS = gql`
+  query SponsorStripeTransactionList($input: SponsorSubscriptionDto!, $input1: PageDto!, $input2: SponsorTransactionFilterDto!) {
+    SponsorStripeTransactionList(sponsorSubscriptionDto: $input, pageDto: $input1, filterDto: $input2) {
+      transactions {
+        _id
+        sponsor
+        brand
+        plan
+        amount_paid
+        currency
+        payment_status
+        subscription_status
+        logs {
+          paymentIntent
+        }
+        createdAt
+        updatedAt
+      }
+      totalCount
+    }
+  }
+`;
+
+const GET_SPONSORS_CRYPTO_DETAILS = gql`
+  query SponsorCryptoTransactionList($input: SponsorSubscriptionDto!, $input1: PageDto!, $input2: SponsorTransactionFilterDto!) {
+    SponsorCryptoTransactionList(sponsorSubscriptionDto: $input, pageDto: $input1, filterDto: $input2) {
+      transactions {
+        _id
+        sponsor
+        brand
+        plan
+        amount_paid
+        currency
+        payment_status
+        subscription_status
+        transaction_hash
+        logs
+        createdAt
+        updatedAt
+      }
+      totalCount
+    }
+  }
+`;
+
+export { GET_SPONSORS, GET_SPONSORS_DETAILS, GET_SPONSORS_PRODUCT_DETAILS, GET_SPONSORS_STRIPE_DETAILS, GET_SPONSORS_CRYPTO_DETAILS };

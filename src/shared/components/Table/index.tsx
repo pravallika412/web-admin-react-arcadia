@@ -14,7 +14,6 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(data);
     updateVisibleData();
   }, [data, page, rowsPerPage, searchValue]);
 
@@ -29,7 +28,7 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
 
   const handleSearchChange = debounce((value) => {
     onSearch && onSearch(value);
-  }, 500);
+  }, 300);
 
   const updateVisibleData = () => {
     const startIndex = page * rowsPerPage;
@@ -71,8 +70,6 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
 
   const handleRowClick = (row) => {
     if (selectableRows) {
-      // Handle row selection here
-      console.log("Selected Row:", row);
       navigate(`/details/${row.id}`);
     }
   };
