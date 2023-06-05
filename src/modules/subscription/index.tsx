@@ -30,7 +30,7 @@ import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "@mui/styles";
-import { CREATE_SUBSCRIPTION, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
+import { CREATE_SUBSCRIPTION, DELETE_PLAN, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
@@ -39,6 +39,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import axios from "axios";
+import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 
 const useStyles = makeStyles({
   root: {
@@ -75,6 +76,9 @@ const Subscription = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditing, setIsEditing] = useState(false);
   const [iPFSLoader, setIPFSLoader] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [iPFSFile, setIPFSFile] = useState("");
   const [presignedLoader, setPresignedLoader] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -84,6 +88,7 @@ const Subscription = () => {
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
   const [getPlans, { data: getAllPlans, loading: planLoader, refetch }] = useLazyQuery(GET_PLANS);
   const [getPlan, { data: getPlanById }] = useLazyQuery(GET_PLAN);
+  const [deletePlan, { data: deletePlanData }] = useMutation(DELETE_PLAN);
 
   const {
     control,
@@ -140,6 +145,7 @@ const Subscription = () => {
   useEffect(() => {
     if (createSub) {
       setOpen(false);
+      setIsDeleting(false);
       setIPFSLoader(false);
       setOpenPlanStatus(true);
       refetch();
@@ -149,11 +155,25 @@ const Subscription = () => {
   useEffect(() => {
     if (updateSub) {
       setOpen(false);
+      setIsDeleting(false);
       setIPFSLoader(false);
       setOpenPlanStatus(true);
       refetch();
     }
   }, [updateSub]);
+
+  useEffect(() => {
+    if (deletePlanData) {
+      setIsDeleting(true);
+      setOpenDelete(false);
+      refetch();
+    }
+  }, [deletePlanData]);
+
+  const handleDelete = () => {
+    deletePlan({ variables: { id: { id: deleteId } } });
+    setOpenDelete(false);
+  };
 
   const uploadImageFn = async (url, data) => {
     await fetch(url, {
@@ -280,6 +300,12 @@ const Subscription = () => {
     setOpen(true);
   };
 
+  const handleDeleteClick = (row) => {
+    console.log(row);
+    setDeleteId(row._id);
+    setOpenDelete(true);
+  };
+
   const handleFileChange = async (event: any) => {
     event.preventDefault();
     setFile(event.target.files[0]);
@@ -301,6 +327,7 @@ const Subscription = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedData(null);
+    setOpenDelete(false);
     reset({ descriptions: [{ description: "" }] });
   };
 
@@ -367,19 +394,32 @@ const Subscription = () => {
                                 value[column.subid]
                               )
                             ) : column.id === "action" ? (
-                              <IconButton
-                                sx={{
-                                  "&:hover": {
-                                    background: theme.colors.primary.lighter,
-                                  },
-                                  color: theme.palette.primary.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={() => handleEditClick(product)}
-                              >
-                                <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
-                              </IconButton>
+                              <>
+                                <IconButton
+                                  sx={{
+                                    "&:hover": {
+                                      background: theme.colors.primary.lighter,
+                                    },
+                                    color: theme.palette.primary.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => handleEditClick(product)}
+                                >
+                                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+                                </IconButton>
+                                <IconButton
+                                  sx={{
+                                    "&:hover": { background: theme.colors.error.lighter },
+                                    color: theme.palette.error.main,
+                                  }}
+                                  color="inherit"
+                                  size="small"
+                                  onClick={() => handleDeleteClick(product)}
+                                >
+                                  <DeleteTwoToneIcon fontSize="small" />
+                                </IconButton>
+                              </>
                             ) : (
                               value
                             )}
@@ -570,10 +610,30 @@ const Subscription = () => {
           <Box display="flex" flexDirection="column" alignItems="center">
             <CheckCircleIcon color="success" sx={{ fontSize: 70, m: 2 }} />
             <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
-              <strong>Plan {isEditing ? "Updated" : "Created"} Successfully</strong>
+              <strong>Plan {isDeleting ? "Deleted" : isEditing ? "Updated" : "Created"} Successfully</strong>
             </DialogContentText>
           </Box>
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+        <DialogContent sx={{ width: 400, height: 300 }}>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <DeleteIcon sx={{ fontSize: 70, m: 2, color: "rgba(204, 43, 53, 1)" }} />
+            <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Delete</Typography>
+            <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600 }}>
+              Are you sure you want to delete this Plan?
+            </DialogContentText>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="contained" sx={{ background: "rgba(204, 43, 53, 1)" }} onClick={handleDelete} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );

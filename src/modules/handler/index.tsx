@@ -279,6 +279,30 @@ const Handler = () => {
               <VisibilityIcon color="primary" />
             </IconButton>
           </Tooltip>
+          <IconButton
+            sx={{
+              "&:hover": {
+                background: theme.colors.primary.lighter,
+              },
+              color: theme.palette.primary.main,
+            }}
+            color="inherit"
+            size="small"
+            onClick={() => handleEditClick(row)}
+          >
+            <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+          </IconButton>
+          <IconButton
+            sx={{
+              "&:hover": { background: theme.colors.error.lighter },
+              color: theme.palette.error.main,
+            }}
+            color="inherit"
+            size="small"
+            onClick={() => handleDeleteClick(row)}
+          >
+            <DeleteTwoToneIcon fontSize="small" />
+          </IconButton>
         </>
       ),
     };
