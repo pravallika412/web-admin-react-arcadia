@@ -37,7 +37,7 @@ const SearchFilter = ({ handleStatusChange }) => {
     <Box width={160} sx={{ m: 1 }}>
       <FormControl fullWidth variant="outlined">
         <InputLabel>Dog Status</InputLabel>
-        <Select onChange={(e) => handleStatusChange(e)} label="Post Status" autoWidth>
+        <Select onChange={(e) => handleStatusChange(e)} defaultValue={""} label="Post Status" autoWidth>
           {postStatus.map((statusOption) => (
             <MenuItem key={statusOption.id} value={statusOption.id}>
               {statusOption.name}

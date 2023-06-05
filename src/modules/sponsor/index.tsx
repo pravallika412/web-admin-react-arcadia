@@ -261,7 +261,7 @@ const Sponsor = () => {
           <Box width={160} sx={{ m: 1 }}>
             <FormControl fullWidth variant="outlined">
               <InputLabel>Subscription Plan</InputLabel>
-              <Select onChange={(e) => handleStatusChange(e, "plan")} label="Subscription Plan" autoWidth>
+              <Select onChange={(e) => handleStatusChange(e, "plan")} label="Subscription Plan" defaultValue={""} autoWidth>
                 {subscriptionStatus.map((statusOption) => (
                   <MenuItem key={statusOption.id} value={statusOption.id}>
                     {statusOption.name}
@@ -273,7 +273,7 @@ const Sponsor = () => {
           <Box width={170} sx={{ m: 1 }}>
             <FormControl fullWidth variant="outlined">
               <InputLabel>Sponsorhsip Status</InputLabel>
-              <Select onChange={(e) => handleStatusChange(e, "status")} label="Sponsorship Status" autoWidth>
+              <Select onChange={(e) => handleStatusChange(e, "status")} label="Sponsorship Status" defaultValue={""} autoWidth>
                 {sponsorshipStatus.map((statusOption) => (
                   <MenuItem key={statusOption.id} value={statusOption.id}>
                     {statusOption.name}

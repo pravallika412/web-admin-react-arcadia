@@ -41,7 +41,11 @@ export default function ForgetPassword() {
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
     console.log(formResponse);
-    forgetPassword({ variables: { input: formResponse } });
+    let payload = {
+      email: formResponse.email,
+      role: "ADMIN",
+    };
+    forgetPassword({ variables: { input: payload } });
   };
 
   return (

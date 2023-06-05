@@ -46,7 +46,7 @@ const HandlerProfileComponent = ({ handlerData }) => {
   return (
     <Box>
       <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
-        Details of {handlerData.name}
+        Details of {handlerData?.name}
       </Typography>
 
       <Paper elevation={3} sx={{ padding: 1.5 }}>
@@ -54,10 +54,10 @@ const HandlerProfileComponent = ({ handlerData }) => {
           <Grid item xs={2} display="flex" flexDirection="column">
             <Box flexGrow={1} display="flex" flexDirection="column" sx={{ pe: 2 }}>
               <Paper style={{ marginBottom: "16px", height: 164, width: 164 }}>
-                {handlerData.profile_picture && <img src={handlerData.profile_picture} alt="Sponsor" style={{ width: "100px", height: "100px", borderRadius: "50%" }} />}
+                {handlerData.profile_image && <img src={handlerData.profile_image} alt="Sponsor" style={{ width: "100%", height: "100%" }} />}
               </Paper>
               <Typography variant="h6" style={{ fontSize: 16, fontWeight: 700, textAlign: "center" }}>
-                {handlerData.name}
+                {handlerData?.name ? handlerData?.name : ""}
               </Typography>
               <Typography variant="body1" style={{ textAlign: "center" }}>
                 {getStatusLabel(handlerData.status) || "N/A"}

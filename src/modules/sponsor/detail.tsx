@@ -56,7 +56,7 @@ const DetailComponent = ({ sponsorData }) => {
             </Box>
           </Grid>
           <Grid item xs={9} sx={{ display: "flex", mt: 2 }}>
-            <Grid container spacing={2} gap={2}>
+            <Grid container spacing={2} gap={5}>
               <Grid item xs={12} md={5}>
                 <Box sx={{ display: "flex", my: 1 }}>
                   <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>

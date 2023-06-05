@@ -1,5 +1,6 @@
 import { useLazyQuery } from "@apollo/client";
 import { Box, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { useEffect, useState } from "react";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
@@ -25,13 +26,25 @@ const paymentStatus = [
   },
 ];
 
+const useStyles = makeStyles((theme) => ({
+  formControl: {
+    width: "100%", // Set a default width for the form control
+  },
+  label: {
+    whiteSpace: "normal", // Allow the label to wrap to multiple lines
+  },
+}));
+
 const SearchFilter = ({ handleStatusChange, selectedPayment }) => {
+  const classes = useStyles();
   return (
     <Grid display="flex">
       <Box width={160} sx={{ m: 1 }}>
-        <FormControl fullWidth variant="outlined">
-          <InputLabel>Payment Gateway</InputLabel>
-          <Select onChange={(e) => handleStatusChange(e, "gateway")} value={selectedPayment.gateway} label="Post Status" autoWidth>
+        <FormControl variant="outlined" className={classes.formControl}>
+          <InputLabel className={classes.label} id="payment-gateway-label">
+            Payment Gateway
+          </InputLabel>
+          <Select labelId="payment-gateway-label" id="payment-gateway-select" value={selectedPayment.gateway} onChange={(e) => handleStatusChange(e, "gateway")} label="Payment Gateway">
             {paymentGateway.map((statusOption) => (
               <MenuItem key={statusOption.id} value={statusOption.value}>
                 {statusOption.name}
@@ -41,9 +54,11 @@ const SearchFilter = ({ handleStatusChange, selectedPayment }) => {
         </FormControl>
       </Box>
       <Box width={160} sx={{ m: 1 }}>
-        <FormControl fullWidth variant="outlined">
-          <InputLabel>Payment Status</InputLabel>
-          <Select onChange={(e) => handleStatusChange(e, "status")} label="Post Status" autoWidth>
+        <FormControl variant="outlined" className={classes.formControl}>
+          <InputLabel className={classes.label} id="payment-status-label">
+            Payment Status
+          </InputLabel>
+          <Select labelId="payment-status-label" id="payment-status-select" defaultValue={""} onChange={(e) => handleStatusChange(e, "status")} label="Payment Status">
             {paymentStatus.map((statusOption) => (
               <MenuItem key={statusOption.id} value={statusOption.id}>
                 {statusOption.name}
