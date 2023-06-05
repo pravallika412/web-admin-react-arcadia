@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
+import { LOGIN_ADMIN, RESET_PASSWORD } from "../../shared/graphQL/common/queries";
 import { Grid, IconButton, InputAdornment, Paper } from "@mui/material";
 import LoginDog from "../../assets/images/LoginDog.svg";
 import Visibility from "@mui/icons-material/Visibility";
@@ -21,35 +21,34 @@ interface IFormInput {
   password: string;
 }
 
-export default function SignIn() {
+export default function ResetPassword() {
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
 
   const navigate = useNavigate();
-  const [loginUser, { data }] = useMutation(LOGIN_ADMIN);
+  const [resetPassword, { data: resetPasswordData }] = useMutation(RESET_PASSWORD);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (data) {
-      window.localStorage.setItem("token", data.signIn.jwtToken);
-      navigate("/overview");
+    if (resetPasswordData) {
+      navigate("/");
     }
-  }, [navigate, data]);
+  }, [navigate, resetPasswordData]);
 
-  const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
-    loginUser({ variables: { input: formResponse } });
-  };
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const handleForgetPasswordClick = () => {
-    navigate("/forget-password"); // Change the path to the route of your "Forget Password" component
+  const onSubmitData = (data) => {
+    console.log(data);
+    const payload = {
+      token: localStorage.getItem("token_password"),
+      newPassword: data.newPassword,
+      confirmPassword: data.newPassword,
+    };
+    resetPassword({ variables: { input: payload } });
   };
 
   return (
@@ -84,66 +83,62 @@ export default function SignIn() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 1, width: 500 }}>
             <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              {...register("email", {
+              label="New Password"
+              {...register("newPassword", {
                 required: {
                   value: true,
-                  message: "Email is required",
-                },
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter valid Email",
-                },
-              })}
-              error={!!errors.email}
-              helperText={errors?.email?.message}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              id="password"
-              type={showPassword ? "text" : "password"}
-              {...register("password", {
-                required: {
-                  value: true,
-                  message: "Password is required",
+                  message: "New Password is required",
                 },
                 pattern: {
                   value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
                   message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
                 },
-                minLength: {
-                  value: 8,
-                  message: "Password must be 8 characters long",
+                maxLength: {
+                  value: 15,
+                  message: "Max length exceeded",
                 },
               })}
+              margin="normal"
+              fullWidth
+              type={showNewPassword ? "text" : "password"}
+              error={!!errors.newPassword}
+              helperText={errors?.newPassword?.message}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    <IconButton onClick={() => setShowNewPassword(!showNewPassword)} onMouseDown={(event) => event.preventDefault()}>
+                      {showNewPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              error={!!errors.password}
-              helperText={errors?.password?.message}
             />
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Typography variant="body2" color="textSecondary" onClick={handleForgetPasswordClick}>
-                Forget password?
-              </Typography>
-            </Box>
+            <TextField
+              label="Confirm Password"
+              {...register("confirmPassword", {
+                required: {
+                  value: true,
+                  message: "Confirm Password is required",
+                },
+                validate: (value) => value === watch("newPassword") || "The passwords do not match",
+              })}
+              margin="normal"
+              fullWidth
+              type={showConfirmPassword ? "text" : "password"}
+              error={Boolean(errors.confirmPassword)}
+              helperText={errors.confirmPassword && errors.confirmPassword.message}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} onMouseDown={(event) => event.preventDefault()}>
+                      {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Sign In
+              Login
             </Button>
           </Box>
         </Box>

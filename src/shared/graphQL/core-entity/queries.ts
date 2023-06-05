@@ -29,4 +29,13 @@ const GET_COREENTITY = gql`
   }
 `;
 
-export { CREATE_ENTITY, GET_DATATYPES, GET_COREENTITY };
+const CREATE_COLLECTION = gql`
+  mutation createNewCollection($input: CreateNewCollectionDto!) {
+    createNewCollection(createNewCollectionDto: $input) {
+      success
+      message
+    }
+  }
+`;
+
+export { CREATE_ENTITY, GET_DATATYPES, GET_COREENTITY, CREATE_COLLECTION };

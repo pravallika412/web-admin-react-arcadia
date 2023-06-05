@@ -9,6 +9,9 @@ import SuspenseLoader from "./shared/components/SuspenseLoader";
 import AddDog from "./modules/Dog/addDog";
 import SponsorDetailComponent from "./modules/sponsor/sponsorDetail";
 import HandlerDetailComponent from "./modules/handler/handlerDetail";
+import ForgetPassword from "./modules/Login/forgetpassword";
+import OTPValidation from "./modules/Login/otp-validate";
+import ResetPassword from "./modules/Login/reset-password";
 
 const Loader = (Component) => (props) =>
   (
@@ -42,6 +45,18 @@ const routes: RouteObject[] = [
       {
         path: "/",
         element: <Login />,
+      },
+      {
+        path: "/forget-password",
+        element: <ForgetPassword />,
+      },
+      {
+        path: "/otp-validate",
+        element: <OTPValidation />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPassword />,
       },
       {
         path: "status",
