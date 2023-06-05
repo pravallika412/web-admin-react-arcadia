@@ -32,6 +32,7 @@ import { makeStyles } from "@mui/styles";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Collection from "./collection";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -230,7 +231,7 @@ const CoreEntity = () => {
                     <Tab label="Entity" {...a11yProps(1)} />
                   </Tabs>
                   <TabPanel value={value} index={0}>
-                    Collection
+                    <Collection />
                   </TabPanel>
                   <TabPanel value={value} index={1}>
                     {!isCoreEntity ? (

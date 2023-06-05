@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
+import { FORGET_PASSWORD, LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
 import { Grid, IconButton, InputAdornment, Paper } from "@mui/material";
 import LoginDog from "../../assets/images/LoginDog.svg";
 import Visibility from "@mui/icons-material/Visibility";
@@ -21,7 +21,7 @@ interface IFormInput {
   password: string;
 }
 
-export default function SignIn() {
+export default function ForgetPassword() {
   const {
     register,
     handleSubmit,
@@ -29,27 +29,19 @@ export default function SignIn() {
   } = useForm();
 
   const navigate = useNavigate();
-  const [loginUser, { data }] = useMutation(LOGIN_ADMIN);
-  const [showPassword, setShowPassword] = useState(false);
+  const [forgetPassword, { data: forgetPasswordData }] = useMutation(FORGET_PASSWORD);
 
   useEffect(() => {
-    if (data) {
-      window.localStorage.setItem("token", data.signIn.jwtToken);
-      navigate("/overview");
+    if (forgetPasswordData) {
+      console.log(forgetPasswordData);
+      localStorage.setItem("token_password", forgetPasswordData?.ForgotPassword?.token);
+      navigate("/otp-validate");
     }
-  }, [navigate, data]);
+  }, [forgetPasswordData]);
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
-    loginUser({ variables: { input: formResponse } });
-  };
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const handleForgetPasswordClick = () => {
-    navigate("/forget-password"); // Change the path to the route of your "Forget Password" component
+    console.log(formResponse);
+    forgetPassword({ variables: { input: formResponse } });
   };
 
   return (
@@ -80,7 +72,7 @@ export default function SignIn() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Fprget Password
           </Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 1, width: 500 }}>
             <TextField
@@ -103,47 +95,8 @@ export default function SignIn() {
               error={!!errors.email}
               helperText={errors?.email?.message}
             />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              id="password"
-              type={showPassword ? "text" : "password"}
-              {...register("password", {
-                required: {
-                  value: true,
-                  message: "Password is required",
-                },
-                pattern: {
-                  value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[.@_])[A-Za-z0-9.@_]{8,}$/,
-                  message: "Password requires atleast one uppercase, one lowercase, one digit and one special character",
-                },
-                minLength: {
-                  value: 8,
-                  message: "Password must be 8 characters long",
-                },
-              })}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              error={!!errors.password}
-              helperText={errors?.password?.message}
-            />
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Typography variant="body2" color="textSecondary" onClick={handleForgetPasswordClick}>
-                Forget password?
-              </Typography>
-            </Box>
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Sign In
+              Send
             </Button>
           </Box>
         </Box>
