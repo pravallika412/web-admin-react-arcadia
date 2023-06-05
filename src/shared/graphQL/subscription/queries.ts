@@ -74,4 +74,14 @@ const UPDATE_PLAN = gql`
     }
   }
 `;
-export { CREATE_SUBSCRIPTION, GET_PLANS, GET_PLAN, UPDATE_PLAN };
+
+const DELETE_PLAN = gql`
+  mutation DeletePlan($id: IdDto!) {
+    DeletePlan(planId: $id) {
+      success
+      message
+    }
+  }
+`;
+
+export { CREATE_SUBSCRIPTION, GET_PLANS, GET_PLAN, UPDATE_PLAN, DELETE_PLAN };
