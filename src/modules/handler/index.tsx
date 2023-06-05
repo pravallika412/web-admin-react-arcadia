@@ -185,10 +185,10 @@ const Handler = () => {
     setPage(0); // Reset page when changing rows per page
   };
 
-  const handleRowClick = (id) => {
-    console.log(id);
-    navigate(`/handlerdetails/${id}`);
-  };
+  // const handleRowClick = (id) => {
+  //   console.log(id);
+  //   navigate(`/handlerdetails/${id}`);
+  // };
 
   const formatDate = (dateToFormat) => {
     const date = new Date(dateToFormat);
@@ -225,6 +225,7 @@ const Handler = () => {
 
   const handleClickOpen = (product) => {
     console.log(product);
+    navigate(`/handlerdetails/${product.id}`);
   };
 
   const handleHandlerStatusClose = () => {
@@ -310,8 +311,8 @@ const Handler = () => {
         searchFilter={undefined}
         onSearch={undefined}
         searchFilterVisible={false}
-        selectableRows={true}
-        onRowClick={handleRowClick}
+        selectableRows={false}
+        onRowClick={undefined}
       ></SharedTable>
       <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
         <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 16px" }}>

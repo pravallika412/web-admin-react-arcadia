@@ -43,7 +43,7 @@ const SearchFilter = ({ handleStatusChange }) => {
     <Box width={160} sx={{ m: 1 }}>
       <FormControl fullWidth variant="outlined">
         <InputLabel>Dog Status</InputLabel>
-        <Select onChange={(e) => handleStatusChange(e)} label="Post Status" autoWidth>
+        <Select onChange={(e) => handleStatusChange(e)} defaultValue={""} label="Post Status" autoWidth>
           {dogStatus.map((statusOption) => (
             <MenuItem key={statusOption.id} value={statusOption.id}>
               {statusOption.name}
@@ -65,15 +65,21 @@ const SupportDogs = ({ id }) => {
     dogStatus: null,
   });
 
-  const [getSponsorProductDetails, { data: getSponsorProductDetailsData, loading: sponsorProductLoading }] = useLazyQuery(GET_SPONSORS_PRODUCT_DETAILS);
+  const [getSponsorProductDetails, { data: getSponsorProductDetailsData, loading: sponsorProductLoading }] = useLazyQuery(GET_SPONSORS_PRODUCT_DETAILS, { fetchPolicy: "no-cache" });
 
   useEffect(() => {
-    getSponsorProductDetails({ variables: { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.dogStatus }, input3: { name: searchValue } } });
+    console.log(searchValue);
+    console.log({ variables: { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.dogStatus }, input3: { name: searchValue ? searchValue : null } } });
+    getSponsorProductDetails({
+      variables: { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.dogStatus }, input3: { name: searchValue ? searchValue : null } },
+    });
   }, [page, rowsPerPage, searchValue, filters]);
 
   useEffect(() => {
     if (getSponsorProductDetailsData) {
+      console.log(getSponsorProductDetailsData.SponsorProducts);
       const parsedProducts = JSON.parse(getSponsorProductDetailsData.SponsorProducts.products[0].products);
+      console.log(parsedProducts);
       setSponsorProductData(parsedProducts);
       setTotalCount(getSponsorProductDetailsData.SponsorProducts.totalCount);
     }
