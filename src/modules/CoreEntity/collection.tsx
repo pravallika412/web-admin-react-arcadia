@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { Grid, TextField, Button, Box, Card, CircularProgress, IconButton, useTheme } from "@mui/material";
+import { Grid, TextField, Button, Box, Card, CircularProgress, IconButton, useTheme, CardMedia } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import { CREATE_COLLECTION } from "../../shared/graphQL/core-entity/queries";
 import { useEffect, useState } from "react";
@@ -7,6 +7,7 @@ import axios from "axios";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { makeStyles } from "@mui/styles";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
+import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 
 const useStyles = makeStyles({
   card: {
@@ -35,11 +36,15 @@ const useStyles = makeStyles({
 const Collection = () => {
   const theme = useTheme();
   const classes = useStyles();
+  const [file, setFile] = useState([]);
   const pinata_api_key = process.env.PINATA_API_KEY;
   const pinata_secret_api_key = process.env.PINATA_API_SECRET_KEY;
   const [collectionImage, setCollectionImage] = useState("");
+  const [presignedURL, setPresignedURL] = useState(null);
   const [loadingImage, setLoadingImage] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
   const [createCollection, { data: createCollectionData, loading: collectionLoader }] = useMutation(CREATE_COLLECTION);
+  const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   const {
     register,
@@ -53,9 +58,28 @@ const Collection = () => {
     }
   }, [createCollectionData]);
 
+  useEffect(() => {
+    if (createPresignedUrl) {
+      setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
+    }
+  }, [createPresignedUrl]);
+
+  useEffect(() => {
+    if (uploadFile) {
+      uploadImageFn(uploadFile, file);
+    }
+  }, [uploadFile]);
+
   const handleFileChange = async (event: any) => {
     event.preventDefault();
     setLoadingImage(true);
+    setFile(event.target.files[0]);
+    let payload = {
+      fileName: event.target.files[0].name,
+      fileType: event.target.files[0].type,
+      filePath: "sponsor",
+    };
+    generatePresignedUrl({ variables: { input: payload } });
     let formData = new FormData();
     formData.append("file", event.target.files[0]);
     const config = {
@@ -74,11 +98,24 @@ const Collection = () => {
       const response = await axios(config);
       console.log(response.data.IpfsHash);
       setCollectionImage(response.data.IpfsHash);
-      setLoadingImage(false);
+      // setLoadingImage(false);
     } catch (error) {
       console.log(error);
       setLoadingImage(false);
     }
+  };
+
+  const uploadImageFn = async (url, data) => {
+    await fetch(url, {
+      method: "PUT",
+      body: data,
+      headers: {
+        "Content-Type": data.type,
+      },
+    });
+    setLoadingImage(false);
+    setPresignedURL(uploadFile.split("?")[0]);
+    console.log(uploadFile.split("?")[0]);
   };
 
   const onSubmit = async (data) => {
@@ -163,6 +200,10 @@ const Collection = () => {
           <Card className={classes.card}>
             {loadingImage ? (
               <CircularProgress />
+            ) : presignedURL ? (
+              <>
+                <CardMedia className={classes.media} image={presignedURL} />
+              </>
             ) : (
               <div>
                 <IconButton

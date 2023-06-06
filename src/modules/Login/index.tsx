@@ -11,10 +11,14 @@ import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
-import { Grid, IconButton, InputAdornment, Paper } from "@mui/material";
+import { Grid, IconButton, InputAdornment, Paper, useTheme } from "@mui/material";
 import LoginDog from "../../assets/images/LoginDog.svg";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import useStyles from "../../styles/theme/styles";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import LockIcon from "@mui/icons-material/Lock";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface IFormInput {
   email: string;
@@ -22,15 +26,19 @@ interface IFormInput {
 }
 
 export default function SignIn() {
+  const classes = useStyles();
+  const theme = useTheme();
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
 
   const navigate = useNavigate();
-  const [loginUser, { data }] = useMutation(LOGIN_ADMIN);
+  const [loginUser, { data, loading: loginLoader }] = useMutation(LOGIN_ADMIN);
   const [showPassword, setShowPassword] = useState(false);
+  const email = watch("email");
 
   useEffect(() => {
     if (data) {
@@ -67,28 +75,41 @@ export default function SignIn() {
           height: "1071px",
         }}
       />
-      <Grid item xs={12} sm={8} md={6} component={Paper} elevation={6} square>
+      <Grid
+        item
+        xs={12}
+        sm={8}
+        md={6}
+        component={Paper}
+        elevation={6}
+        square
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          minHeight: "100vh", // Optional, it will fill the screen vertically
+          bgcolor: "primary.main",
+        }}
+      >
         <Box
           sx={{
-            marginTop: 8,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            mx: "100px",
+            mt: 20,
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
+          <Typography component="h1" className={classes.font48} sx={{ color: "white" }}>
+            Welcome Back!
           </Typography>
-          <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 1, width: 500 }}>
+          <Typography className={`${classes.font18} ${classes.tertiary200}`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</Typography>
+          <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 3, width: 468 }}>
             <TextField
               margin="normal"
-              required
+              focused
               fullWidth
+              className={errors.email ? classes.textFieldError : classes.textFieldWhite}
               id="email"
-              label="Email Address"
+              label="Email"
               name="email"
               {...register("email", {
                 required: {
@@ -100,14 +121,22 @@ export default function SignIn() {
                   message: "Please enter valid Email",
                 },
               })}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailOutlineIcon className={classes.primary200} />
+                  </InputAdornment>
+                ),
+              }}
               error={!!errors.email}
               helperText={errors?.email?.message}
             />
             <TextField
               margin="normal"
-              required
               fullWidth
+              focused
               name="password"
+              className={errors.password ? classes.textFieldError : classes.textFieldWhite}
               label="Password"
               id="password"
               type={showPassword ? "text" : "password"}
@@ -126,10 +155,15 @@ export default function SignIn() {
                 },
               })}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlinedIcon className={classes.primary200} />
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                      {showPassword ? <Visibility className={classes.primary200} /> : <VisibilityOff className={classes.primary200} />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -138,12 +172,39 @@ export default function SignIn() {
               helperText={errors?.password?.message}
             />
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Typography variant="body2" color="textSecondary" onClick={handleForgetPasswordClick}>
+              <Typography className={`${classes.font12} ${classes.pointer}`} color="white" onClick={handleForgetPasswordClick}>
                 Forget password?
               </Typography>
             </Box>
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Sign In
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                fontWeight: 700,
+                height: 64,
+                mt: 4,
+                mb: 2,
+                color: theme.colors.primary.main,
+                background: "#FFFFFF",
+                "&:hover": {
+                  color: theme.colors.primary.main,
+                  background: "#FFFFFF",
+                },
+              }}
+              disabled={loginLoader}
+              classes={{ disabled: classes.loginDisabledButton }}
+            >
+              {loginLoader ? (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    position: "absolute",
+                  }}
+                />
+              ) : (
+                "Login"
+              )}
             </Button>
           </Box>
         </Box>

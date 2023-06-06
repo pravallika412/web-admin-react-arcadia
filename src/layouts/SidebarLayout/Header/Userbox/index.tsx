@@ -36,14 +36,14 @@ const UserBoxText = styled(Box)(
 const UserBoxLabel = styled(Typography)(
   ({ theme }) => `
         font-weight: ${theme.typography.fontWeightBold};
-        color: ${theme.palette.secondary.main};
+        color: ${theme.palette.primary.main};
         display: block;
 `
 );
 
 const UserBoxDescription = styled(Typography)(
   ({ theme }) => `
-        color: ${lighten(theme.palette.secondary.main, 0.5)}
+        color: ${lighten(theme.palette.primary.main, 0.5)}
 `
 );
 
@@ -84,12 +84,16 @@ function HeaderUserbox() {
 
   return (
     <>
-      <UserBoxButton color="secondary" ref={ref} onClick={handleOpen}>
+      <UserBoxButton color="primary" ref={ref} onClick={handleOpen}>
         <Avatar variant="rounded" alt={user.name} src={user.avatar} />
         <Hidden mdDown>
           <UserBoxText>
-            <UserBoxLabel variant="body1">{user.name}</UserBoxLabel>
-            <UserBoxDescription variant="body2">{user.jobtitle}</UserBoxDescription>
+            <UserBoxLabel variant="body1" color="primary">
+              {user.name}
+            </UserBoxLabel>
+            <UserBoxDescription variant="body2" color="primary">
+              {user.jobtitle}
+            </UserBoxDescription>
           </UserBoxText>
         </Hidden>
         <Hidden smDown>

@@ -6,9 +6,9 @@ import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
 
 const columns = [
-  { id: "dogName", label: "Dog's Name", minWidth: 170 },
-  { id: "createdOn", label: "Created On", minWidth: 170 },
-  { id: "dogstatus", label: "Dog's Status", minWidth: 170 },
+  { id: "dogName", label: "Dog's Name" },
+  { id: "createdOn", label: "Created On" },
+  { id: "dogstatus", label: "Dog's Status" },
 ];
 
 const dogStatus = [

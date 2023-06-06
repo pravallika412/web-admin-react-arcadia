@@ -94,16 +94,8 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
         <TableHead>
           <TableRow>
             {columns.map((column, index) => (
-              <TableCell
-                key={index}
-                sx={{
-                  height: "43px",
-                  backgroundColor: "#E6F4FF",
-                  textTransform: "none",
-                  minHeight: "43px",
-                }}
-              >
-                {column.label}
+              <TableCell key={index} sx={{ height: "43px", backgroundColor: "#E6F4FF", textTransform: "none", minHeight: "43px" }}>
+                <Box sx={index === columns.length - 1 ? { display: "flex", justifyContent: "flex-end" } : {}}>{column.label}</Box>
               </TableCell>
             ))}
           </TableRow>
@@ -119,7 +111,9 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
             visibleData.map((row, rowIndex) => (
               <TableRow key={rowIndex} onClick={() => handleRowClick(row)} style={selectableRows ? { cursor: "pointer" } : {}}>
                 {columns.map((column, index) => (
-                  <TableCell key={index}>{row[column.id]}</TableCell>
+                  <TableCell key={index}>
+                    <Box sx={index === columns.length - 1 ? { display: "flex", justifyContent: "flex-end" } : {}}>{row[column.id]}</Box>
+                  </TableCell>
                 ))}
               </TableRow>
             ))

@@ -12,6 +12,7 @@ import { onError } from "@apollo/client/link/error";
 import "react-toastify/dist/ReactToastify.css";
 import toast, { Toaster } from "react-hot-toast";
 import { Alert, Snackbar } from "@mui/material";
+import { GlobalStyle } from "./styles/theme/globalFont";
 
 const baseURL = process.env.API_BASE_URL;
 const httpLink = createHttpLink({
@@ -50,6 +51,7 @@ const client = new ApolloClient({
 
 ReactDOM.render(
   <HelmetProvider>
+    <GlobalStyle />
     <SidebarProvider>
       <ApolloProvider client={client}>
         <BrowserRouter>

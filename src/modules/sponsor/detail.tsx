@@ -45,7 +45,7 @@ const DetailComponent = ({ sponsorData }) => {
           <Grid item xs={2} display="flex" flexDirection="column">
             <Box flexGrow={1} display="flex" flexDirection="column" sx={{ pe: 2 }}>
               <Paper style={{ marginBottom: "16px", height: 164, width: 164 }}>
-                {sponsor.profile_picture && <img src={sponsor.profile_picture} alt="Sponsor" style={{ width: "100px", height: "100px", borderRadius: "50%" }} />}
+                {sponsor.profile_picture && <img src={sponsor.profile_picture} alt="Sponsor" style={{ width: "100%", height: "100%" }} />}
               </Paper>
               <Typography variant="h6" style={{ fontSize: 16, fontWeight: 700, textAlign: "center" }}>
                 {sponsor.name}
@@ -81,19 +81,19 @@ const DetailComponent = ({ sponsorData }) => {
               <Grid item xs={12} md={5}>
                 <Box sx={{ display: "flex", my: 1 }}>
                   <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                    Created At:
-                  </Typography>
-                  <Typography variant="body1">{new Date(sponsor.createdAt).toLocaleString()}</Typography>
-                </Box>
-                <Box sx={{ display: "flex", my: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                     Subscription Plan:
                   </Typography>
                   <Typography variant="body1">{planDetails.name}</Typography>
                 </Box>
                 <Box sx={{ display: "flex", my: 1 }}>
                   <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                    Plan Ends On:
+                    Created on:
+                  </Typography>
+                  <Typography variant="body1">{new Date(sponsor.createdAt).toLocaleString()}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", my: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
+                    Plan ends on:
                   </Typography>
                   <Typography variant="body1">{new Date(subscription_end_date * 1000).toLocaleString()}</Typography>
                 </Box>
