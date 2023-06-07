@@ -15,9 +15,11 @@ const DialogComponent = (props) => {
       }}
     >
       <Box display="flex" justifyContent="flex-end" p={1} sx={{ overflow: "hidden" }}>
-        <IconButton edge="end" color="primary" onClick={handleClose} aria-label="close">
-          <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
-        </IconButton>
+        {handleClose && (
+          <IconButton edge="end" color="primary" onClick={handleClose} aria-label="close">
+            <CancelIcon sx={{ fontSize: 30, color: "#0481D9" }} />
+          </IconButton>
+        )}
       </Box>
       <DialogContent sx={{ overflow: "hidden" }}>{content}</DialogContent>
       <DialogActions>{actions}</DialogActions>
