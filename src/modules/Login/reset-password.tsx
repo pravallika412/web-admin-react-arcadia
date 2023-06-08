@@ -50,7 +50,6 @@ export default function ResetPassword() {
   }, [navigate, resetPasswordData]);
 
   const onSubmitData = (data) => {
-    console.log(data);
     const payload = {
       token: localStorage.getItem("token_password"),
       newPassword: data.newPassword,

@@ -43,6 +43,7 @@ const useStyles = makeStyles(() => ({
   disabledButton: {
     background: `${colors.primary600} !important`,
     color: `rgba(255, 255, 255) !important`,
+    opacity: 0.7,
   },
   otpInput: {
     textAlign: "center",

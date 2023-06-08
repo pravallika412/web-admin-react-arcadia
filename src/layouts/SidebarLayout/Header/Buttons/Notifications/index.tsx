@@ -1,20 +1,13 @@
-import {
-  alpha,
-  Badge,
-  Box,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  Popover,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import { useRef, useState } from 'react';
-import NotificationsActiveTwoToneIcon from '@mui/icons-material/NotificationsActiveTwoTone';
-import { styled } from '@mui/material/styles';
+import { alpha, Badge, Box, CircularProgress, Divider, Grid, IconButton, Link, List, ListItem, Popover, Tooltip, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import NotificationsActiveTwoToneIcon from "@mui/icons-material/NotificationsActiveTwoTone";
+import { styled } from "@mui/material/styles";
 
-import { formatDistance, subDays } from 'date-fns';
+import { formatDistance, subDays } from "date-fns";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { MARK_ALL_READ, MARK_READ, SHOW_ADMIN_NOTIFICATIONS } from "../../../../../shared/graphQL/settings/queries";
+import Dummy from "../../../../../assets/images/dummy.png";
+import { useNavigate } from "react-router";
 
 const NotificationsBadge = styled(Badge)(
   ({ theme }) => `
@@ -43,6 +36,35 @@ const NotificationsBadge = styled(Badge)(
 function HeaderNotifications() {
   const ref = useRef<any>(null);
   const [isOpen, setOpen] = useState<boolean>(false);
+  const [notificationData, setNotificationData] = useState([]);
+  const [unReadCount, setUnReadCount] = useState<number>(0);
+  const [markRead, { data: markReadData, loading: markReadLoader }] = useMutation(MARK_READ);
+  const [markAllRead, { data: markAllReadData, loading: markAllReadLoader }] = useMutation(MARK_ALL_READ);
+  const [showNotifications, { data: showNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(SHOW_ADMIN_NOTIFICATIONS, { fetchPolicy: "no-cache" });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    showNotifications({ variables: { input1: {}, input2: {} } });
+  }, []);
+
+  useEffect(() => {
+    if (showNotificationData) {
+      setNotificationData(showNotificationData.AdminInAppNotifications.notifications);
+      setUnReadCount(showNotificationData.AdminInAppNotifications.unread_count);
+    }
+  }, [showNotificationData]);
+
+  useEffect(() => {
+    if (markReadData) {
+      refetch();
+    }
+  }, [markReadData]);
+
+  useEffect(() => {
+    if (markAllReadData) {
+      refetch();
+    }
+  }, [markAllReadData]);
 
   const handleOpen = (): void => {
     setOpen(true);
@@ -52,15 +74,30 @@ function HeaderNotifications() {
     setOpen(false);
   };
 
+  const handleNotificationClick = (notification) => {
+    if (notification) {
+      markRead({ variables: { input: { id: notification._id } } });
+      if (notification.notification_type === "post_created") {
+        navigate("/posts");
+        setOpen(false);
+      }
+    }
+  };
+
+  const handleMarkAllRead = () => {
+    markAllRead();
+  };
+
   return (
     <>
       <Tooltip arrow title="Notifications">
         <IconButton color="primary" ref={ref} onClick={handleOpen}>
           <NotificationsBadge
-            badgeContent={1}
+            badgeContent={unReadCount}
+            max={10}
             anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right'
+              vertical: "top",
+              horizontal: "right",
             }}
           >
             <NotificationsActiveTwoToneIcon />
@@ -72,49 +109,80 @@ function HeaderNotifications() {
         onClose={handleClose}
         open={isOpen}
         anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
+          vertical: "top",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
+          vertical: "top",
+          horizontal: "right",
         }}
       >
-        <Box
-          sx={{ p: 2 }}
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-        >
+        <Box sx={{ p: 2 }} display="flex" alignItems="center" justifyContent="space-between">
           <Typography variant="h5">Notifications</Typography>
+          <Typography variant="h5">
+            <Link
+              component="button"
+              variant="inherit"
+              color="primary"
+              onClick={handleMarkAllRead}
+              disabled={unReadCount === 0}
+              sx={{
+                opacity: unReadCount === 0 ? 0.5 : 1,
+                cursor: unReadCount === 0 ? "unset" : "pointer",
+              }}
+            >
+              Mark All Read
+            </Link>
+          </Typography>
         </Box>
         <Divider />
-        <List sx={{ p: 0 }}>
-          <ListItem
-            sx={{ p: 2, minWidth: 350, display: { xs: 'block', sm: 'flex' } }}
-          >
-            <Box flex="1">
-              <Box display="flex" justifyContent="space-between">
-                <Typography sx={{ fontWeight: 'bold' }}>
-                  Messaging Platform
-                </Typography>
-                <Typography variant="caption" sx={{ textTransform: 'none' }}>
-                  {formatDistance(subDays(new Date(), 3), new Date(), {
-                    addSuffix: true
-                  })}
-                </Typography>
-              </Box>
-              <Typography
-                component="span"
-                variant="body2"
-                color="text.secondary"
-              >
-                {' '}
-                new messages in your inbox
-              </Typography>
+        <Box sx={{ minHeight: 700 }}>
+          {markAllReadLoader || markReadLoader ? (
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 700, width: 700 }}>
+              <CircularProgress />
             </Box>
-          </ListItem>
-        </List>
+          ) : (
+            <List sx={{ p: 0 }}>
+              {notificationData.map((notification) => (
+                <ListItem
+                  key={notification._id}
+                  sx={{
+                    p: 2,
+                    width: 700,
+                    display: { xs: "block", sm: "flex" },
+                    cursor: "pointer",
+                    "&:hover": {
+                      ...(notification.read === false && { background: "#E6F4FF" }),
+                    },
+                    ...(notification.read === false && { background: "#E6F4FF" }),
+                  }}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item xs={6} md={1}>
+                      <Box sx={{ mr: 2 }}>
+                        {<img src={notification.image_url ? notification.image_url.url : Dummy} alt="image" style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "50%" }} />}
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} md={9}>
+                      <Typography sx={{ fontWeight: "bold" }}>{notification.subject}</Typography>
+                      <Typography component="span" variant="body2" color="text.secondary">
+                        {notification.message}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} md={2}>
+                      <Typography variant="caption" sx={{ textTransform: "none" }}>
+                        {formatDistance(subDays(new Date(notification.createdAt), 0), new Date(), {
+                          addSuffix: true,
+                        })}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
       </Popover>
     </>
   );

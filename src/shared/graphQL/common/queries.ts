@@ -50,4 +50,34 @@ const GENERATE_PRESIGNED_URL = gql`
   }
 `;
 
-export { LOGIN_ADMIN, GENERATE_PRESIGNED_URL, FORGET_PASSWORD, VERIFY_OTP, RESEND_OTP, RESET_PASSWORD };
+const SPONSOR_STATS = gql`
+  query GetSponsorSubscriptionStats($input: GetSponsorSubscriptionStatsDto!) {
+    GetSponsorSubscriptionStats(getSponsorSubscriptionStatsDto: $input) {
+      sponsorSubscriptionStats {
+        _id {
+          year
+          month
+          day
+          dayOfWeek
+          week
+        }
+        timestamp
+        sponsorCount
+      }
+      totalCount
+    }
+  }
+`;
+
+const GET_USER_COUNT = gql`
+  query {
+    GetUsersCount {
+      sponsorCount
+      handlerCount
+      productCount
+      totalAmount
+    }
+  }
+`;
+
+export { LOGIN_ADMIN, GENERATE_PRESIGNED_URL, FORGET_PASSWORD, VERIFY_OTP, RESEND_OTP, RESET_PASSWORD, SPONSOR_STATS, GET_USER_COUNT };

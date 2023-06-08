@@ -51,10 +51,6 @@ const SharedTable = ({ columns, data, page, rowsPerPage, totalRows, onPageChange
   };
 
   const handleRowClick = (row) => {
-    // if (selectableRows) {
-    //   navigate(`/details/${row.id}`);
-    // }
-    console.log(row);
     if (selectableRows) {
       onRowClick(row.id);
     }

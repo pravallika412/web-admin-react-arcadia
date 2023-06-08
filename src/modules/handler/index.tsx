@@ -86,8 +86,8 @@ const Handler = () => {
   } = useForm();
 
   useEffect(() => {
-    getHandlers({ variables: { input: {} } });
-  }, []);
+    getHandlers({ variables: { input: { page: page + 1, limit: rowsPerPage } } });
+  }, [page, rowsPerPage]);
 
   useEffect(() => {
     if (getAllHandlers) {
@@ -157,7 +157,6 @@ const Handler = () => {
   };
 
   const handleDeleteClick = (row) => {
-    console.log(row);
     setDeleteId(row.id);
     setOpenDelete(true);
   };
@@ -184,11 +183,6 @@ const Handler = () => {
     setRowsPerPage(newRowsPerPage);
     setPage(0); // Reset page when changing rows per page
   };
-
-  // const handleRowClick = (id) => {
-  //   console.log(id);
-  //   navigate(`/handlerdetails/${id}`);
-  // };
 
   const formatDate = (dateToFormat) => {
     const date = new Date(dateToFormat);
@@ -224,7 +218,6 @@ const Handler = () => {
   };
 
   const handleClickOpen = (product) => {
-    console.log(product);
     navigate(`/handlerdetails/${product.id}`);
   };
 

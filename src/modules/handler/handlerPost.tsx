@@ -133,7 +133,6 @@ const HandlerPosts = ({ id }) => {
   };
 
   const formattedData = handlerFeedData.map((row) => {
-    console.log(handlerFeedData);
     let imageUrl = row.product.image || "";
 
     if (imageUrl.includes("?")) {
