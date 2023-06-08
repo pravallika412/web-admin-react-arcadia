@@ -1100,7 +1100,7 @@ export const PureLightTheme = createTheme({
           },
 
           "&.Mui-checked .MuiSwitch-thumb": {
-            backgroundColor: colors.primary.main,
+            backgroundColor: "#FFFFFF",
           },
         },
       },

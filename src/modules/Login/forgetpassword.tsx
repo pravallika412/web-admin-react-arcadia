@@ -36,7 +36,6 @@ export default function ForgetPassword() {
 
   useEffect(() => {
     if (forgetPasswordData) {
-      console.log(forgetPasswordData);
       localStorage.setItem("token_password", forgetPasswordData?.ForgotPassword?.token);
       window.localStorage.setItem("email", email);
       navigate("/otp-validate");
@@ -44,7 +43,6 @@ export default function ForgetPassword() {
   }, [forgetPasswordData]);
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
-    console.log(formResponse);
     let payload = {
       email: formResponse.email,
       role: "ADMIN",

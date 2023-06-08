@@ -301,7 +301,6 @@ const Subscription = () => {
   };
 
   const handleDeleteClick = (row) => {
-    console.log(row);
     setDeleteId(row._id);
     setOpenDelete(true);
   };

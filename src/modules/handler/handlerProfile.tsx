@@ -3,8 +3,6 @@ import { Box } from "@mui/system";
 import Label from "../../shared/components/Label";
 
 const HandlerProfileComponent = ({ handlerData }) => {
-  console.log(handlerData);
-
   if (!handlerData) {
     return null; // or return a placeholder or error message
   }

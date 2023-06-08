@@ -68,8 +68,6 @@ const SupportDogs = ({ id }) => {
   const [getSponsorProductDetails, { data: getSponsorProductDetailsData, loading: sponsorProductLoading }] = useLazyQuery(GET_SPONSORS_PRODUCT_DETAILS, { fetchPolicy: "no-cache" });
 
   useEffect(() => {
-    console.log(searchValue);
-    console.log({ variables: { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.dogStatus }, input3: { name: searchValue ? searchValue : null } } });
     getSponsorProductDetails({
       variables: { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.dogStatus }, input3: { name: searchValue ? searchValue : null } },
     });
@@ -77,9 +75,7 @@ const SupportDogs = ({ id }) => {
 
   useEffect(() => {
     if (getSponsorProductDetailsData) {
-      console.log(getSponsorProductDetailsData.SponsorProducts);
       const parsedProducts = JSON.parse(getSponsorProductDetailsData.SponsorProducts.products[0].products);
-      console.log(parsedProducts);
       setSponsorProductData(parsedProducts);
       setTotalCount(getSponsorProductDetailsData.SponsorProducts.totalCount);
     }

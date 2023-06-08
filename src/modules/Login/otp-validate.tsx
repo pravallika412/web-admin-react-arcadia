@@ -30,24 +30,20 @@ const OTPValidation = () => {
   const loading = verifyOtpLoader || resendOtpLoader;
 
   const handleChange = (otp) => {
-    console.log(otp);
     setOtp(otp);
     setInput(true);
   };
 
   useEffect(() => {
     if (verifyOtpData) {
-      console.log(verifyOtpData);
       navigate("/reset-password");
     } else if (verifyOtpError) {
-      console.log(verifyOtpError);
       setOtp("");
     }
   }, [verifyOtpData, verifyOtpError]);
 
   useEffect(() => {
     if (resendOtpData) {
-      console.log(resendOtpData);
       localStorage.setItem("token_password", resendOtpData.resendOtp.token);
     }
   }, [resendOtpData]);
@@ -79,14 +75,18 @@ const OTPValidation = () => {
   const handleConfirm = () => {
     const token = localStorage.getItem("token_password");
     const payload = { token, otp };
-    console.log(payload);
     verifyOtp({ variables: { input: payload } });
   };
 
-  const renderInput = (inputProps: any, index: number) => {
+  const renderInput = ({ ...inputProps }) => {
     return (
       <input
         {...inputProps}
+        onKeyPress={(event) => {
+          if (!/[0-9]/.test(event.key)) {
+            event.preventDefault();
+          }
+        }}
         style={{
           width: "48px",
           height: "58px",
@@ -102,6 +102,7 @@ const OTPValidation = () => {
       />
     );
   };
+
   return (
     <Box sx={{ background: theme.colors.primary.main, height: "100vh" }}>
       <DialogComponent
@@ -143,7 +144,7 @@ const OTPValidation = () => {
               variant="contained"
               sx={{ width: "100%", height: 63, borderRadius: "6px" }}
               onClick={handleConfirm}
-              disabled={loading}
+              disabled={loading || otp.length !== 6}
               classes={{ disabled: classes.disabledButton }}
             >
               {loading ? <CircularProgress size={24} sx={{ color: "#FFFFFF" }} /> : "Confirm"}

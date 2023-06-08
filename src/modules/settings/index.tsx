@@ -35,6 +35,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ChangePassword from "./changePassword";
 import CircularProgress from "@mui/material/CircularProgress";
 import Web3 from "web3";
+import Notifications from "./notifications";
 
 const web3 = new Web3();
 interface TabPanelProps {
@@ -384,6 +385,9 @@ const Settings = () => {
                   </TabPanel>
                   <TabPanel value={value} index={1}>
                     <ChangePassword />
+                  </TabPanel>
+                  <TabPanel value={value} index={2}>
+                    <Notifications />
                   </TabPanel>
                 </Box>
               </CardContent>

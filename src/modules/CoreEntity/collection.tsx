@@ -96,11 +96,9 @@ const Collection = () => {
     // Make request
     try {
       const response = await axios(config);
-      console.log(response.data.IpfsHash);
       setCollectionImage(response.data.IpfsHash);
       // setLoadingImage(false);
     } catch (error) {
-      console.log(error);
       setLoadingImage(false);
     }
   };
@@ -115,11 +113,9 @@ const Collection = () => {
     });
     setLoadingImage(false);
     setPresignedURL(uploadFile.split("?")[0]);
-    console.log(uploadFile.split("?")[0]);
   };
 
   const onSubmit = async (data) => {
-    console.log(data);
     let data1 = JSON.stringify({
       pinataContent: {
         description: data.description,
@@ -150,13 +146,11 @@ const Collection = () => {
     };
 
     const res = await axios(config);
-    console.log(res);
     let payload = {
       name: data.name,
       symbol: data.symbol,
       defaultURI: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
     };
-    console.log(payload);
     createCollection({ variables: { input: payload } });
   };
 

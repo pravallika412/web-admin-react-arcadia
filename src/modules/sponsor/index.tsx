@@ -205,7 +205,6 @@ const Sponsor = () => {
   };
 
   const handleRowClick = (id) => {
-    console.log(id);
     navigate(`/sponsordetails/${id}`);
   };
 

@@ -72,7 +72,6 @@ const UserActivities = ({ id }) => {
   };
 
   const formattedData = handlerActivityData.map((row) => {
-    console.log(handlerActivityData);
     let imageUrl = row.product.image || "";
 
     if (imageUrl.includes("?")) {
