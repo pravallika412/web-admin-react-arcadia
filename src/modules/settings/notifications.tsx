@@ -54,7 +54,7 @@ const IOSSwitch = styled((props: SwitchProps) => <Switch focusVisibleClassName="
 
 const Notifications = () => {
   const [notification, setNotification] = useState(null);
-  const [getAdminNotifications, { data: getAdminNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(GET_ADMIN_NOTIFICATIONS);
+  const [getAdminNotifications, { data: getAdminNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(GET_ADMIN_NOTIFICATIONS, { fetchPolicy: "no-cache" });
   const [updateNotification, { data: updateNotificationData, loading: updateloading }] = useMutation(UPDATE_NOTIFICATIONS);
 
   useEffect(() => {
@@ -66,6 +66,12 @@ const Notifications = () => {
       setNotification(getAdminNotificationData.GetAdminNotificationSettings);
     }
   }, [getAdminNotificationData]);
+
+  useEffect(() => {
+    if (updateNotificationData) {
+      refetch();
+    }
+  }, [updateNotificationData]);
 
   const handleChange = (event) => {
     const { name, checked } = event.target;
