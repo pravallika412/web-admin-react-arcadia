@@ -116,10 +116,10 @@ function Overview() {
   const [totalCount, setTotalCount] = useState(0);
   const [postStatuses, setPostStatuses] = useState([]);
   const [userStats, setUserStats] = useState(null);
-  const [getPlans, { data: getAllPlans, loading: planLoader, refetch }] = useLazyQuery(GET_PLANS);
-  const [getUsers, { data: getUserCount, loading: userLoader }] = useLazyQuery(GET_USER_COUNT);
+  const [getPlans, { data: getAllPlans, loading: planLoader, refetch }] = useLazyQuery(GET_PLANS, { fetchPolicy: "no-cache" });
+  const [getUsers, { data: getUserCount, loading: userLoader }] = useLazyQuery(GET_USER_COUNT, { fetchPolicy: "no-cache" });
   const [sponsorStats, { data: sponsorStatsData, loading: statsLoader }] = useLazyQuery(SPONSOR_STATS, { fetchPolicy: "no-cache" });
-  const [getPostCount, { data: getPostCountData, loading: countLoading, refetch: refetchPostCount }] = useLazyQuery(GET_POST_COUNT);
+  const [getPostCount, { data: getPostCountData, loading: countLoading, refetch: refetchPostCount }] = useLazyQuery(GET_POST_COUNT, { fetchPolicy: "no-cache" });
 
   const yearOptions = [
     { label: 2023, value: 2023 },
