@@ -12,6 +12,7 @@ import HandlerDetailComponent from "./modules/handler/handlerDetail";
 import ForgetPassword from "./modules/Login/forgetpassword";
 import OTPValidation from "./modules/Login/otp-validate";
 import ResetPassword from "./modules/Login/reset-password";
+import DogDetails from "./modules/Dog/dogDetails";
 
 const Loader = (Component) => (props) =>
   (
@@ -108,6 +109,10 @@ const routes: RouteObject[] = [
       {
         path: "dog/addDog",
         element: <AddDog />,
+      },
+      {
+        path: "/dogdetails/:id",
+        element: <DogDetails />,
       },
       {
         path: "core-entity",
