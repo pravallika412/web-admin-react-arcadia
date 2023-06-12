@@ -189,7 +189,15 @@ const Subscription = () => {
   const onSubmit = async (data) => {
     setIPFSLoader(true);
     const responseimg = await axios.get(
-      uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : uploadFile ? (uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile) : uploadFile,
+      uploadFileEdit
+        ? uploadFileEdit.includes("?")
+          ? uploadFileEdit.split("?")[0]
+          : uploadFileEdit
+        : uploadFile
+        ? uploadFile.includes("?")
+          ? uploadFile.split("?")[0]
+          : uploadFile
+        : data.planImage,
       {
         responseType: "arraybuffer",
       }
@@ -243,15 +251,7 @@ const Subscription = () => {
         description: JSON.stringify(data.descriptions.map((item) => item.description)),
         name: data.name,
         price: Number(data.price),
-        planImage: uploadFileEdit
-          ? uploadFileEdit.includes("?")
-            ? uploadFileEdit.split("?")[0]
-            : uploadFileEdit
-          : uploadFile
-          ? uploadFile.includes("?")
-            ? uploadFile.split("?")[0]
-            : uploadFile
-          : uploadFile,
+        planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : data.planImage,
         supportableProductCount: data.supportableProductCount,
         tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };

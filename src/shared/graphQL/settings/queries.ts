@@ -35,6 +35,27 @@ const GET_ADMIN_NOTIFICATIONS = gql`
   }
 `;
 
+const GET_ADMIN_TRANSACTIONS = gql`
+  query GetAdminTransactions($input1: PageDto!, $input2: TransactionFilter!) {
+    GetAdminTransactions(pageDto: $input1, filterDto: $input2) {
+      transactions {
+        _id
+        sponsor
+        brand
+        plan
+        feed
+        transaction_hash
+        block_number
+        status
+        transaction_status
+        logs
+        createdAt
+      }
+      totalCount
+    }
+  }
+`;
+
 const SHOW_ADMIN_NOTIFICATIONS = gql`
   query AdminInAppNotifications($input1: PageDto!, $input2: NotificationFilterDto!) {
     AdminInAppNotifications(pageDto: $input1, filterDto: $input2) {
@@ -111,4 +132,4 @@ const MARK_ALL_READ = gql`
   }
 `;
 
-export { GET_ADMIN, UPDATE_PROFILE, CHANGE_PASSWORD, GET_ADMIN_NOTIFICATIONS, UPDATE_NOTIFICATIONS, SHOW_ADMIN_NOTIFICATIONS, MARK_READ, MARK_ALL_READ };
+export { GET_ADMIN, UPDATE_PROFILE, CHANGE_PASSWORD, GET_ADMIN_NOTIFICATIONS, UPDATE_NOTIFICATIONS, SHOW_ADMIN_NOTIFICATIONS, MARK_READ, MARK_ALL_READ, GET_ADMIN_TRANSACTIONS };
