@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
 import { alpha, Box, List, styled, Button, ListItem } from "@mui/material";
-import { NavLink as RouterLink } from "react-router-dom";
+import { NavLink as RouterLink, useLocation, useMatch } from "react-router-dom";
 import { SidebarContext } from "../../../../shared/contexts/SidebarContext";
 
 import DesignServicesTwoToneIcon from "@mui/icons-material/DesignServicesTwoTone";
@@ -88,7 +88,7 @@ const SubMenuWrapper = styled(Box)(
 
           &.active,
           &:hover {
-            background-color: ${alpha(theme.colors.alpha.trueWhite[100], 0.06)};
+            background-color: ${theme.colors.primary.main};
             color: ${theme.colors.alpha.trueWhite[100]};
 
             .MuiButton-startIcon,
@@ -155,6 +155,7 @@ const SubMenuWrapper = styled(Box)(
 
 function SidebarMenu() {
   const { closeSidebar } = useContext(SidebarContext);
+  let location = useLocation();
 
   return (
     <>
@@ -173,18 +174,39 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/sponsors" startIcon={<PeopleAltIcon />}>
+                <Button
+                  disableRipple
+                  component={RouterLink}
+                  onClick={closeSidebar}
+                  to="/sponsors"
+                  startIcon={<PeopleAltIcon />}
+                  className={location.pathname.includes("sponsors") || location.pathname.includes("sponsordetails") ? "active" : ""}
+                >
                   Sponsor
                 </Button>
               </ListItem>
 
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/handler" startIcon={<PersonIcon />}>
+                <Button
+                  disableRipple
+                  component={RouterLink}
+                  onClick={closeSidebar}
+                  to="/handler"
+                  startIcon={<PersonIcon />}
+                  className={location.pathname.includes("handler") || location.pathname.includes("handlerdetails") ? "active" : ""}
+                >
                   Handler
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/dog" startIcon={<PetsIcon />}>
+                <Button
+                  disableRipple
+                  component={RouterLink}
+                  onClick={closeSidebar}
+                  to="/dog"
+                  startIcon={<PetsIcon />}
+                  className={location.pathname.includes("dog") || location.pathname.includes("dogdetails") ? "active" : ""}
+                >
                   Dog
                 </Button>
               </ListItem>
@@ -206,17 +228,6 @@ function SidebarMenu() {
             </List>
           </SubMenuWrapper>
         </List>
-        {/* <List component="div">
-          <SubMenuWrapper>
-            <List component="div">
-              <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/status/404" startIcon={<CheckBoxTwoToneIcon />}>
-                  Error 404
-                </Button>
-              </ListItem>
-            </List>
-          </SubMenuWrapper>
-        </List> */}
       </MenuWrapper>
     </>
   );

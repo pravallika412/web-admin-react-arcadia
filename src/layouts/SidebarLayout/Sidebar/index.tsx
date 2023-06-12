@@ -35,18 +35,13 @@ function Sidebar() {
           position: "fixed",
           left: 0,
           top: 0,
-          background: theme.palette.mode === "dark" ? alpha(lighten(theme.header.background, 0.1), 0.5) : darken(theme.colors.alpha.black[100], 0.5),
+          background: "#00385F",
           boxShadow: theme.palette.mode === "dark" ? theme.sidebar.boxShadow : "none",
         }}
       >
         <Scrollbar>
-          <Box mt={3}>
-            <Box
-              mx={2}
-              sx={{
-                width: 52,
-              }}
-            >
+          <Box mt={3} sx={{ display: "flex", justifyContent: "center" }}>
+            <Box>
               <Logo />
             </Box>
           </Box>
@@ -77,12 +72,7 @@ function Sidebar() {
         >
           <Scrollbar>
             <Box mt={3}>
-              <Box
-                mx={2}
-                sx={{
-                  width: 52,
-                }}
-              >
+              <Box mx={2}>
                 <Logo />
               </Box>
             </Box>
