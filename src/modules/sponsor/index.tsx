@@ -67,37 +67,6 @@ const subscriptionStatus = [
   },
 ];
 
-const SearchFilter = ({ handleStatusChange }) => {
-  return (
-    <Grid sx={{ display: "flex" }}>
-      <Box width={160} sx={{ m: 1 }}>
-        <FormControl fullWidth variant="outlined">
-          <InputLabel>Subscription Plan</InputLabel>
-          <Select onChange={(e) => handleStatusChange(e, "plan")} label="Subscription Plan" autoWidth>
-            {subscriptionStatus.map((statusOption) => (
-              <MenuItem key={statusOption.id} value={statusOption.id}>
-                {statusOption.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-      <Box width={170} sx={{ m: 1 }}>
-        <FormControl fullWidth variant="outlined">
-          <InputLabel>Sponsorhsip Status</InputLabel>
-          <Select onChange={(e) => handleStatusChange(e, "status")} label="Sponsorship Status" autoWidth>
-            {sponsorshipStatus.map((statusOption) => (
-              <MenuItem key={statusOption.id} value={statusOption.id}>
-                {statusOption.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-    </Grid>
-  );
-};
-
 const Sponsor = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);

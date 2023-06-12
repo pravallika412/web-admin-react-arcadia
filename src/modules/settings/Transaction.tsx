@@ -3,6 +3,7 @@ import { Box, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typogr
 import { useEffect, useState } from "react";
 import SharedTable from "../../shared/components/Table";
 import { GET_ADMIN_TRANSACTIONS } from "../../shared/graphQL/settings/queries";
+import { makeStyles } from "@mui/styles";
 
 const columns = [
   { id: "transactionHash", label: "Transaction ID", minWidth: "auto" },
@@ -69,7 +70,17 @@ const transactionStatus = [
   },
 ];
 
+const useStyles = makeStyles((theme) => ({
+  formControl: {
+    width: "100%", // Set a default width for the form control
+  },
+  label: {
+    whiteSpace: "normal", // Allow the label to wrap to multiple lines
+  },
+}));
+
 const Transaction = () => {
+  const classes = useStyles();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [transactions, setTransactions] = useState([]);
@@ -141,9 +152,11 @@ const Transaction = () => {
     <>
       <Grid container justifyContent="flex-end" alignItems="center">
         <Box width={180} sx={{ m: 1 }}>
-          <FormControl fullWidth variant="outlined">
-            <InputLabel>Transaction Status</InputLabel>
-            <Select onChange={(e) => handleStatusChange(e)} label="Subscription Plan" defaultValue={""} autoWidth>
+          <FormControl fullWidth variant="outlined" className={classes.formControl}>
+            <InputLabel className={classes.label} id="txnstatus">
+              Transaction Status
+            </InputLabel>
+            <Select labelId="txnstatus" id="txn-menu" onChange={(e) => handleStatusChange(e)} label="Transaction Status" defaultValue={""} autoWidth>
               {transactionStatus.map((statusOption) => (
                 <MenuItem key={statusOption.id} value={statusOption.id}>
                   {statusOption.name}

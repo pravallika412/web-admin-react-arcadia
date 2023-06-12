@@ -79,6 +79,7 @@ const Subscription = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [imageIpfs, setImageIpfs] = useState("");
   const [iPFSFile, setIPFSFile] = useState("");
   const [presignedLoader, setPresignedLoader] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -146,7 +147,6 @@ const Subscription = () => {
     if (createSub) {
       setOpen(false);
       setIsDeleting(false);
-      setIPFSLoader(false);
       setOpenPlanStatus(true);
       refetch();
     }
@@ -156,7 +156,7 @@ const Subscription = () => {
     if (updateSub) {
       setOpen(false);
       setIsDeleting(false);
-      setIPFSLoader(false);
+
       setOpenPlanStatus(true);
       refetch();
     }
@@ -188,38 +188,11 @@ const Subscription = () => {
 
   const onSubmit = async (data) => {
     setIPFSLoader(true);
-    const responseimg = await axios.get(
-      uploadFileEdit
-        ? uploadFileEdit.includes("?")
-          ? uploadFileEdit.split("?")[0]
-          : uploadFileEdit
-        : uploadFile
-        ? uploadFile.includes("?")
-          ? uploadFile.split("?")[0]
-          : uploadFile
-        : data.planImage,
-      {
-        responseType: "arraybuffer",
-      }
-    );
-
-    const formData = new FormData();
-    formData.append("file", new Blob([responseimg.data]));
-
-    const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        pinata_api_key: pinata_api_key,
-        pinata_secret_api_key: pinata_secret_api_key,
-      },
-    });
-
-    setIPFSFile(response.data.IpfsHash);
     let data1 = JSON.stringify({
       pinataContent: {
         description: data.descriptions.map((item) => item.description).join(", "),
         external_url: "https://dev.d50w243ncde5q.amplifyapp.com/",
-        image: `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`,
+        image: imageIpfs,
         name: data.name,
         attributes: [
           {
@@ -246,6 +219,7 @@ const Subscription = () => {
 
     const res = await axios(config);
     if (isEditing) {
+      setIPFSLoader(false);
       let updatePayload = {
         planId: selectedData.planId,
         description: JSON.stringify(data.descriptions.map((item) => item.description)),
@@ -257,6 +231,7 @@ const Subscription = () => {
       };
       updateSubscription({ variables: { input: updatePayload } });
     } else {
+      setIPFSLoader(false);
       let payload = {
         name: data.name,
         description: JSON.stringify(data.descriptions.map((item) => item.description)),
@@ -276,6 +251,15 @@ const Subscription = () => {
     let payload = {
       planId: row._id,
     };
+    console.log(row);
+    fetch(row.nft_media_url)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.image);
+        setImageIpfs(data.image);
+      })
+      .catch((error) => console.error("Error:", error));
+
     let editData = getAllPlans.GetPlans.filter((e) => e._id === row._id)[0];
     let initial_values = {
       name: editData.name,
@@ -315,6 +299,20 @@ const Subscription = () => {
     };
     setPresignedLoader(true);
     generatePresignedUrl({ variables: { input: payload } });
+    const formData = new FormData();
+    formData.append("file", event.target.files[0]);
+
+    const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        pinata_api_key: pinata_api_key,
+        pinata_secret_api_key: pinata_secret_api_key,
+      },
+    });
+
+    const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
+    setImageIpfs(ipfsUrl);
+    console.log(ipfsUrl);
   };
 
   const handleOpen = () => {
@@ -595,7 +593,7 @@ const Subscription = () => {
             <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
-        {(iPFSLoader || presignedLoader) && <SuspenseLoader left="0%" />}
+        {(iPFSLoader || presignedLoader || updatePlanLoader || addPlanLoader) && <SuspenseLoader left="0%" />}
       </Dialog>
 
       <Dialog open={openPlanStatus} onClose={handlePlanStatusClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">

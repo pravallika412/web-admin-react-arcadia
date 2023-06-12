@@ -18,6 +18,14 @@ const GET_PRODUCTS = gql`
   }
 `;
 
+const GET_PRODUCT_DETAILS = gql`
+  query retrieveProduct($input: RetrieveProductDto!) {
+    retrieveProduct(retrieveProductDto: $input) {
+      productData
+    }
+  }
+`;
+
 const UPDATE_PRODUCT = gql`
   mutation updateProduct($id: IdDto!, $input: UpdateProductDto!) {
     updateProduct(productId: $id, updateProductDto: $input) {
@@ -36,4 +44,4 @@ const DELETE_PRODUCT = gql`
   }
 `;
 
-export { CREATE_PRODUCT, GET_PRODUCTS, UPDATE_PRODUCT, DELETE_PRODUCT };
+export { CREATE_PRODUCT, GET_PRODUCTS, UPDATE_PRODUCT, DELETE_PRODUCT, GET_PRODUCT_DETAILS };

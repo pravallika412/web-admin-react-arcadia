@@ -69,6 +69,11 @@ const useStyles = makeStyles({
     right: 0,
     margin: "0 auto",
   },
+  disabledButton: {
+    background: `#024C7F !important`,
+    color: `rgba(255, 255, 255) !important`,
+    opacity: 0.7,
+  },
 });
 
 function TabPanel(props: TabPanelProps) {
@@ -184,6 +189,12 @@ const Settings = () => {
   };
 
   const onSubmit = (data) => {
+    if (!web3.utils.isAddress(data.merchantAddress) && data.merchantAddress) {
+      setError("merchantAddress", {
+        type: "manual",
+        message: "Invalid Ethereum address",
+      });
+    }
     const payload = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -378,7 +389,7 @@ const Settings = () => {
                         </Grid>
                       </Grid>
                       <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
-                        <Button variant="contained" type="submit" disabled={loadingImage}>
+                        <Button variant="contained" type="submit" disabled={loadingImage || Object.keys(errors).length > 0} classes={{ disabled: classes.disabledButton }}>
                           Update
                         </Button>
                       </Grid>
