@@ -57,6 +57,7 @@ function HeaderUserbox() {
   useEffect(() => {
     if (getAdminData) {
       setUserData(getAdminData.getAdmin);
+      localStorage.setItem("membership_address", getAdminData.getAdmin.brandDetails.membership_contract_address);
     }
   }, [getAdminData]);
 

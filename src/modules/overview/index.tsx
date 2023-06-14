@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { GET_PLANS } from "../../shared/graphQL/subscription/queries";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
-import PetsOutlinedIcon from "@mui/icons-material/PetsOutlined";
+import PetsOutlinedIcon from "../../assets/images/pets.svg";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { GET_POST_COUNT } from "../../shared/graphQL/post/queries";
@@ -177,9 +177,6 @@ function Overview() {
   useEffect(() => {
     if (getAllPlans) {
       setPlanList(getAllPlans.GetPlans);
-      if (getAllPlans.GetPlans.length > 0) {
-        setPlan(getAllPlans.GetPlans[0]._id);
-      }
     }
   }, [getAllPlans]);
 
@@ -267,7 +264,7 @@ function Overview() {
   };
   const getSelectedPlanName = (planId: string) => {
     const selectedPlan = planList.find((plan) => plan._id === planId);
-    return selectedPlan ? selectedPlan.name : "Plan Name";
+    return selectedPlan ? selectedPlan.name : "All Plans";
   };
 
   return (
@@ -314,7 +311,7 @@ function Overview() {
                 <StyledHeader>
                   <Typography variant="h4">Total Dogs</Typography>
                   <StyledIcon>
-                    <PetsOutlinedIcon />
+                    <img src={PetsOutlinedIcon} alt="pet" />
                   </StyledIcon>
                 </StyledHeader>
                 <StyledTotalCount align="left">{userStats.productCount}</StyledTotalCount>{" "}
@@ -334,7 +331,7 @@ function Overview() {
                     <AccountBalanceWalletOutlinedIcon />
                   </StyledIcon>
                 </StyledHeader>
-                <StyledTotalCount align="left">{userStats.totalAmount}</StyledTotalCount>
+                <StyledTotalCount align="left">$ {userStats.totalAmount}</StyledTotalCount>
               </>
             ) : (
               renderSkeleton()
@@ -344,51 +341,56 @@ function Overview() {
         <Grid item xs={12} sm={8}>
           <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
             <Grid item xs={12}>
-              {/* Subscription Plan Name */}
-              <h2>Subscription Plan - {getSelectedPlanName(plan)}</h2>
+              {chartData ? <h2>Subscription Plan - {getSelectedPlanName(plan)}</h2> : <Skeleton variant="text" width={100} />}
             </Grid>
-            <Grid item xs={12} container justifyContent="flex-end">
-              {/* Select Dropdowns */}
+            {chartData ? (
+              <Grid item xs={12} container justifyContent="flex-end">
+                {/* Select Dropdowns */}
 
-              <FormControl sx={{ m: 1, width: 100, mt: 3 }} size="small">
-                <Select value={startYear} onChange={(event) => setStartYear(event.target.value)}>
-                  <MenuItem disabled value="">
-                    <em>Select</em>
-                  </MenuItem>
-                  {yearOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                <FormControl sx={{ m: 1, width: 100, mt: 3 }} size="small">
+                  <Select value={startYear} onChange={(event) => setStartYear(event.target.value)}>
+                    <MenuItem disabled value="">
+                      <span>Select</span>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                    {yearOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <FormControl sx={{ m: 1, width: 130, mt: 3 }} size="small">
-                <Select value={month} onChange={(event) => setMonth(event.target.value)} displayEmpty>
-                  <MenuItem value="">
-                    <em>Select</em>
-                  </MenuItem>
-                  {monthOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                <FormControl sx={{ m: 1, width: 130, mt: 3 }} size="small">
+                  <Select value={month} onChange={(event) => setMonth(event.target.value)} displayEmpty>
+                    <MenuItem value="">
+                      <span>Select</span>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                    {monthOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <FormControl sx={{ m: 1, minWidth: 130, mt: 3 }} size="small">
-                <Select value={plan} onChange={(event) => setPlan(event.target.value)}>
-                  <MenuItem disabled value="">
-                    <em>Select</em>
-                  </MenuItem>
-                  {planList.map((plan) => (
-                    <MenuItem key={plan._id} value={plan._id}>
-                      {plan.name}
+                <FormControl sx={{ m: 1, minWidth: 130, mt: 3 }} size="small">
+                  <Select value={plan} onChange={(event) => setPlan(event.target.value)} displayEmpty>
+                    <MenuItem value="">
+                      <span>Select</span>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                    {planList.map((plan) => (
+                      <MenuItem key={plan._id} value={plan._id}>
+                        {plan.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            ) : (
+              <Grid item xs={12} container justifyContent="flex-end">
+                <Skeleton variant="text" width={300} height={50} />
+              </Grid>
+            )}
             <Grid item xs={12}>
               {chartData ? <Line data={chartData} options={options} /> : <Skeleton variant="rectangular" height={300} />}
             </Grid>

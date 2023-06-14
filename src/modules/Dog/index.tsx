@@ -294,7 +294,7 @@ const Dog = () => {
             ) : (
               ""
             )}
-            <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
+            <div style={{ alignItems: "center", paddingTop: "7px", paddingLeft: "10px" }}>
               <strong>{row?.name}</strong>
               <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row._id}</Typography>
             </div>
@@ -328,43 +328,6 @@ const Dog = () => {
   const handleRowClick = (id) => {
     navigate(`/dogdetails/${id}`);
   };
-
-  // const renderColumn = (column, product, value) => {
-  //   switch (column.id) {
-  //     case "name":
-  //       return (
-  //         <div style={{ display: "flex" }}>
-  //           {product["image"] ? (
-  //             <div
-  //               style={{
-  //                 display: "flex",
-  //                 justifyContent: "center",
-  //                 alignItems: "center",
-  //                 backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
-  //                 borderRadius: "50%",
-  //                 padding: "2px",
-  //                 width: "50px",
-  //                 height: "50px",
-  //               }}
-  //             >
-  //               <img src={product["image"]} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt="profile" />
-  //             </div>
-  //           ) : (
-  //             ""
-  //           )}
-  //           <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
-  //             <strong>{value ? value : ""}</strong>
-  //           </div>
-  //         </div>
-  //       );
-  //     case "status":
-  //       return getStatusLabel(value);
-  //     case "createdAt":
-  //       return formatDate(value);
-  //     default:
-  //       return value;
-  //   }
-  // };
 
   return (
     <Container component="main">

@@ -37,6 +37,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Web3 from "web3";
 import Notifications from "./notifications";
 import Transaction from "./Transaction";
+import TokenList from "./wallet";
 
 const web3 = new Web3();
 interface TabPanelProps {
@@ -249,7 +250,7 @@ const Settings = () => {
                     <Tab label="My Profile" {...a11yProps(0)} />
                     <Tab label="Change Password" {...a11yProps(1)} />
                     <Tab label="Notifications" {...a11yProps(2)} />
-                    {/* <Tab label="Wallet" {...a11yProps(3)} /> */}
+                    <Tab label="Wallet" {...a11yProps(3)} />
                     <Tab label="Transaction History" {...a11yProps(4)} />
                   </Tabs>
                   <TabPanel value={value} index={0}>
@@ -402,6 +403,9 @@ const Settings = () => {
                     <Notifications />
                   </TabPanel>
                   <TabPanel value={value} index={3}>
+                    <TokenList address={"0x470816C620d574a68F9598f542Aed8d441cF6c13"} />
+                  </TabPanel>
+                  <TabPanel value={value} index={4}>
                     <Transaction />
                   </TabPanel>
                 </Box>
