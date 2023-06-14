@@ -23,6 +23,7 @@ import { useNavigate } from "react-router";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
+import { GET_PLANS } from "../../shared/graphQL/subscription/queries";
 
 const columns = [
   { id: "sponsor_name", label: "Sponsor Name", minWidth: "auto" },
@@ -48,36 +49,31 @@ const sponsorshipStatus = [
     name: "Inactive",
   },
 ];
-const subscriptionStatus = [
-  {
-    id: "all",
-    name: "All",
-  },
-  {
-    id: "Basic Plan",
-    name: "Basic Plan",
-  },
-  {
-    id: "Premium Plan",
-    name: "Premium Plan",
-  },
-  {
-    id: "Platinum Plan",
-    name: "Platinum Plan",
-  },
-];
 
 const Sponsor = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [planList, setPlanList] = useState([]);
   const [filters, setFilters] = useState({
     status: null,
     plan: null,
   });
   const [getSponsors, { data: getAllSponsors, loading: sponsorLoading, refetch }] = useLazyQuery(GET_SPONSORS);
+  const [getPlans, { data: getAllPlans, loading: planLoader }] = useLazyQuery(GET_PLANS, { fetchPolicy: "no-cache" });
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getPlans();
+  }, []);
+
+  useEffect(() => {
+    if (getAllPlans) {
+      setPlanList(getAllPlans.GetPlans);
+    }
+  }, [getAllPlans]);
 
   useEffect(() => {
     getSponsors({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: { sortBy: "sponsor.createdAt", sortOrder: -1 }, input3: { status: filters.status, plan: filters.plan } } });
@@ -230,9 +226,12 @@ const Sponsor = () => {
             <FormControl fullWidth variant="outlined">
               <InputLabel>Subscription Plan</InputLabel>
               <Select onChange={(e) => handleStatusChange(e, "plan")} label="Subscription Plan" defaultValue={""} autoWidth>
-                {subscriptionStatus.map((statusOption) => (
-                  <MenuItem key={statusOption.id} value={statusOption.id}>
-                    {statusOption.name}
+                <MenuItem value="">
+                  <span>All</span>
+                </MenuItem>
+                {planList.map((plan) => (
+                  <MenuItem key={plan._id} value={plan.name}>
+                    {plan.name}
                   </MenuItem>
                 ))}
               </Select>
