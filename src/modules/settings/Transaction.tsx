@@ -8,6 +8,7 @@ import { makeStyles } from "@mui/styles";
 const columns = [
   { id: "transactionHash", label: "Transaction ID", minWidth: "auto" },
   { id: "createdAt", label: "Transaction Date", type: "date", minWidth: "auto" },
+  { id: "type", label: "Transaction Type", minWidth: "auto" },
   { id: "status", label: "Status", minWidth: "auto" },
 ];
 
@@ -70,17 +71,7 @@ const transactionStatus = [
   },
 ];
 
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    width: "100%", // Set a default width for the form control
-  },
-  label: {
-    whiteSpace: "normal", // Allow the label to wrap to multiple lines
-  },
-}));
-
 const Transaction = () => {
-  const classes = useStyles();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [transactions, setTransactions] = useState([]);
@@ -144,7 +135,8 @@ const Transaction = () => {
     return {
       transactionHash: data?.transaction_hash ? data?.transaction_hash.slice(0, 3) + "*******" + data?.transaction_hash.slice(-4) : "",
       createdAt: formatDate(data.createdAt),
-      status: data.status,
+      type: data.status,
+      status: data.transaction_status,
     };
   });
 
@@ -152,10 +144,8 @@ const Transaction = () => {
     <>
       <Grid container justifyContent="flex-end" alignItems="center">
         <Box width={180} sx={{ m: 1 }}>
-          <FormControl fullWidth variant="outlined" className={classes.formControl}>
-            <InputLabel className={classes.label} id="txnstatus">
-              Transaction Status
-            </InputLabel>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="txnstatus">Transaction Type</InputLabel>
             <Select labelId="txnstatus" id="txn-menu" onChange={(e) => handleStatusChange(e)} label="Transaction Status" defaultValue={""} autoWidth>
               {transactionStatus.map((statusOption) => (
                 <MenuItem key={statusOption.id} value={statusOption.id}>

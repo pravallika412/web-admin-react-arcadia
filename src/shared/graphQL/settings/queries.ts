@@ -13,6 +13,9 @@ const GET_ADMIN = gql`
       first_name
       last_name
       profile_image
+      brandDetails {
+        membership_contract_address
+      }
       merchant_address
     }
   }
