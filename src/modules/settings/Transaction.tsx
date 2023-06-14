@@ -51,11 +51,11 @@ const transactionStatus = [
   },
   {
     id: "NOT_AUTHENTICATED",
-    name: "NOT AUTHENTICATED",
+    name: "Not Authenticated",
   },
   {
     id: "TIER_NOT_FOUND",
-    name: "TIER NOT FOUND",
+    name: "Tier not found",
   },
   {
     id: "new_subscription_plan_updated",
