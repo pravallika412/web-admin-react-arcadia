@@ -255,7 +255,7 @@ const Handler = () => {
             ) : (
               ""
             )}
-            <div style={{ alignItems: "center", paddingTop: "15px", paddingLeft: "10px" }}>
+            <div style={{ alignItems: "center", paddingTop: "7px", paddingLeft: "10px" }}>
               <strong>{row.name ? row.name : "N/A"}</strong>
               <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product}</Typography>
             </div>
