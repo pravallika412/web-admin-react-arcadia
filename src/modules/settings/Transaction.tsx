@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import SharedTable from "../../shared/components/Table";
 import { GET_ADMIN_TRANSACTIONS } from "../../shared/graphQL/settings/queries";
 import { makeStyles } from "@mui/styles";
+import Label from "../../shared/components/Label";
 
 const columns = [
   { id: "transactionHash", label: "Transaction ID", minWidth: "auto" },
+  { id: "gasfee", label: "Gas fee (MATIC)", minWidth: "auto" },
   { id: "createdAt", label: "Transaction Date", type: "date", minWidth: "auto" },
   { id: "type", label: "Transaction Type", minWidth: "auto" },
   { id: "status", label: "Status", minWidth: "auto" },
@@ -55,7 +57,7 @@ const transactionStatus = [
   },
   {
     id: "TIER_NOT_FOUND",
-    name: "Tier not found",
+    name: "Tier Not Found",
   },
   {
     id: "new_subscription_plan_updated",
@@ -71,19 +73,37 @@ const transactionStatus = [
   },
 ];
 
+const SearchFilter = ({ handleStatusChange }) => {
+  return (
+    <Box width={180} sx={{ m: 1 }}>
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="txnstatus">Transaction Type</InputLabel>
+        <Select labelId="txnstatus" id="txn-menu" onChange={(e) => handleStatusChange(e)} label="Transaction Status" defaultValue={""} autoWidth>
+          {transactionStatus.map((statusOption) => (
+            <MenuItem key={statusOption.id} value={statusOption.id}>
+              {statusOption.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  );
+};
+
 const Transaction = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [transactions, setTransactions] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({
     status: null,
   });
   const [getAdminTransaction, { data: getAdminTransactionData, loading: transactionLoading, refetch }] = useLazyQuery(GET_ADMIN_TRANSACTIONS, { fetchPolicy: "no-cache" });
 
   useEffect(() => {
-    getAdminTransaction({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.status } } });
-  }, [page, rowsPerPage, filters]);
+    getAdminTransaction({ variables: { input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.status, transactionHash: searchValue } } });
+  }, [page, rowsPerPage, filters, searchValue]);
 
   useEffect(() => {
     if (getAdminTransactionData) {
@@ -131,31 +151,43 @@ const Transaction = () => {
     }));
   };
 
+  type Color = "error" | "info" | "secondary" | "primary" | "warning" | "success";
+  const getStatusLabel = (status: "success" | "failed"): JSX.Element => {
+    let color = "";
+    let text = "";
+    switch (status) {
+      case "success":
+        text = "Success";
+        color = "success";
+        break;
+      case "failed":
+        text = "Failed";
+        color = "error";
+        break;
+      default:
+        color = "warning";
+        text = "failed";
+        break;
+    }
+    return <Label color={color as Color}>{text}</Label>;
+  };
+
   const formattedData = transactions.map((data) => {
     return {
       transactionHash: data?.transaction_hash ? data?.transaction_hash.slice(0, 3) + "*******" + data?.transaction_hash.slice(-4) : "",
+      gasfee: data?.gasFees ? parseFloat(data?.gasFees).toFixed(6) : 0,
       createdAt: formatDate(data.createdAt),
-      type: data.status,
-      status: data.transaction_status,
+      type: data?.status ? transactionStatus.find((item) => item.id === data?.status).name : "",
+      status: data?.transaction_status ? getStatusLabel(data.transaction_status) : "",
     };
   });
 
+  const handleSearch = (value) => {
+    setSearchValue(value);
+  };
+
   return (
     <>
-      <Grid container justifyContent="flex-end" alignItems="center">
-        <Box width={180} sx={{ m: 1 }}>
-          <FormControl fullWidth variant="outlined">
-            <InputLabel id="txnstatus">Transaction Type</InputLabel>
-            <Select labelId="txnstatus" id="txn-menu" onChange={(e) => handleStatusChange(e)} label="Transaction Status" defaultValue={""} autoWidth>
-              {transactionStatus.map((statusOption) => (
-                <MenuItem key={statusOption.id} value={statusOption.id}>
-                  {statusOption.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-      </Grid>
       <SharedTable
         columns={columns}
         data={formattedData}
@@ -165,9 +197,9 @@ const Transaction = () => {
         totalRows={totalCount}
         onPageChange={handlePageChange}
         onRowsPerPageChange={handleRowsPerPageChange}
-        searchFilter={undefined}
-        onSearch={undefined}
-        searchFilterVisible={false}
+        onSearch={handleSearch}
+        searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
+        searchFilterVisible={true}
         selectableRows={false}
         onRowClick={undefined}
       ></SharedTable>

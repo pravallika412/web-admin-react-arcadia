@@ -53,6 +53,7 @@ const GET_ADMIN_TRANSACTIONS = gql`
         transaction_status
         logs
         createdAt
+        gasFees
       }
       totalCount
     }
