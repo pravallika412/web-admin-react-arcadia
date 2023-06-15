@@ -6,6 +6,7 @@ import LocalizationProvider from "@mui/lab/LocalizationProvider";
 
 import { CssBaseline } from "@mui/material";
 import ThemeProvider from "../../styles/theme/ThemeProvider";
+import noInternetGif from "../../assets/images/nointernet.gif";
 
 function App() {
   const content = useRoutes(router);
@@ -14,6 +15,7 @@ function App() {
     <ThemeProvider>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <CssBaseline />
+        <img src={noInternetGif} alt="No internet" style={{ display: "none" }} />
         {content}
       </LocalizationProvider>
     </ThemeProvider>

@@ -1,7 +1,7 @@
 import { Box, DialogContentText, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DialogComponent from "../../../../shared/components/Dialog";
-import NoInternetGif from "../../../../../public/static/gif/nointernet.gif";
+import NoInternetGif from "../../../../assets/images/nointernet.gif";
 
 const NoInternet = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
