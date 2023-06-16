@@ -96,7 +96,7 @@ const Collection = () => {
 
   const brandDetails = async () => {
     const address = localStorage.getItem("membership_address");
-    if (address) {
+    if (address !== "null") {
       setLoadingBrandDetails(true);
       // Check if address exists
       const brand_instance = new web3.eth.Contract(collectionABI, address);
