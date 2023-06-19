@@ -1,4 +1,4 @@
-import { alpha, Badge, Box, CircularProgress, Divider, Grid, IconButton, Link, List, ListItem, Popover, Tooltip, Typography } from "@mui/material";
+import { alpha, Badge, Box, CircularProgress, Divider, Grid, IconButton, Link, ListItem, Popover, Tooltip, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import NotificationsActiveTwoToneIcon from "@mui/icons-material/NotificationsActiveTwoTone";
 import { styled } from "@mui/material/styles";
@@ -8,6 +8,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import { MARK_ALL_READ, MARK_READ, SHOW_ADMIN_NOTIFICATIONS } from "../../../../../shared/graphQL/settings/queries";
 import Dummy from "../../../../../assets/images/dummy.png";
 import { useNavigate } from "react-router";
+import { List } from "react-virtualized";
 
 const NotificationsBadge = styled(Badge)(
   ({ theme }) => `
@@ -42,15 +43,17 @@ function HeaderNotifications() {
   const [markAllRead, { data: markAllReadData, loading: markAllReadLoader }] = useMutation(MARK_ALL_READ);
   const [showNotifications, { data: showNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(SHOW_ADMIN_NOTIFICATIONS, { fetchPolicy: "no-cache" });
   const navigate = useNavigate();
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   useEffect(() => {
-    showNotifications({ variables: { input1: {}, input2: {} } });
+    showNotifications({ variables: { input1: { page: 1, limit: 200 }, input2: {} } });
   }, []);
 
   useEffect(() => {
     if (showNotificationData) {
       setNotificationData(showNotificationData.AdminInAppNotifications.notifications);
       setUnReadCount(showNotificationData.AdminInAppNotifications.unread_count);
+      setTotalCount(showNotificationData.AdminInAppNotifications.totalCount);
     }
   }, [showNotificationData]);
 
@@ -86,6 +89,50 @@ function HeaderNotifications() {
 
   const handleMarkAllRead = () => {
     markAllRead();
+  };
+
+  const rowRenderer = ({ index, style, key }) => {
+    const notification = notificationData[index];
+    if (!notification) {
+      // Optionally render a placeholder or loading component here
+      return null;
+    }
+    return (
+      <ListItem
+        key={key}
+        style={style}
+        sx={{
+          p: 2,
+          width: 700,
+          display: { xs: "block", sm: "flex" },
+          cursor: "pointer",
+          "&:hover": {
+            ...(notification.read === false && { background: "#E6F4FF" }),
+          },
+          ...(notification.read === false && { background: "#E6F4FF" }),
+        }}
+        onClick={() => handleNotificationClick(notification)}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={6} md={1}>
+            <Box sx={{ mr: 2 }}>{<img src={notification.image_url ? notification.image_url.url : Dummy} alt="image" style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "50%" }} />}</Box>
+          </Grid>
+          <Grid item xs={6} md={9}>
+            <Typography sx={{ fontWeight: "bold" }}>{notification.subject}</Typography>
+            <Typography component="span" variant="body2" color="text.secondary">
+              {notification.message}
+            </Typography>
+          </Grid>
+          <Grid item xs={6} md={2}>
+            <Typography variant="caption" sx={{ textTransform: "none" }}>
+              {formatDistance(subDays(new Date(notification.createdAt), 0), new Date(), {
+                addSuffix: true,
+              })}
+            </Typography>
+          </Grid>
+        </Grid>
+      </ListItem>
+    );
   };
 
   return (
@@ -142,45 +189,7 @@ function HeaderNotifications() {
               <CircularProgress />
             </Box>
           ) : (
-            <List sx={{ p: 0 }}>
-              {notificationData.map((notification) => (
-                <ListItem
-                  key={notification._id}
-                  sx={{
-                    p: 2,
-                    width: 700,
-                    display: { xs: "block", sm: "flex" },
-                    cursor: "pointer",
-                    "&:hover": {
-                      ...(notification.read === false && { background: "#E6F4FF" }),
-                    },
-                    ...(notification.read === false && { background: "#E6F4FF" }),
-                  }}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} md={1}>
-                      <Box sx={{ mr: 2 }}>
-                        {<img src={notification.image_url ? notification.image_url.url : Dummy} alt="image" style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "50%" }} />}
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6} md={9}>
-                      <Typography sx={{ fontWeight: "bold" }}>{notification.subject}</Typography>
-                      <Typography component="span" variant="body2" color="text.secondary">
-                        {notification.message}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} md={2}>
-                      <Typography variant="caption" sx={{ textTransform: "none" }}>
-                        {formatDistance(subDays(new Date(notification.createdAt), 0), new Date(), {
-                          addSuffix: true,
-                        })}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              ))}
-            </List>
+            <List width={700} height={700} rowCount={totalCount} rowHeight={100} rowRenderer={rowRenderer} />
           )}
         </Box>
       </Popover>

@@ -30,6 +30,7 @@ import {
   useTheme,
   FormControl,
   InputLabel,
+  Tooltip,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
@@ -49,12 +50,15 @@ import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import SharedTable from "../../shared/components/Table";
+import QRCode from "react-qr-code";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const columns = [
   { id: "name", label: "Dog's Name", minWidth: 170 },
   { id: "createdAt", label: "Created On", minWidth: 170 },
   { id: "barcode", label: "Barcode", minWidth: 170 },
   { id: "status", label: "Dog's status", minWidth: 170 },
+  { id: "action", label: "Action", minWidth: 170 },
 ];
 
 const dogStatus = [
@@ -140,6 +144,12 @@ const Dog = () => {
       [fieldName]: value,
     }));
   };
+
+  useEffect(() => {
+    if (deleteProductData) {
+      refetch();
+    }
+  }, [deleteProductData]);
 
   useEffect(() => {
     getProducts({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage }, search: searchValue, status: filters.dogStatus } } });
@@ -302,8 +312,34 @@ const Dog = () => {
         </>
       ),
       createdAt: formatDate(row.createdAt),
-      barcode: "",
+      barcode: (
+        <QRCode
+          value={row._id} // bind the QR code with dog id
+          size={34} // size of the QR code, you can adjust based on your needs
+          level="Q" // Error correction level of the QR Code, can be L, M, Q, H
+        />
+      ),
       status: getStatusLabel(row.status),
+      action: (
+        <>
+          <Tooltip title="View">
+            <IconButton onClick={() => handleClickOpen(row)}>
+              <VisibilityIcon color="primary" />
+            </IconButton>
+          </Tooltip>
+          <IconButton
+            sx={{
+              "&:hover": { background: theme.colors.error.lighter },
+              color: theme.palette.error.main,
+            }}
+            color="inherit"
+            size="small"
+            onClick={() => handleDeleteClick(row)}
+          >
+            <DeleteTwoToneIcon fontSize="small" />
+          </IconButton>
+        </>
+      ),
     };
   });
 
@@ -325,8 +361,9 @@ const Dog = () => {
     }));
   };
 
-  const handleRowClick = (id) => {
-    navigate(`/dogdetails/${id}`);
+  const handleClickOpen = (row) => {
+    console.log(row);
+    navigate(`/dogdetails/${row._id}`);
   };
 
   return (
@@ -358,89 +395,12 @@ const Dog = () => {
         onSearch={handleSearch}
         searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
         searchFilterVisible={true}
-        selectableRows={true}
-        onRowClick={handleRowClick}
+        selectableRows={false}
+        onRowClick={undefined}
       ></SharedTable>
 
-      {/* <Paper>
-        <TableContainer>
-          <Table aria-label="Product table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell key={column.id} style={{ minWidth: column.minWidth, textTransform: "none" }}>
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {products.length > 0 ? (
-                products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={product._id}>
-                      {columns.map((column) => {
-                        const value = product[column.id] ? product[column.id] : "";
-                        return (
-                          <TableCell key={column.id}>
-                            {column.id === "action" ? (
-                              <>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": {
-                                      background: theme.colors.primary.lighter,
-                                    },
-                                    color: theme.palette.primary.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => handleEditClick(product)}
-                                >
-                                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
-                                </IconButton>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": { background: theme.colors.error.lighter },
-                                    color: theme.palette.error.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => handleDeleteClick(product)}
-                                >
-                                  <DeleteTwoToneIcon fontSize="small" />
-                                </IconButton>
-                              </>
-                            ) : (
-                              renderColumn(column, product, value)
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell align="center" colSpan={6}>
-                    No results found!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={products.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper> */}
       <Dialog open={openDelete} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-        <DialogTitle id="alert-dialog-title">Suspend</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Delete</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">Are you sure you want to delete this Dog?</DialogContentText>
         </DialogContent>

@@ -77,6 +77,7 @@ const Collection = () => {
 
   useEffect(() => {
     if (createCollectionData) {
+      refetch();
       console.log(createCollectionData);
       setDialog(true);
     }

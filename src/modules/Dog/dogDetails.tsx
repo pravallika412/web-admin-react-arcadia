@@ -1,16 +1,23 @@
-import { useLazyQuery } from "@apollo/client";
-import { Grid, Icon, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { Button, DialogActions, DialogContent, DialogContentText, Grid, Icon, IconButton, List, ListItem, ListItemText, Paper, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import Label from "../../shared/components/Label";
-import { GET_PRODUCT_DETAILS } from "../../shared/graphQL/dog/queries";
+import { DELETE_PRODUCT, GET_PRODUCT_DETAILS } from "../../shared/graphQL/dog/queries";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+import QRCode from "react-qr-code";
+import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
+import DialogComponent from "../../shared/components/Dialog";
 
 const DogDetails = () => {
+  const theme = useTheme();
   const { id } = useParams();
+  const [openDelete, setOpenDelete] = useState(false);
   const [productData, setProductData] = useState(null);
   const [getProductDetails, { data: getProductDetailsData, loading: productDetailsLoading, refetch }] = useLazyQuery(GET_PRODUCT_DETAILS);
+  const [deleteProduct, { data: deleteProductData }] = useMutation(DELETE_PRODUCT);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getProductDetails({ variables: { input: { productId: id } } });
@@ -22,6 +29,12 @@ const DogDetails = () => {
       setProductData(JSON.parse(getProductDetailsData.retrieveProduct.productData));
     }
   }, [getProductDetailsData]);
+
+  useEffect(() => {
+    if (deleteProductData) {
+      navigate(`/dog`);
+    }
+  }, [deleteProductData]);
 
   const formatDate = (dateToFormat) => {
     if (dateToFormat) {
@@ -69,16 +82,42 @@ const DogDetails = () => {
     return <Label color={color as Color}>{text}</Label>;
   };
 
+  const handleDeleteClick = (row) => {
+    setOpenDelete(true);
+  };
+
+  const handleClose = (rw) => {
+    setOpenDelete(false);
+  };
+
+  const handleDelete = () => {
+    deleteProduct({ variables: { id: { id: id } } });
+    setOpenDelete(false);
+  };
+
   return (
     <Box sx={{ m: 2 }}>
       <Box>
         {productData && (
           <>
-            <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
-              Details of {productData.name}
-            </Typography>
+            <Box display="flex" justifyContent={"space-between"}>
+              <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
+                Details of {productData.name}
+              </Typography>
+              <IconButton
+                sx={{
+                  "&:hover": { background: theme.colors.error.lighter },
+                  color: theme.palette.error.main,
+                }}
+                color="inherit"
+                size="small"
+                onClick={() => handleDeleteClick(productData)}
+              >
+                <DeleteTwoToneIcon fontSize="small" />
+              </IconButton>
+            </Box>
             <Paper elevation={3} sx={{ padding: 1.5 }}>
-              <Grid container spacing={2} gap={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={2} display="flex" flexDirection="column">
                   <Box flexGrow={1} display="flex" flexDirection="column" sx={{ pe: 2 }}>
                     <Paper style={{ marginBottom: "16px", height: 164, width: 164 }}>
@@ -92,9 +131,9 @@ const DogDetails = () => {
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={9} sx={{ display: "flex", mt: 2 }}>
-                  <Grid container spacing={2} gap={4}>
-                    <Grid item xs={12} md={4}>
+                <Grid item xs={10} sx={{ display: "flex", mt: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={5}>
                       <Box sx={{ display: "flex", my: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                           Breed:
@@ -121,7 +160,7 @@ const DogDetails = () => {
                       </Box>
                     </Grid>
                     <Box sx={{ width: "0.5px", backgroundColor: "rgba(204, 204, 204, 1)", my: 3, mx: 2 }} />
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={5}>
                       <Box sx={{ display: "flex", my: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                           Gender:
@@ -146,6 +185,13 @@ const DogDetails = () => {
                         </Typography>
                         <Typography variant="body1">{productData.totalPosts}</Typography>
                       </Box>
+                    </Grid>
+                    <Grid item xs={6} md={1} display="flex" justifyContent="flex-end">
+                      <QRCode
+                        value={productData._id} // bind the QR code with dog id
+                        size={64} // size of the QR code, you can adjust based on your needs
+                        level="Q" // Error correction level of the QR Code, can be L, M, Q, H
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -260,6 +306,26 @@ const DogDetails = () => {
           </>
         )}
       </Box>
+
+      <DialogComponent
+        open={openDelete}
+        width={324}
+        height={240}
+        handleClose={handleClose}
+        content={
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">Are you sure you want to delete this Dog?</DialogContentText>
+          </DialogContent>
+        }
+        actions={
+          <DialogActions>
+            <Button onClick={handleClose}>No</Button>
+            <Button onClick={handleDelete} autoFocus>
+              Yes
+            </Button>
+          </DialogActions>
+        }
+      />
     </Box>
   );
 };
