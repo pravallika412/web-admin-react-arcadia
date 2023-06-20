@@ -23,23 +23,26 @@ const CREATE_SUBSCRIPTION = gql`
 `;
 
 const GET_PLANS = gql`
-  query {
-    GetPlans {
-      _id
-      name
-      description
-      contract_address
-      nft_media_url
-      plan_image
-      stripe_product_id
-      default_price {
-        price
-        recurring
-        renewal_period
-        renewal_number
-        supportable_product_count
-        stripe_price_id
+  query GetPlans($input: FilterDto!) {
+    GetPlans(filterDto: $input) {
+      plans {
+        _id
+        name
+        description
+        contract_address
+        nft_media_url
+        plan_image
+        stripe_product_id
+        default_price {
+          price
+          recurring
+          renewal_period
+          renewal_number
+          supportable_product_count
+          stripe_price_id
+        }
       }
+      totalCount
     }
   }
 `;

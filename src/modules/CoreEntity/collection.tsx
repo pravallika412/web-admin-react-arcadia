@@ -1,5 +1,5 @@
 import { useFieldArray, useForm } from "react-hook-form";
-import { Grid, TextField, Button, Box, Card, CircularProgress, IconButton, useTheme, CardMedia, Skeleton, DialogContentText } from "@mui/material";
+import { Grid, TextField, Button, Box, Card, CircularProgress, IconButton, useTheme, CardMedia, Skeleton, DialogContentText, Typography } from "@mui/material";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_COLLECTION } from "../../shared/graphQL/core-entity/queries";
 import { useEffect, useState } from "react";
@@ -211,7 +211,7 @@ const Collection = () => {
 
   const handleClose = () => {
     setDialog(false);
-    getAdmin();
+    refetch();
   };
 
   return (
@@ -259,6 +259,7 @@ const Collection = () => {
                 fullWidth
                 label="Name"
                 margin="normal"
+                required
                 {...register("name", {
                   required: "Required",
                   pattern: {
@@ -276,25 +277,42 @@ const Collection = () => {
               <TextField
                 fullWidth
                 multiline
+                required
                 label="Description"
                 margin="normal"
                 minRows={4}
-                {...register("description", { required: "Required" })}
+                {...register("description", {
+                  required: "Required",
+                  maxLength: {
+                    value: 200,
+                    message: "Max length exceeded",
+                  },
+                })}
                 error={Boolean(errors.description)}
                 helperText={errors.description?.message}
               />
-              {/* <TextField fullWidth label="Symbol" margin="normal" {...register("symbol", { required: "Required" })} error={Boolean(errors.symbol)} helperText={errors.symbol?.message} /> */}
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <TextField label="Name" margin="normal" value="Symbol" disabled fullWidth />
+                  <TextField label="Name" required margin="normal" value="Symbol" disabled fullWidth />
                 </Grid>
                 <Grid item xs={5}>
                   <TextField
                     label="Value"
+                    required
                     margin="normal"
                     InputLabelProps={{ shrink: true }}
                     fullWidth
-                    {...register("symbolValue", { required: "Required" })}
+                    {...register("symbolValue", {
+                      required: "Required",
+                      pattern: {
+                        value: /^[A-Za-z][A-Za-z\s]*$/,
+                        message: "Please enter valid name",
+                      },
+                      maxLength: {
+                        value: 10,
+                        message: "Max length exceeded",
+                      },
+                    })}
                     error={Boolean(errors.symbolValue)}
                     helperText={errors.symbolValue?.message}
                   ></TextField>
@@ -369,11 +387,16 @@ const Collection = () => {
                       size="large"
                     >
                       <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                      <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFileChange(e) })} hidden />
+                      <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { required: "Image is required", onChange: (e) => handleFileChange(e) })} hidden />
                     </IconButton>
                   </div>
                 )}
               </Card>
+              {errors.profileImage && (
+                <Typography color="error" variant="body2">
+                  {errors.profileImage.message}
+                </Typography>
+              )}
             </Grid>
           </Grid>
           {collectionLoader && <SuspenseLoader left={10} />}

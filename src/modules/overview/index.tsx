@@ -150,7 +150,7 @@ function Overview() {
   }, [startYear, month, plan]);
 
   useEffect(() => {
-    getPlans();
+    getPlans({ variables: { input: { pageDto: { page: 1, limit: 50 } } } });
     getPostCount();
     getUsers();
   }, []);
@@ -176,7 +176,7 @@ function Overview() {
 
   useEffect(() => {
     if (getAllPlans) {
-      setPlanList(getAllPlans.GetPlans);
+      setPlanList(getAllPlans.GetPlans.plans);
     }
   }, [getAllPlans]);
 

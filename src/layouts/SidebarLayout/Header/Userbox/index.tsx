@@ -113,14 +113,8 @@ function HeaderUserbox() {
           vertical: "top",
           horizontal: "right",
         }}
+        sx={{ top: 60 }}
       >
-        <MenuUserBox sx={{ minWidth: 210 }} display="flex">
-          <Avatar variant="rounded" alt={user.name} src={user.avatar} />
-          <UserBoxText>
-            <UserBoxLabel variant="body1">{user.name}</UserBoxLabel>
-            <UserBoxDescription variant="body2">{user.jobtitle}</UserBoxDescription>
-          </UserBoxText>
-        </MenuUserBox>
         <Box sx={{ m: 1 }}>
           <Button color="primary" onClick={logout} fullWidth>
             <LockOpenTwoToneIcon sx={{ mr: 1 }} />

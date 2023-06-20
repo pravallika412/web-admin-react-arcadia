@@ -155,6 +155,7 @@ function HeaderNotifications() {
         anchorEl={ref.current}
         onClose={handleClose}
         open={isOpen}
+        sx={{ top: 40, right: 5 }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "right",
@@ -183,13 +184,13 @@ function HeaderNotifications() {
           </Typography>
         </Box>
         <Divider />
-        <Box sx={{ minHeight: 700 }}>
+        <Box>
           {markAllReadLoader || markReadLoader ? (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 700, width: 700 }}>
               <CircularProgress />
             </Box>
           ) : (
-            <List width={700} height={700} rowCount={totalCount} rowHeight={100} rowRenderer={rowRenderer} />
+            <List width={700} height={700} overflow={"hidden"} rowCount={totalCount} rowHeight={100} rowRenderer={rowRenderer} />
           )}
         </Box>
       </Popover>

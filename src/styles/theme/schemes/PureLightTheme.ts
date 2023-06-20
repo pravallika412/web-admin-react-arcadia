@@ -729,6 +729,9 @@ export const PureLightTheme = createTheme({
           "&.MuiDialog-paper": {
             boxShadow: "none",
           },
+          "&.MuiPopover-paper": {
+            overflow: "hidden",
+          },
         },
         elevation0: {
           boxShadow: "none",
