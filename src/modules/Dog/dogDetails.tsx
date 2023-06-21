@@ -20,7 +20,7 @@ const DogDetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getProductDetails({ variables: { input: { productId: id } } });
+    getProductDetails({ variables: { input: { customId: id } } });
   }, []);
 
   useEffect(() => {
