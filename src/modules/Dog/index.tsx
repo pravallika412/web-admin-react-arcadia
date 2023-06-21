@@ -363,7 +363,7 @@ const Dog = () => {
 
   const handleClickOpen = (row) => {
     console.log(row);
-    navigate(`/dogdetails/${row._id}`);
+    navigate(`/dogdetails/${row.custom_id}`);
   };
 
   return (
