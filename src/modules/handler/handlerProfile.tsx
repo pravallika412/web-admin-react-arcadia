@@ -1,11 +1,31 @@
-import { Grid, Paper, Typography } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogContentText, Grid, IconButton, Paper, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import Label from "../../shared/components/Label";
+import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import { useEffect, useState } from "react";
+import DialogComponent from "../../shared/components/Dialog";
+import { useMutation } from "@apollo/client";
+import { DELETE_HANDLER } from "../../shared/graphQL/handler/queries";
+import { useNavigate, useParams } from "react-router";
 
 const HandlerProfileComponent = ({ handlerData }) => {
+  const { id } = useParams();
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [openDelete, setOpenDelete] = useState(false);
+  const [deleteProduct, { data: deleteProductData }] = useMutation(DELETE_HANDLER);
+
   if (!handlerData) {
     return null; // or return a placeholder or error message
   }
+
+  useEffect(() => {
+    setOpenDelete(false);
+    if (deleteProductData) {
+      navigate(`/handler`);
+    }
+  }, [deleteProductData]);
 
   const formatDate = (dateToFormat) => {
     const date = new Date(dateToFormat);
@@ -41,11 +61,36 @@ const HandlerProfileComponent = ({ handlerData }) => {
     return <Label color={color as Color}>{text}</Label>;
   };
 
+  const handleDeleteClick = (row) => {
+    setOpenDelete(true);
+  };
+
+  const handleClose = (rw) => {
+    setOpenDelete(false);
+  };
+
+  const handleDelete = () => {
+    deleteProduct({ variables: { id: { id: id } } });
+  };
+
   return (
     <Box>
-      <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
-        Details of {handlerData?.name}
-      </Typography>
+      <Box display="flex" justifyContent={"space-between"}>
+        <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
+          Details of {handlerData.name}
+        </Typography>
+        <IconButton
+          sx={{
+            "&:hover": { background: theme.colors.error.lighter },
+            color: theme.palette.error.main,
+          }}
+          color="inherit"
+          size="small"
+          onClick={() => handleDeleteClick(handlerData)}
+        >
+          <DeleteTwoToneIcon fontSize="small" />
+        </IconButton>
+      </Box>
 
       <Paper elevation={3} sx={{ padding: 1.5 }}>
         <Grid container spacing={2} gap={3}>
@@ -88,6 +133,25 @@ const HandlerProfileComponent = ({ handlerData }) => {
           </Grid>
         </Grid>
       </Paper>
+      <DialogComponent
+        open={openDelete}
+        width={324}
+        height={240}
+        handleClose={handleClose}
+        content={
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">Are you sure you want to delete this Dog?</DialogContentText>
+          </DialogContent>
+        }
+        actions={
+          <DialogActions>
+            <Button onClick={handleClose}>No</Button>
+            <Button onClick={handleDelete} autoFocus>
+              Yes
+            </Button>
+          </DialogActions>
+        }
+      />
     </Box>
   );
 };

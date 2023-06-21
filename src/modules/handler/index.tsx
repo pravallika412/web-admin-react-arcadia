@@ -74,7 +74,7 @@ const Handler = () => {
   const [createHandler, { data: createHandlerData, loading: addHandlerLoader }] = useMutation(CREATE_HANDLER);
   const [updateHandler, { data: updateHandlerData, loading: updateHandlerLoader }] = useMutation(UPDATE_HANDLER);
   const [deleteHandler, { data: deleteHandlerData }] = useMutation(DELETE_HANDLER);
-  const [getHandlers, { data: getAllHandlers, loading: handlerLoader, refetch }] = useLazyQuery(GET_HANDLERS);
+  const [getHandlers, { data: getAllHandlers, loading: handlerLoader, refetch }] = useLazyQuery(GET_HANDLERS, { fetchPolicy: "no-cache" });
   const navigate = useNavigate();
 
   const {

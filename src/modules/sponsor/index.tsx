@@ -66,12 +66,12 @@ const Sponsor = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getPlans();
+    getPlans({ variables: { input: { pageDto: { page: 1, limit: 50 } } } });
   }, []);
 
   useEffect(() => {
     if (getAllPlans) {
-      setPlanList(getAllPlans.GetPlans);
+      setPlanList(getAllPlans.GetPlans.plans);
     }
   }, [getAllPlans]);
 

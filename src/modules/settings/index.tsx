@@ -403,7 +403,7 @@ const Settings = () => {
                     <Notifications />
                   </TabPanel>
                   <TabPanel value={value} index={3}>
-                    <TokenList address={"0x470816C620d574a68F9598f542Aed8d441cF6c13"} />
+                    <TokenList address={getAdminData?.getAdmin.matic_wallet.wallet_address} />
                   </TabPanel>
                   <TabPanel value={value} index={4}>
                     <Transaction />

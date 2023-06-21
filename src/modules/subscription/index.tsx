@@ -40,6 +40,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import axios from "axios";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
+import SharedTable from "../../shared/components/Table";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const useStyles = makeStyles({
   root: {
@@ -55,11 +57,11 @@ const useStyles = makeStyles({
 });
 
 const columns = [
-  { _id: 1, id: "name", label: "Name", minWidth: 170 },
-  { _id: 2, id: "plan_image", label: "Plan Image", minWidth: 170 },
-  { _id: 3, id: "default_price", subid: "price", label: "Price", minWidth: 170 },
-  { _id: 4, id: "default_price", subid: "supportable_product_count", label: "Product Count", minWidth: 170 },
-  { _id: 5, id: "action", label: "Action" },
+  { id: "name", label: "Handler Name", minWidth: 170 },
+  // { id: "createdAt", label: "Created On", minWidth: 170 },
+  { id: "price", label: "Price", minWidth: 170 },
+  { id: "count", label: "No. of Dogs", minWidth: 170 },
+  { id: "action", label: "Action", minWidth: 170 },
 ];
 
 const Subscription = () => {
@@ -72,8 +74,9 @@ const Subscription = () => {
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadFileEdit, setUploadFileEdit] = useState(null);
   const [products, setProducts] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isEditing, setIsEditing] = useState(false);
   const [iPFSLoader, setIPFSLoader] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -82,8 +85,11 @@ const Subscription = () => {
   const [imageIpfs, setImageIpfs] = useState("");
   const [iPFSFile, setIPFSFile] = useState("");
   const [presignedLoader, setPresignedLoader] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const [selectedData, setSelectedData] = useState(null);
+  const [fileName, setFileName] = useState("");
   const [openPlanStatus, setOpenPlanStatus] = useState(false);
+  const [imageEdit, setImageEdit] = useState("");
   const [createSubscription, { data: createSub, loading: addPlanLoader }] = useMutation(CREATE_SUBSCRIPTION);
   const [updateSubscription, { data: updateSub, loading: updatePlanLoader }] = useMutation(UPDATE_PLAN);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
@@ -96,6 +102,7 @@ const Subscription = () => {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -104,6 +111,7 @@ const Subscription = () => {
       price: "",
       name: "",
       supportableProductCount: "",
+      mtdescription: "",
     },
   });
 
@@ -134,12 +142,13 @@ const Subscription = () => {
   }, [uploadFileEdit]);
 
   useEffect(() => {
-    getPlans();
-  }, []);
+    getPlans({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage }, search: searchValue } } });
+  }, [page, rowsPerPage, searchValue]);
 
   useEffect(() => {
     if (getAllPlans) {
-      setProducts(getAllPlans.GetPlans);
+      setProducts(getAllPlans.GetPlans.plans);
+      setTotalCount(getAllPlans.GetPlans.totalCount);
     }
   }, [getAllPlans]);
 
@@ -175,6 +184,10 @@ const Subscription = () => {
     setOpenDelete(false);
   };
 
+  const handleSearch = (value) => {
+    setSearchValue(value);
+  };
+
   const uploadImageFn = async (url, data) => {
     await fetch(url, {
       method: "PUT",
@@ -187,10 +200,11 @@ const Subscription = () => {
   };
 
   const onSubmit = async (data) => {
+    console.log(data);
     setIPFSLoader(true);
     let data1 = JSON.stringify({
       pinataContent: {
-        description: data.descriptions.map((item) => item.description).join(", "),
+        description: data.mtdescription,
         external_url: "https://dev.d50w243ncde5q.amplifyapp.com/",
         image: imageIpfs,
         name: data.name,
@@ -225,7 +239,7 @@ const Subscription = () => {
         description: JSON.stringify(data.descriptions.map((item) => item.description)),
         name: data.name,
         price: Number(data.price),
-        planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : data.planImage,
+        planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : imageEdit,
         supportableProductCount: data.supportableProductCount,
         tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };
@@ -256,18 +270,20 @@ const Subscription = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data.image);
+        setValue("mtdescription", data.description);
         setImageIpfs(data.image);
       })
       .catch((error) => console.error("Error:", error));
 
-    let editData = getAllPlans.GetPlans.filter((e) => e._id === row._id)[0];
+    let editData = getAllPlans.GetPlans.plans.filter((e) => e._id === row._id)[0];
+    console.log(editData);
     let initial_values = {
       name: editData.name,
       descriptions: [],
-      planImage: editData.plan_image,
       price: editData.default_price.price,
       supportableProductCount: editData.default_price.supportable_product_count,
     };
+    setImageEdit(editData.plan_image);
     let descriptions;
     try {
       descriptions = JSON.parse(editData.description);
@@ -290,6 +306,9 @@ const Subscription = () => {
   };
 
   const handleFileChange = async (event: any) => {
+    console.log(event);
+    const file = event.target.files[0];
+    setFileName(file.name);
     event.preventDefault();
     setFile(event.target.files[0]);
     let payload = {
@@ -324,6 +343,7 @@ const Subscription = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedData(null);
+    setFileName("");
     setOpenDelete(false);
     reset({ descriptions: [{ description: "" }] });
   };
@@ -341,6 +361,96 @@ const Subscription = () => {
     setOpenPlanStatus(false);
   };
 
+  const formatDate = (dateToFormat) => {
+    const date = new Date(dateToFormat);
+    const year = date.getFullYear();
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);
+    const day = ("0" + date.getDate()).slice(-2);
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  };
+
+  const formattedData = products.map((row) => {
+    let imageUrl = row.plan_image || "";
+
+    if (imageUrl.includes("?")) {
+      imageUrl = imageUrl.split("?")[0];
+    }
+
+    return {
+      id: row.id,
+      name: (
+        <>
+          <div style={{ display: "flex" }}>
+            {imageUrl ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundImage: "linear-gradient(to right, rgba(85, 105, 255, 1), rgba(30, 136, 229, 1), rgba(52, 163, 83, 1))",
+                  borderRadius: "50%",
+                  padding: "2px",
+                  width: "50px",
+                  height: "50px",
+                }}
+              >
+                <img src={imageUrl} style={{ width: "45px", height: "45px", borderRadius: "50%" }} alt={row.name} />
+              </div>
+            ) : (
+              ""
+            )}
+            <div style={{ alignItems: "center", paddingTop: "7px", paddingLeft: "10px" }}>
+              <strong>{row.name ? row.name : "N/A"}</strong>
+              <Typography sx={{ fontSize: "10px", fontWeight: 400 }}>WDF{row.product}</Typography>
+            </div>
+          </div>
+        </>
+      ),
+      price: row?.default_price ? row.default_price?.price : "",
+      count: row?.default_price ? row.default_price?.supportable_product_count : "",
+      // createdAt: formatDate(row.createdAt),
+      action: (
+        <>
+          <IconButton
+            sx={{
+              "&:hover": {
+                background: theme.colors.primary.lighter,
+              },
+              color: theme.palette.primary.main,
+            }}
+            color="inherit"
+            size="small"
+            onClick={() => handleEditClick(row)}
+          >
+            <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+          </IconButton>
+          <IconButton
+            sx={{
+              "&:hover": { background: theme.colors.error.lighter },
+              color: theme.palette.error.main,
+            }}
+            color="inherit"
+            size="small"
+            onClick={() => handleDeleteClick(row)}
+          >
+            <DeleteTwoToneIcon fontSize="small" />
+          </IconButton>
+        </>
+      ),
+    };
+  });
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (rowperpage) => {
+    const newRowsPerPage = parseInt(rowperpage, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0); // Reset page when changing rows per page
+  };
+
   return (
     <Container component="main">
       <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
@@ -355,97 +465,23 @@ const Subscription = () => {
           </Button>
         </Grid>
       </Grid>
-      <Paper>
-        <TableContainer>
-          <Table aria-label="Product table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell key={column._id} style={{ minWidth: column.minWidth }}>
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {planLoader ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length}>
-                    <Skeleton variant="rectangular" animation="wave" height={400} />
-                  </TableCell>
-                </TableRow>
-              ) : products.length > 0 ? (
-                products.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={product._id}>
-                      {columns.map((column) => {
-                        const value = product[column.id];
-                        return (
-                          <TableCell key={column._id}>
-                            {column.id === "plan_image" ? (
-                              <img src={value} alt="Plan Image" className={classes.image} />
-                            ) : column.id === "default_price" ? (
-                              column.subid === "price" ? (
-                                "$" + value[column.subid]
-                              ) : (
-                                value[column.subid]
-                              )
-                            ) : column.id === "action" ? (
-                              <>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": {
-                                      background: theme.colors.primary.lighter,
-                                    },
-                                    color: theme.palette.primary.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => handleEditClick(product)}
-                                >
-                                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
-                                </IconButton>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": { background: theme.colors.error.lighter },
-                                    color: theme.palette.error.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => handleDeleteClick(product)}
-                                >
-                                  <DeleteTwoToneIcon fontSize="small" />
-                                </IconButton>
-                              </>
-                            ) : (
-                              value
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell align="center" colSpan={6}>
-                    No results found!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={products.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+
+      <SharedTable
+        columns={columns}
+        data={formattedData}
+        page={page}
+        tableBodyLoader={planLoader}
+        rowsPerPage={rowsPerPage}
+        totalRows={totalCount}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        searchFilter={undefined}
+        searchFilterVisible={true}
+        onSearch={handleSearch}
+        selectableRows={false}
+        onRowClick={undefined}
+      ></SharedTable>
+
       <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
         <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 24px" }}>
           {isEditing ? "Update Plan" : "Add Plan"}
@@ -498,7 +534,7 @@ const Subscription = () => {
                           endAdornment: (
                             <InputAdornment position="end">
                               <IconButton onClick={() => remove(index)}>
-                                <DeleteIcon />
+                                <DeleteIcon sx={{ color: theme.palette.error.main }} />
                               </IconButton>
                             </InputAdornment>
                           ),
@@ -514,7 +550,7 @@ const Subscription = () => {
               </Button>
             </div>
 
-            <div>
+            {/* <div>
               <TextField
                 label="Plan Image"
                 name="planImage"
@@ -537,7 +573,75 @@ const Subscription = () => {
                 error={!!errors.planImage}
                 helperText={errors?.planImage?.message}
               />
+            </div> */}
+
+            <div>
+              <Controller
+                name="planImage"
+                control={control}
+                defaultValue=""
+                rules={
+                  !isEditing
+                    ? {
+                        required: {
+                          value: true,
+                          message: "This is required",
+                        },
+                      }
+                    : {}
+                }
+                render={({ field }) => (
+                  <>
+                    <input
+                      {...field}
+                      id="file-upload"
+                      type="file"
+                      hidden
+                      onChange={(e) => {
+                        field.onChange(e); // use field.onChange to notify the form when a file is selected
+                        handleFileChange(e);
+                      }}
+                    />
+                    <Button
+                      variant="outlined"
+                      onClick={() => document.getElementById("file-upload").click()}
+                      startIcon={<CloudUploadIcon />}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: "450px",
+                        height: "131px",
+                        background: "#FFFFFF",
+                        border: "1px dashed #999999",
+                        borderRadius: "6px",
+                      }}
+                    >
+                      {fileName ? fileName : "Upload Plan Image"}
+                    </Button>
+                    {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
+                  </>
+                )}
+              />
             </div>
+
+            <Controller
+              name="mtdescription"
+              control={control}
+              defaultValue=""
+              rules={{
+                required: "Description is required",
+                pattern: {
+                  value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
+                  message: "Please enter a valid description",
+                },
+                maxLength: {
+                  value: 200,
+                  message: "Max length exceeded",
+                },
+              }}
+              render={({ field }) => <TextField {...field} label="Metadata Description" margin="normal" fullWidth error={!!errors.mtdescription} helperText={errors?.mtdescription?.message} />}
+            />
 
             <div>
               <Controller
