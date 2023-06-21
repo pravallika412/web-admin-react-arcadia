@@ -28,8 +28,8 @@ const useStyles = makeStyles({
 function TokenList({ address }) {
   const classes = useStyles();
   const [tokens, setTokens] = useState([]);
-
-  const alchemyUrl = "https://polygon-mumbai.g.alchemy.com/v2/7IRs_CKHx8BKNUUJmw3ZtAXdfQucCU7M";
+  const alchemy_api_key = process.env.ALCHEMY_API_KEY;
+  const alchemyUrl = `https://polygon-mumbai.g.alchemy.com/v2/${alchemy_api_key}`;
 
   const makeAlchemyRequest = (method, params) => {
     return axios({

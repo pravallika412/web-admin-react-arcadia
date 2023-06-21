@@ -16,7 +16,6 @@ import DialogComponent from "../../shared/components/Dialog";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { GET_ADMIN } from "../../shared/graphQL/settings/queries";
 
-const web3 = new Web3("https://polygon-mumbai.g.alchemy.com/v2/7IRs_CKHx8BKNUUJmw3ZtAXdfQucCU7M");
 const useStyles = makeStyles({
   card: {
     width: 227,
@@ -47,6 +46,7 @@ const Collection = () => {
   const [file, setFile] = useState([]);
   const pinata_api_key = process.env.PINATA_API_KEY;
   const pinata_secret_api_key = process.env.PINATA_API_SECRET_KEY;
+  const alchemy_api_key = process.env.ALCHEMY_API_KEY;
   const [collectionImage, setCollectionImage] = useState("");
   const [presignedURL, setPresignedURL] = useState(null);
   const [loadingImage, setLoadingImage] = useState(false);
@@ -57,7 +57,7 @@ const Collection = () => {
   const [loadingBrandDetails, setLoadingBrandDetails] = useState(false);
   const [dialog, setDialog] = useState(false);
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
-
+  const web3 = new Web3(`https://polygon-mumbai.g.alchemy.com/v2/${alchemy_api_key}`);
   const {
     register,
     handleSubmit,
