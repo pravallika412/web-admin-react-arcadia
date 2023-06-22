@@ -38,6 +38,11 @@ const useStyles = makeStyles({
     right: 0,
     margin: "0 auto",
   },
+  disabledButton: {
+    background: `#024C7F !important`,
+    color: `rgba(255, 255, 255) !important`,
+    opacity: 0.7,
+  },
 });
 
 const Collection = () => {
@@ -56,7 +61,8 @@ const Collection = () => {
   const [brandDetailsData, setBrandDetailsData] = useState(null);
   const [loadingBrandDetails, setLoadingBrandDetails] = useState(false);
   const [dialog, setDialog] = useState(false);
-  const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
+  const [membershipCA, setMembershipCA] = useState(localStorage.getItem("membership_address"));
+  const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN, { fetchPolicy: "no-cache" });
   const web3 = new Web3(`https://polygon-mumbai.g.alchemy.com/v2/${alchemy_api_key}`);
   const {
     register,
@@ -72,16 +78,26 @@ const Collection = () => {
   });
 
   useEffect(() => {
-    brandDetails();
-  }, [getAdminData]);
+    const address = membershipCA;
+    console.log(address);
+    if (address !== "null") {
+      fetchBrandDetails(address);
+    }
+  }, [membershipCA]);
 
   useEffect(() => {
     if (createCollectionData) {
-      refetch();
+      getAdmin();
       console.log(createCollectionData);
-      setDialog(true);
     }
   }, [createCollectionData]);
+
+  useEffect(() => {
+    if (getAdminData) {
+      localStorage.setItem("membership_address", getAdminData.getAdmin.brandDetails.membership_contract_address);
+      setMembershipCA(getAdminData.getAdmin.brandDetails.membership_contract_address);
+    }
+  }, [getAdminData]);
 
   useEffect(() => {
     if (createPresignedUrl) {
@@ -95,31 +111,28 @@ const Collection = () => {
     }
   }, [uploadFile]);
 
-  const brandDetails = async () => {
-    const address = localStorage.getItem("membership_address");
-    if (address !== "null") {
-      setLoadingBrandDetails(true);
-      // Check if address exists
+  const fetchBrandDetails = async (address) => {
+    setLoadingBrandDetails(true);
+    try {
       const brand_instance = new web3.eth.Contract(collectionABI, address);
-      console.log(brand_instance);
       const name = await brand_instance.methods.name().call();
       const symbol = await brand_instance.methods.symbol().call();
       const defaultURI = await brand_instance.methods.defaultURI().call();
-      fetch(defaultURI)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          const description = data.description;
-          const brandProperties = data.attributes;
-          const image = data.image;
-          const brand_details = { name, symbol, description, brandProperties, image };
-          setBrandDetailsData(brand_details); // Set the brand details data
-          setLoadingBrandDetails(false);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          setLoadingBrandDetails(false); // Stop loading even if there's an error
-        });
+
+      const response = await fetch(defaultURI);
+      const data = await response.json();
+
+      setBrandDetailsData({
+        name,
+        symbol,
+        description: data.description,
+        brandProperties: data.attributes,
+        image: data.image,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoadingBrandDetails(false);
     }
   };
 
@@ -259,9 +272,8 @@ const Collection = () => {
                 fullWidth
                 label="Name"
                 margin="normal"
-                required
                 {...register("name", {
-                  required: "Required",
+                  required: "Name is required",
                   pattern: {
                     value: /^[A-Za-z][A-Za-z\s]*$/,
                     message: "Please enter valid name",
@@ -277,12 +289,11 @@ const Collection = () => {
               <TextField
                 fullWidth
                 multiline
-                required
                 label="Description"
                 margin="normal"
                 minRows={4}
                 {...register("description", {
-                  required: "Required",
+                  required: "Description is required",
                   maxLength: {
                     value: 200,
                     message: "Max length exceeded",
@@ -293,17 +304,16 @@ const Collection = () => {
               />
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <TextField label="Name" required margin="normal" value="Symbol" disabled fullWidth />
+                  <TextField label="Name" margin="normal" value="Symbol" disabled fullWidth />
                 </Grid>
                 <Grid item xs={5}>
                   <TextField
                     label="Value"
-                    required
                     margin="normal"
                     InputLabelProps={{ shrink: true }}
                     fullWidth
                     {...register("symbolValue", {
-                      required: "Required",
+                      required: "Symbol is required",
                       pattern: {
                         value: /^[A-Za-z][A-Za-z\s]*$/,
                         message: "Please enter valid name",
@@ -393,14 +403,14 @@ const Collection = () => {
                 )}
               </Card>
               {errors.profileImage && (
-                <Typography color="error" variant="body2">
-                  {errors.profileImage.message}
+                <Typography color="error" variant="body2" sx={{ pt: 1, pl: 2 }}>
+                  {errors.profileImage?.message}
                 </Typography>
               )}
             </Grid>
           </Grid>
           {collectionLoader && <SuspenseLoader left={10} />}
-          <Button variant="contained" type="submit" disabled={collectionLoader}>
+          <Button variant="contained" type="submit" disabled={Object.keys(errors).length > 0 || collectionLoader} classes={{ disabled: classes.disabledButton }}>
             Submit
           </Button>
         </form>
