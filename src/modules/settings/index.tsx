@@ -149,7 +149,6 @@ const Settings = () => {
         lastName: data.last_name,
         email: data.email,
         walletAddress: data.matic_wallet.wallet_address,
-        merchantAddress: data.merchant_address,
         profileImage: data.profile_image,
       };
       reset(initial_values);
@@ -190,31 +189,12 @@ const Settings = () => {
   };
 
   const onSubmit = (data) => {
-    if (!web3.utils.isAddress(data.merchantAddress) && data.merchantAddress) {
-      setError("merchantAddress", {
-        type: "manual",
-        message: "Invalid Ethereum address",
-      });
-    }
     const payload = {
       firstName: data.firstName,
       lastName: data.lastName,
       profileImage: presignedURL ? presignedURL : null,
-      merchantAddress: data.merchantAddress ? web3.utils.toChecksumAddress(data.merchantAddress) : null,
     };
     updateProfile({ variables: { input: payload } });
-  };
-
-  const handleAddressChange = (event) => {
-    const address = event.target.value;
-    if (!web3.utils.isAddress(address) && address) {
-      setError("merchantAddress", {
-        type: "manual",
-        message: "Invalid Ethereum address",
-      });
-    } else {
-      clearErrors("merchantAddress");
-    }
   };
 
   const uploadImageFn = async (url, data) => {
@@ -227,13 +207,6 @@ const Settings = () => {
     });
     setLoadingImage(false);
     setPresignedURL(uploadFile.split("?")[0]);
-  };
-
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSnackbar(false);
   };
 
   return (
@@ -321,21 +294,6 @@ const Settings = () => {
                                 <Skeleton variant="text" width="100%" height={70} />
                               ) : (
                                 <TextField label="Wallet Address" {...register("walletAddress")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
-                              )}
-                            </Grid>
-                            <Grid item xs={12} md={12}>
-                              {loading ? (
-                                <Skeleton variant="text" width="100%" height={70} />
-                              ) : (
-                                <TextField
-                                  label="Merchant Address"
-                                  {...register("merchantAddress", { onChange: (e) => handleAddressChange(e) })}
-                                  margin="normal"
-                                  InputLabelProps={{ shrink: true }}
-                                  fullWidth
-                                  error={!!errors.merchantAddress}
-                                  helperText={errors?.merchantAddress?.message}
-                                />
                               )}
                             </Grid>
                           </>
