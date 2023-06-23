@@ -52,6 +52,9 @@ const useStyles = makeStyles(() => ({
     padding: 10,
   },
   textFieldWhite: {
+    "& input:-webkit-autofill": {
+      "-webkit-text-fill-color": "white !important",
+    },
     "& .MuiOutlinedInput-root": {
       "&.Mui-focused:hover .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.primary200,
@@ -85,6 +88,7 @@ const useStyles = makeStyles(() => ({
       },
     },
   },
+
   textFieldError: {
     "& .MuiFormLabel-root": {
       color: colors.secondary300,
