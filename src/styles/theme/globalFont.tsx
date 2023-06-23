@@ -11,7 +11,6 @@ input:-webkit-autofill,
   input:-webkit-autofill:focus, 
   input:-webkit-autofill:active  {
     transition: background-color 5000s ease-in-out 0s;
-    -webkit-text-fill-color: white !important;
   }
   :root {
     transition: margin 300ms ease-in-out;

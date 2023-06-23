@@ -1,4 +1,3 @@
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -7,7 +6,6 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
@@ -17,7 +15,6 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import useStyles from "../../styles/theme/styles";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import LockIcon from "@mui/icons-material/Lock";
 import CircularProgress from "@mui/material/CircularProgress";
 
 interface IFormInput {
@@ -33,7 +30,7 @@ export default function SignIn() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<IFormInput>();
 
   const navigate = useNavigate();
   const [loginUser, { data, loading: loginLoader }] = useMutation(LOGIN_ADMIN);

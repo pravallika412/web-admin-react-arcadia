@@ -57,7 +57,7 @@ const useStyles = makeStyles({
 });
 
 const columns = [
-  { id: "name", label: "Handler Name", minWidth: 170 },
+  { id: "name", label: "Name of Plan", minWidth: 170 },
   // { id: "createdAt", label: "Created On", minWidth: 170 },
   { id: "price", label: "Price", minWidth: 170 },
   { id: "count", label: "No. of Dogs", minWidth: 170 },
@@ -456,7 +456,7 @@ const Subscription = () => {
       <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
         <Grid item>
           <Typography variant="h3" component="h3" gutterBottom>
-            List of Plans
+            List of Subscription Plans
           </Typography>
         </Grid>
         <Grid item>
@@ -682,6 +682,10 @@ const Subscription = () => {
                   pattern: {
                     value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
                     message: "Please enter a valid Product Count",
+                  },
+                  maxLength: {
+                    value: 3,
+                    message: "Max length exceeded",
                   },
                 }}
                 render={({ field }) => (
