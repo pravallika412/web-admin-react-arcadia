@@ -31,6 +31,7 @@ const GET_PLANS = gql`
         description
         contract_address
         nft_media_url
+        createdAt
         plan_image
         stripe_product_id
         default_price {

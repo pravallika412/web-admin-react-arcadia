@@ -14,6 +14,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Alert, Snackbar } from "@mui/material";
 import { GlobalStyle } from "./styles/theme/globalFont";
 import NoInternet from "./modules/pages/Status/NoInternet";
+import NetworkErrorDialog from "./modules/pages/Status/ServerError";
 
 const baseURL = process.env.API_BASE_URL;
 const httpLink = createHttpLink({
@@ -56,6 +57,7 @@ ReactDOM.render(
     <SidebarProvider>
       <ApolloProvider client={client}>
         <BrowserRouter>
+          <NetworkErrorDialog />
           <NoInternet />
           <App />
           <Toaster />

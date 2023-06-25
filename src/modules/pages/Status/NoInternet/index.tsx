@@ -11,7 +11,6 @@ const NoInternet = () => {
   };
 
   useEffect(() => {
-    console.log(isOnline);
     window.addEventListener("online", updateNetwork);
     window.addEventListener("offline", updateNetwork);
 

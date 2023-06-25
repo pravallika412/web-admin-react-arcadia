@@ -1,8 +1,8 @@
 import gql from "graphql-tag";
 
 const CREATE_ENTITY = gql`
-  mutation createCoreEntity($input: CoreEntityDto!) {
-    createCoreEntity(coreEntityDto: $input) {
+  mutation CreateCoreEntity($input: CoreEntityDto!) {
+    CreateCoreEntity(coreEntityDto: $input) {
       success
       message
     }
@@ -21,7 +21,7 @@ const GET_DATATYPES = gql`
 
 const GET_COREENTITY = gql`
   query {
-    retrieveCoreEntity {
+    RetrieveCoreEntity {
       _id
       product_table_name
       product_schema

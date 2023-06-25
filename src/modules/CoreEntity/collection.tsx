@@ -79,7 +79,6 @@ const Collection = () => {
 
   useEffect(() => {
     const address = membershipCA;
-    console.log(address);
     if (address !== "null") {
       fetchBrandDetails(address);
     }
@@ -88,7 +87,6 @@ const Collection = () => {
   useEffect(() => {
     if (createCollectionData) {
       getAdmin();
-      console.log(createCollectionData);
     }
   }, [createCollectionData]);
 
@@ -182,7 +180,6 @@ const Collection = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log(data);
     let data1 = JSON.stringify({
       pinataContent: {
         description: data.description,
@@ -201,7 +198,6 @@ const Collection = () => {
         ],
       },
     });
-    console.log(data1);
     let config = {
       method: "post",
       url: "https://api.pinata.cloud/pinning/pinJSONToIPFS",
@@ -229,42 +225,7 @@ const Collection = () => {
 
   return (
     <>
-      {brandDetailsData ? ( // Check if brand details exist
-        <Grid container spacing={2}>
-          <Grid item xs={9} md={9}>
-            <TextField label="Name" margin="normal" value={brandDetailsData.name} disabled fullWidth />
-            <TextField label="Description" margin="normal" value={brandDetailsData.description} disabled fullWidth />
-            {brandDetailsData.brandProperties.map((property, index) => (
-              <Grid container spacing={2} key={index}>
-                <Grid item xs={6}>
-                  <TextField label="Property Name" margin="normal" value={property.trait_type} disabled fullWidth />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField label="Property Value" name="type" margin="normal" value={property.value} InputLabelProps={{ shrink: true }} disabled fullWidth />
-                </Grid>
-              </Grid>
-            ))}
-          </Grid>
-
-          <Grid item xs={3} md={3}>
-            <Card className={classes.card}>
-              <CardMedia className={classes.media} image={brandDetailsData.image} />
-            </Card>
-          </Grid>
-        </Grid>
-      ) : loadingBrandDetails ? ( // Check if loading
-        <Grid container spacing={2}>
-          <Grid item xs={9} md={9}>
-            <Skeleton variant="text" height={50} />
-            <Skeleton variant="text" height={50} />
-            <Skeleton variant="text" height={50} />
-            <Skeleton variant="text" height={50} />
-          </Grid>
-          <Grid item xs={3} md={3}>
-            <Skeleton variant="rectangular" height={200} />
-          </Grid>
-        </Grid>
-      ) : (
+      {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={9}>
@@ -315,7 +276,7 @@ const Collection = () => {
                     {...register("symbolValue", {
                       required: "Symbol is required",
                       pattern: {
-                        value: /^[A-Za-z][A-Za-z\s]*$/,
+                        value: /^[A-Za-z0-9][A-Za-z0-9\s]*$/,
                         message: "Please enter valid name",
                       },
                       maxLength: {
@@ -338,20 +299,32 @@ const Collection = () => {
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <TextField
-                        label="Name"
+                        label="Property Name"
                         fullWidth
                         margin="normal"
-                        {...register(`properties.${index}.name`, { required: "Required" })}
+                        {...register(`properties.${index}.name`, {
+                          required: "Required",
+                          pattern: {
+                            value: /^[A-Za-z0-9][A-Za-z0-9\s]*$/,
+                            message: "Please enter valid property name",
+                          },
+                        })}
                         error={Boolean(errors.properties && errors.properties[index] && errors.properties[index].name)}
                         helperText={errors.properties && errors.properties[index] && errors.properties[index].name?.message}
                       />
                     </Grid>
                     <Grid item xs={5}>
                       <TextField
-                        label="Value"
+                        label="Property Value"
                         fullWidth
                         margin="normal"
-                        {...register(`properties.${index}.value`, { required: "Required" })}
+                        {...register(`properties.${index}.value`, {
+                          required: "Required",
+                          pattern: {
+                            value: /^[A-Za-z0-9][A-Za-z0-9\s]*$/,
+                            message: "Please enter valid property value",
+                          },
+                        })}
                         error={Boolean(errors.properties && errors.properties[index] && errors.properties[index].value)}
                         helperText={errors.properties && errors.properties[index] && errors.properties[index].value?.message}
                       />
@@ -414,7 +387,7 @@ const Collection = () => {
             Submit
           </Button>
         </form>
-      )}
+      }
 
       <DialogComponent
         open={dialog}
