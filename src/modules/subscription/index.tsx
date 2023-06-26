@@ -58,7 +58,7 @@ const useStyles = makeStyles({
 
 const columns = [
   { id: "name", label: "Name of Plan", minWidth: 170 },
-  // { id: "createdAt", label: "Created On", minWidth: 170 },
+  { id: "createdAt", label: "Created On", minWidth: 170 },
   { id: "price", label: "Price", minWidth: 170 },
   { id: "count", label: "No. of Dogs", minWidth: 170 },
   { id: "action", label: "Action", minWidth: 170 },
@@ -200,7 +200,6 @@ const Subscription = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log(data);
     setIPFSLoader(true);
     let data1 = JSON.stringify({
       pinataContent: {
@@ -265,18 +264,15 @@ const Subscription = () => {
     let payload = {
       planId: row._id,
     };
-    console.log(row);
     fetch(row.nft_media_url)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.image);
         setValue("mtdescription", data.description);
         setImageIpfs(data.image);
       })
       .catch((error) => console.error("Error:", error));
 
     let editData = getAllPlans.GetPlans.plans.filter((e) => e._id === row._id)[0];
-    console.log(editData);
     let initial_values = {
       name: editData.name,
       descriptions: [],
@@ -306,7 +302,6 @@ const Subscription = () => {
   };
 
   const handleFileChange = async (event: any) => {
-    console.log(event);
     const file = event.target.files[0];
     setFileName(file.name);
     event.preventDefault();
@@ -331,7 +326,6 @@ const Subscription = () => {
 
     const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
     setImageIpfs(ipfsUrl);
-    console.log(ipfsUrl);
   };
 
   const handleOpen = () => {
@@ -366,7 +360,7 @@ const Subscription = () => {
     const year = date.getFullYear();
     const month = ("0" + (date.getMonth() + 1)).slice(-2);
     const day = ("0" + date.getDate()).slice(-2);
-    const formattedDate = `${year}-${month}-${day}`;
+    const formattedDate = `${day}/${month}/${year}`;
     return formattedDate;
   };
 
@@ -409,7 +403,7 @@ const Subscription = () => {
       ),
       price: row?.default_price ? row.default_price?.price : "",
       count: row?.default_price ? row.default_price?.supportable_product_count : "",
-      // createdAt: formatDate(row.createdAt),
+      createdAt: formatDate(row?.createdAt),
       action: (
         <>
           <IconButton

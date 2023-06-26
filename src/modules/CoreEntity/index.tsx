@@ -92,11 +92,32 @@ const CoreEntity = () => {
     reset,
     watch,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      collectionName: "",
+      fields: [],
+      basicinfo: [
+        {
+          fieldName: "",
+          dataType: 0,
+          data: "",
+        },
+      ],
+    },
+  });
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "fields",
+  });
+
+  const {
+    fields: basicinfoFields,
+    append: appendBasicInfo,
+    remove: removeBasicInfo,
+  } = useFieldArray({
+    control,
+    name: "basicinfo",
   });
 
   useEffect(() => {
@@ -113,8 +134,8 @@ const CoreEntity = () => {
 
   useEffect(() => {
     if (getCoreEntityData) {
-      if (getCoreEntityData.retrieveCoreEntity.product_schema) {
-        setCoreEntityFields(JSON.parse(getCoreEntityData.retrieveCoreEntity.product_schema));
+      if (getCoreEntityData.RetrieveCoreEntity.product_schema) {
+        setCoreEntityFields(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
         setIsCoreEntity(true);
       } else {
         setCoreEntityFields([]);
@@ -134,6 +155,7 @@ const CoreEntity = () => {
   };
 
   const onSubmit = (data) => {
+    console.log(data);
     const initialFields = [
       { fieldName: "name", dataType: 1, data: "" },
       { fieldName: "image", dataType: 7, data: "" },
@@ -183,7 +205,7 @@ const CoreEntity = () => {
   const MyComponent = () => (
     <>
       <Grid item xs={12}>
-        <TextField label="Collection Name" margin="normal" value={getCoreEntityData && getCoreEntityData.retrieveCoreEntity.product_table_name} disabled fullWidth />
+        <TextField label="Collection Name" margin="normal" value={getCoreEntityData && getCoreEntityData.RetrieveCoreEntity.product_table_name} disabled fullWidth />
       </Grid>
       {coreEntityFields &&
         coreEntityFields.map((field, index) => {
@@ -234,123 +256,186 @@ const CoreEntity = () => {
                     <Collection />
                   </TabPanel>
                   <TabPanel value={value} index={1}>
-                    {!isCoreEntity ? (
+                    {isCoreEntity ? (
                       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-                        <TextField
-                          label="Collection Name"
-                          name="collectionName"
-                          margin="normal"
-                          required
-                          fullWidth
-                          {...register("collectionName", {
-                            required: {
-                              value: true,
-                              message: "Collection Name is required",
-                            },
-                            pattern: {
-                              value: /^[A-Za-z][A-Za-z\s]*$/,
-                              message: "Please enter valid collection name",
-                            },
-                            maxLength: {
-                              value: 15,
-                              message: "Max length exceeded",
-                            },
-                          })}
-                          error={!!errors.collectionName}
-                          helperText={errors?.collectionName?.message}
-                        />
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <TextField label="Entity Name" margin="normal" value="name" disabled fullWidth />
+                        <Box>
+                          <Typography variant="h3">Entity</Typography>
+
+                          <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                              <TextField
+                                label="Collection Name"
+                                name="collectionName"
+                                margin="normal"
+                                required
+                                fullWidth
+                                {...register("collectionName", {
+                                  required: {
+                                    value: true,
+                                    message: "Collection Name is required",
+                                  },
+                                  pattern: {
+                                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                                    message: "Please enter valid collection name",
+                                  },
+                                  maxLength: {
+                                    value: 15,
+                                    message: "Max length exceeded",
+                                  },
+                                })}
+                                error={!!errors.collectionName}
+                                helperText={errors?.collectionName?.message}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <TextField label="Entity Name" margin="normal" value="name" disabled fullWidth />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <TextField label="Entity Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                            </Grid>
                           </Grid>
-                          <Grid item xs={6}>
-                            <TextField label="Entity Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <TextField label="Entity Name" margin="normal" value="photo_url" disabled fullWidth />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <TextField label="Entity Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <TextField label="Entity Name" margin="normal" value="photo_url" disabled fullWidth />
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <TextField label="Entity Name" margin="normal" value="status" disabled fullWidth />
+                            </Grid>
+                            <Grid item xs={5}>
+                              <TextField label="Entity Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                            </Grid>
+                            <Grid item xs={1}>
+                              <Button sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                                Add
+                              </Button>
+                            </Grid>
                           </Grid>
-                          <Grid item xs={6}>
-                            <TextField label="Entity Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
-                          </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <TextField label="Entity Name" margin="normal" value="status" disabled fullWidth />
-                          </Grid>
-                          <Grid item xs={5}>
-                            <TextField label="Entity Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
-                          </Grid>
-                          <Grid item xs={1}>
-                            <Button sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: "", data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
-                              Add
-                            </Button>
-                          </Grid>
-                        </Grid>
-                        {fields.map((field, index) => (
-                          <div key={field.id}>
-                            <Grid container spacing={2} my={1}>
-                              <Grid item xs={6}>
-                                <TextField label="Entity Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
-                              </Grid>
-                              <Grid item xs={5}>
-                                {/* <Select label="Entity Type" variant="outlined" defaultValue="" fullWidth {...register(`fields.${index}.dataType`)}>
-                                {dataTypesEntity.map((option) => (
-                                  <MenuItem key={option.order} value={option.order}>
-                                    {option.name}
-                                  </MenuItem>
-                                ))}
-                              </Select> */}
-                                <Controller
-                                  name={`fields.${index}.dataType`}
-                                  control={control} // assuming you have `control` from useForm()
-                                  defaultValue=""
-                                  render={({ field }) => (
-                                    <FormControl variant="outlined" fullWidth>
-                                      <InputLabel id={`fields-${index}-label`}>Entity Type</InputLabel>
-                                      <Select labelId={`fields-${index}-label`} label="Entity Type" {...field}>
-                                        {dataTypesEntity.map((option) => (
-                                          <MenuItem key={option.order} value={option.order}>
-                                            {option.name}
-                                          </MenuItem>
-                                        ))}
-                                      </Select>
-                                    </FormControl>
-                                  )}
-                                />
-                              </Grid>
-                              {watch(`fields.${index}.dataType`) === 5 && (
-                                <Grid item xs={11} md={11}>
-                                  <TextField
-                                    label="Enter text"
-                                    fullWidth
-                                    value={text}
-                                    InputProps={{
-                                      startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
-                                    }}
-                                    {...register(`fields.${index}.data`)}
-                                    onChange={handleChangeEnumType}
-                                    onKeyDown={handleKeyDown}
+                          {fields.map((field, index) => (
+                            <div key={field.id}>
+                              <Grid container spacing={2} my={1}>
+                                <Grid item xs={6}>
+                                  <TextField label="Entity Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
+                                </Grid>
+                                <Grid item xs={5}>
+                                  <Controller
+                                    name={`fields.${index}.dataType`}
+                                    control={control} // assuming you have `control` from useForm()
+                                    render={({ field }) => (
+                                      <FormControl variant="outlined" fullWidth>
+                                        <InputLabel id={`fields-${index}-label`}>Entity Type</InputLabel>
+                                        <Select labelId={`fields-${index}-label`} label="Entity Type" {...field}>
+                                          {dataTypesEntity.map((option) => (
+                                            <MenuItem key={option.order} value={option.order}>
+                                              {option.name}
+                                            </MenuItem>
+                                          ))}
+                                        </Select>
+                                      </FormControl>
+                                    )}
                                   />
                                 </Grid>
-                              )}
-                              <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
-                                <IconButton
-                                  sx={{
-                                    "&:hover": { background: theme.colors.error.lighter },
-                                    color: theme.palette.error.main,
-                                  }}
-                                  color="inherit"
-                                  size="small"
-                                  onClick={() => remove(index)}
-                                >
-                                  <DeleteTwoToneIcon fontSize="small" />
-                                </IconButton>
+                                {watch(`fields.${index}.dataType`) === 5 && (
+                                  <Grid item xs={11} md={11}>
+                                    <TextField
+                                      label="Enter text"
+                                      fullWidth
+                                      value={text}
+                                      InputProps={{
+                                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                                      }}
+                                      {...register(`fields.${index}.data`)}
+                                      onChange={handleChangeEnumType}
+                                      onKeyDown={handleKeyDown}
+                                    />
+                                  </Grid>
+                                )}
+                                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                                  <IconButton
+                                    sx={{
+                                      "&:hover": { background: theme.colors.error.lighter },
+                                      color: theme.palette.error.main,
+                                    }}
+                                    color="inherit"
+                                    size="small"
+                                    onClick={() => remove(index)}
+                                  >
+                                    <DeleteTwoToneIcon fontSize="small" />
+                                  </IconButton>
+                                </Grid>
                               </Grid>
+                            </div>
+                          ))}
+                        </Box>
+                        <Box>
+                          <Typography variant="h3">Basic Information</Typography>
+                          <Grid container spacing={2}>
+                            <Grid item xs={1}>
+                              <Button sx={{ mt: 2.5 }} onClick={() => appendBasicInfo({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                                Add
+                              </Button>
                             </Grid>
-                          </div>
-                        ))}
+                          </Grid>
+                          {basicinfoFields.map((field, index) => (
+                            <div key={field.id}>
+                              <Grid container spacing={2} my={1}>
+                                <Grid item xs={6}>
+                                  <TextField label="Entity Name" variant="outlined" fullWidth {...register(`basicinfo.${index}.fieldName`)} />
+                                </Grid>
+                                <Grid item xs={5}>
+                                  <Controller
+                                    name={`basicinfo.${index}.dataType`}
+                                    control={control} // assuming you have `control` from useForm()
+                                    render={({ field }) => (
+                                      <FormControl variant="outlined" fullWidth>
+                                        <InputLabel id={`basicinfo-${index}-label`}>Entity Type</InputLabel>
+                                        <Select labelId={`basicinfo-${index}-label`} label="Entity Type" {...field}>
+                                          {dataTypesEntity.map((option) => (
+                                            <MenuItem key={option.order} value={option.order}>
+                                              {option.name}
+                                            </MenuItem>
+                                          ))}
+                                        </Select>
+                                      </FormControl>
+                                    )}
+                                  />
+                                </Grid>
+                                {watch(`basicinfo.${index}.dataType`) === 5 && (
+                                  <Grid item xs={11} md={11}>
+                                    <TextField
+                                      label="Enter text"
+                                      fullWidth
+                                      value={text}
+                                      InputProps={{
+                                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                                      }}
+                                      {...register(`basicinfo.${index}.data`)}
+                                      onChange={handleChangeEnumType}
+                                      onKeyDown={handleKeyDown}
+                                    />
+                                  </Grid>
+                                )}
+                                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                                  <IconButton
+                                    sx={{
+                                      "&:hover": { background: theme.colors.error.lighter },
+                                      color: theme.palette.error.main,
+                                    }}
+                                    color="inherit"
+                                    size="small"
+                                    onClick={() => removeBasicInfo(index)}
+                                  >
+                                    <DeleteTwoToneIcon fontSize="small" />
+                                  </IconButton>
+                                </Grid>
+                              </Grid>
+                            </div>
+                          ))}
+                        </Box>
                         <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
                           <Button variant="contained" type="submit">
                             Create
