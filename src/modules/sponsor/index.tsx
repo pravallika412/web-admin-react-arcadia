@@ -145,7 +145,7 @@ const Sponsor = () => {
   };
 
   type Color = "error" | "info" | "secondary";
-  const getStatusLabel = (status: "active" | "inactive" | "suspended"): JSX.Element => {
+  const getStatusLabel = (status: "active" | "inactive" | "suspended" | "canceled"): JSX.Element => {
     let color = "";
     let text = "";
     switch (status) {
@@ -157,8 +157,8 @@ const Sponsor = () => {
         text = "Inactive";
         color = "secondary";
         break;
-      case "suspended":
-        text = "Suspended";
+      case "canceled":
+        text = "Canceled";
         color = "error";
         break;
       default:

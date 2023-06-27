@@ -89,6 +89,8 @@ module.exports = {
         PINATA_API_KEY: JSON.stringify(process.env.PINATA_API_KEY),
         PINATA_API_SECRET_KEY: JSON.stringify(process.env.PINATA_API_SECRET_KEY),
         ALCHEMY_API_KEY: JSON.stringify(process.env.ALCHEMY_API_KEY),
+        TOKEN_SECURITY_KEY: JSON.stringify(process.env.TOKEN_SECURITY_KEY),
+        INIT_VECTOR: JSON.stringify(process.env.INIT_VECTOR),
       },
     }),
   ],

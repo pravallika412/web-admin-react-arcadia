@@ -1,6 +1,5 @@
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import {
-  MenuItem,
   TextField,
   Button,
   Box,
@@ -8,30 +7,20 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TablePagination,
   IconButton,
   useTheme,
   Grid,
   Typography,
   InputAdornment,
-  Skeleton,
-  CircularProgress,
   DialogContentText,
-  Backdrop,
+  CardMedia,
+  Card,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import { makeStyles } from "@mui/styles";
-import { CREATE_SUBSCRIPTION, DELETE_PLAN, GET_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
-import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
+import { CREATE_SUBSCRIPTION, DELETE_PLAN, GET_PLANS, UPDATE_PLAN } from "../../shared/graphQL/subscription/queries";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -41,7 +30,10 @@ import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import axios from "axios";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import SharedTable from "../../shared/components/Table";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CropModal from "../../shared/components/CropModal";
+import DialogComponent from "../../shared/components/Dialog";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 const useStyles = makeStyles({
   root: {
@@ -53,6 +45,19 @@ const useStyles = makeStyles({
   image: {
     maxWidth: 50,
     maxHeight: 50,
+  },
+  card: {
+    width: 450,
+    height: 130,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  media: {
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
   },
 });
 
@@ -69,10 +74,7 @@ const Subscription = () => {
   const pinata_secret_api_key = process.env.PINATA_API_SECRET_KEY;
   const theme = useTheme();
   const classes = useStyles();
-  const [file, setFile] = useState([]);
   const [open, setOpen] = useState(false);
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploadFileEdit, setUploadFileEdit] = useState(null);
   const [products, setProducts] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
@@ -83,19 +85,28 @@ const Subscription = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [imageIpfs, setImageIpfs] = useState("");
-  const [iPFSFile, setIPFSFile] = useState("");
   const [presignedLoader, setPresignedLoader] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [selectedData, setSelectedData] = useState(null);
-  const [fileName, setFileName] = useState("");
   const [openPlanStatus, setOpenPlanStatus] = useState(false);
-  const [imageEdit, setImageEdit] = useState("");
   const [createSubscription, { data: createSub, loading: addPlanLoader }] = useMutation(CREATE_SUBSCRIPTION);
   const [updateSubscription, { data: updateSub, loading: updatePlanLoader }] = useMutation(UPDATE_PLAN);
-  const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
   const [getPlans, { data: getAllPlans, loading: planLoader, refetch }] = useLazyQuery(GET_PLANS);
-  const [getPlan, { data: getPlanById }] = useLazyQuery(GET_PLAN);
   const [deletePlan, { data: deletePlanData }] = useMutation(DELETE_PLAN);
+  const [src, setSrc] = useState(null);
+  const [loadingImage, setLoadingImage] = useState(false);
+  const [croppedImageUrl, setCroppedImageUrl] = useState(null);
+  const [openCropModal, setCropModal] = useState(false);
+  const [imageModal, setImageModal] = useState(false);
+
+  const setCroppedImageUrlCallbackPlan = useCallback(
+    (url) => {
+      console.log(url);
+      setLoadingImage(false);
+      setCroppedImageUrl(url);
+    },
+    [croppedImageUrl]
+  );
 
   const {
     control,
@@ -119,27 +130,6 @@ const Subscription = () => {
     control,
     name: "descriptions",
   });
-
-  useEffect(() => {
-    if (createPresignedUrl && !isEditing) {
-      setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
-    }
-    if (createPresignedUrl && isEditing) {
-      setUploadFileEdit(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
-    }
-  }, [createPresignedUrl]);
-
-  useEffect(() => {
-    if (uploadFile) {
-      uploadImageFn(uploadFile, file);
-    }
-  }, [uploadFile]);
-
-  useEffect(() => {
-    if (uploadFileEdit) {
-      uploadImageFn(uploadFileEdit, file);
-    }
-  }, [uploadFileEdit]);
 
   useEffect(() => {
     getPlans({ variables: { input: { pageDto: { page: page + 1, limit: rowsPerPage }, search: searchValue } } });
@@ -188,17 +178,6 @@ const Subscription = () => {
     setSearchValue(value);
   };
 
-  const uploadImageFn = async (url, data) => {
-    await fetch(url, {
-      method: "PUT",
-      body: data,
-      headers: {
-        "Content-Type": data.type,
-      },
-    });
-    setPresignedLoader(false);
-  };
-
   const onSubmit = async (data) => {
     setIPFSLoader(true);
     let data1 = JSON.stringify({
@@ -238,7 +217,7 @@ const Subscription = () => {
         description: JSON.stringify(data.descriptions.map((item) => item.description)),
         name: data.name,
         price: Number(data.price),
-        planImage: uploadFileEdit ? (uploadFileEdit.includes("?") ? uploadFileEdit.split("?")[0] : uploadFileEdit) : imageEdit,
+        planImage: croppedImageUrl ? croppedImageUrl : "",
         supportableProductCount: data.supportableProductCount,
         tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };
@@ -249,7 +228,7 @@ const Subscription = () => {
         name: data.name,
         description: JSON.stringify(data.descriptions.map((item) => item.description)),
         recurring: true,
-        planImage: uploadFile.includes("?") ? uploadFile.split("?")[0] : uploadFile,
+        planImage: croppedImageUrl ? croppedImageUrl : "",
         renewalPeriod: "month",
         price: Number(data.price),
         renewalNumber: 1,
@@ -273,13 +252,14 @@ const Subscription = () => {
       .catch((error) => console.error("Error:", error));
 
     let editData = getAllPlans.GetPlans.plans.filter((e) => e._id === row._id)[0];
+    setCroppedImageUrl(editData.plan_image);
     let initial_values = {
       name: editData.name,
       descriptions: [],
       price: editData.default_price.price,
       supportableProductCount: editData.default_price.supportable_product_count,
     };
-    setImageEdit(editData.plan_image);
+
     let descriptions;
     try {
       descriptions = JSON.parse(editData.description);
@@ -301,35 +281,9 @@ const Subscription = () => {
     setOpenDelete(true);
   };
 
-  const handleFileChange = async (event: any) => {
-    const file = event.target.files[0];
-    setFileName(file.name);
-    event.preventDefault();
-    setFile(event.target.files[0]);
-    let payload = {
-      fileName: event.target.files[0].name,
-      fileType: event.target.files[0].type,
-      filePath: "sponsor",
-    };
-    setPresignedLoader(true);
-    generatePresignedUrl({ variables: { input: payload } });
-    const formData = new FormData();
-    formData.append("file", event.target.files[0]);
-
-    const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        pinata_api_key: pinata_api_key,
-        pinata_secret_api_key: pinata_secret_api_key,
-      },
-    });
-
-    const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
-    setImageIpfs(ipfsUrl);
-  };
-
   const handleOpen = () => {
     setOpen(true);
+    setCroppedImageUrl(null);
     setIsEditing(false);
     reset({});
   };
@@ -337,22 +291,17 @@ const Subscription = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedData(null);
-    setFileName("");
+
     setOpenDelete(false);
     reset({ descriptions: [{ description: "" }] });
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
   const handlePlanStatusClose = () => {
     setOpenPlanStatus(false);
+  };
+
+  const handleCloseImage = () => {
+    setImageModal(false);
   };
 
   const formatDate = (dateToFormat) => {
@@ -445,6 +394,44 @@ const Subscription = () => {
     setPage(0); // Reset page when changing rows per page
   };
 
+  const handleFile = async (e) => {
+    console.log(e);
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        const img = new Image();
+        img.addEventListener("load", () => {
+          const width = img.width;
+          const height = img.height;
+
+          if (width < 300 || height < 300) {
+            setImageModal(true);
+            console.log("Please upload an image larger than 300x300");
+          } else {
+            setSrc(reader.result as string);
+            setCropModal(true);
+          }
+        });
+
+        img.src = reader.result as string;
+      });
+      reader.readAsDataURL(e.target.files[0]);
+      const formData = new FormData();
+      formData.append("file", e.target.files[0]);
+
+      const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          pinata_api_key: pinata_api_key,
+          pinata_secret_api_key: pinata_secret_api_key,
+        },
+      });
+
+      const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
+      setImageIpfs(ipfsUrl);
+    }
+  };
+
   return (
     <Container component="main">
       <Grid container justifyContent="space-between" alignItems="center" sx={{ ms: 2, mt: 2 }}>
@@ -459,7 +446,7 @@ const Subscription = () => {
           </Button>
         </Grid>
       </Grid>
-
+      {/* {loadingImage && <SuspenseLoader />} */}
       <SharedTable
         columns={columns}
         data={formattedData}
@@ -568,8 +555,61 @@ const Subscription = () => {
                 helperText={errors?.planImage?.message}
               />
             </div> */}
+            <Card className={classes.card}>
+              {
+                <>
+                  {loadingImage ? <SuspenseLoader /> : <CardMedia className={classes.media} image={croppedImageUrl} />}
+                  <IconButton
+                    component="label"
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      "&:hover": {
+                        background: theme.colors.primary.lighter,
+                      },
+                    }}
+                    color="inherit"
+                    htmlFor="profileImageInput"
+                    size="large"
+                  >
+                    <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                    <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
+                  </IconButton>
+                  {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />}
+                </>
+              }
+            </Card>
+            {/* <div>
+              <Card className={classes.card}>
+                {croppedImageUrl && <CardMedia className={classes.media} image={croppedImageUrl} />}
+                <IconButton
+                  component="label"
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "450px",
+                    height: "131px",
+                    background: "#FFFFFF",
+                    border: "1px dashed #999999",
+                    borderRadius: "6px",
+                  }}
+                  color="inherit"
+                  htmlFor="profileImageInput"
+                  size="large"
+                >
+                  <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                  <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
+                </IconButton>
+                {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} />}
 
-            <div>
+                {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
+              </Card>
+            </div> */}
+            {/* <div>
               <Controller
                 name="planImage"
                 control={control}
@@ -586,39 +626,35 @@ const Subscription = () => {
                 }
                 render={({ field }) => (
                   <>
-                    <input
-                      {...field}
-                      id="file-upload"
-                      type="file"
-                      hidden
-                      onChange={(e) => {
-                        field.onChange(e); // use field.onChange to notify the form when a file is selected
-                        handleFileChange(e);
-                      }}
-                    />
-                    <Button
-                      variant="outlined"
-                      onClick={() => document.getElementById("file-upload").click()}
-                      startIcon={<CloudUploadIcon />}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: "450px",
-                        height: "131px",
-                        background: "#FFFFFF",
-                        border: "1px dashed #999999",
-                        borderRadius: "6px",
-                      }}
-                    >
-                      {fileName ? fileName : "Upload Plan Image"}
-                    </Button>
-                    {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
+                    <Card className={classes.card}>
+                      {croppedImageUrl && <CardMedia className={classes.media} image={croppedImageUrl} />}
+                      <IconButton
+                        component="label"
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "450px",
+                          height: "131px",
+                          background: "#FFFFFF",
+                          border: "1px dashed #999999",
+                          borderRadius: "6px",
+                        }}
+                        color="inherit"
+                        htmlFor="profileImageInput"
+                        size="large"
+                      >
+                        <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                        <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
+                      </IconButton>
+                      {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} />}
+
+                      {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
+                    </Card>
                   </>
                 )}
               />
-            </div>
-
+            </div> */}
             <Controller
               name="mtdescription"
               control={control}
@@ -689,10 +725,10 @@ const Subscription = () => {
             </div>
           </DialogContent>
           <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={addPlanLoader || updatePlanLoader}>
               Submit
             </Button>
-            <Button onClick={handleClose}>Cancel</Button>
           </DialogActions>
         </Box>
         {(iPFSLoader || presignedLoader || updatePlanLoader || addPlanLoader) && <SuspenseLoader left="0%" />}
@@ -734,6 +770,21 @@ const Subscription = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <DialogComponent
+        open={imageModal}
+        width={324}
+        height={240}
+        handleClose={handleCloseImage}
+        content={
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <ErrorOutlineIcon color="error" sx={{ fontSize: 72, mb: 4 }} />
+            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+              <strong> Please choose image more than 300 * 300</strong>
+            </DialogContentText>
+          </Box>
+        }
+        actions={undefined}
+      />
     </Container>
   );
 };
