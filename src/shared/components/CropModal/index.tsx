@@ -15,6 +15,7 @@ interface CropModalProps {
   setCropModal: (open: boolean) => void;
   setCroppedImageUrl: any;
   src: string;
+  setLoadingImage: (open: boolean) => void;
 }
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
@@ -33,7 +34,7 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
   );
 }
 
-const CropModal: React.FC<CropModalProps> = ({ openCropModal, setCropModal, src, setCroppedImageUrl }) => {
+const CropModal: React.FC<CropModalProps> = ({ openCropModal, setCropModal, src, setCroppedImageUrl, setLoadingImage }) => {
   const [crop, setCrop] = useState<Crop>();
   const [aspect, setAspect] = useState<number | undefined>(1 / 1);
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -86,6 +87,8 @@ const CropModal: React.FC<CropModalProps> = ({ openCropModal, setCropModal, src,
   }
 
   const handleDone = async () => {
+    setCropModal(false);
+    setLoadingImage(true);
     const canvas = await previewCanvasRef.current;
     const base64ImageData = canvas.toDataURL("image/jpeg");
     const croppedImageFile = dataURLtoFile(base64ImageData, "cropped_image.jpg");
@@ -99,9 +102,9 @@ const CropModal: React.FC<CropModalProps> = ({ openCropModal, setCropModal, src,
     const presignedUrl = await generatePresignedUrlAWS({ variables: { input: payload } });
     await uploadImage(presignedUrl?.data.GeneratePresignedUrl.presignedUrl, croppedImageFile);
 
-    setCropModal(false);
-    setCompletedCrop(null);
     setCroppedImageUrl(presignedUrl?.data.GeneratePresignedUrl.presignedUrl.split("?")[0]);
+    setLoadingImage(false);
+    setCompletedCrop(null);
   };
 
   const uploadImage = async (url, data) => {

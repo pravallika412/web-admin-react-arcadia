@@ -4,6 +4,7 @@ const LOGIN_ADMIN = gql`
   mutation signIn($input: LoginDto!) {
     signIn(loginDto: $input) {
       jwtToken
+      expiresIn
     }
   }
 `;

@@ -16,6 +16,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import useStyles from "../../styles/theme/styles";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import CircularProgress from "@mui/material/CircularProgress";
+import crypto from "crypto";
 
 interface IFormInput {
   email: string;
@@ -31,7 +32,8 @@ export default function SignIn() {
     watch,
     formState: { errors },
   } = useForm<IFormInput>();
-
+  const secretKey = process.env.TOKEN_SECURITY_KEY;
+  const iv = process.env.INIT_VECTOR;
   const navigate = useNavigate();
   const [loginUser, { data, loading: loginLoader }] = useMutation(LOGIN_ADMIN);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,10 +41,30 @@ export default function SignIn() {
 
   useEffect(() => {
     if (data) {
-      window.localStorage.setItem("token", data.signIn.jwtToken);
-      navigate("/overview");
+      window.localStorage.setItem("expiresIn", data?.signIn.expiresIn);
+      const encryptedToken = data?.signIn.jwtToken; // Your encrypted JWT token
+      if (encryptedToken) {
+        decryptMessage(encryptedToken);
+      }
     }
   }, [navigate, data]);
+
+  async function decryptMessage(encryptedData) {
+    const algorithm = "aes-256-cbc";
+    const keyBuffer = Buffer.from(secretKey, "hex");
+    const initVector = Buffer.from(iv, "hex");
+    const decipher = crypto.createDecipheriv(algorithm, keyBuffer, initVector);
+    decipher.setEncoding("hex");
+
+    // Decrypt the data
+    let decryptedData = decipher.update(encryptedData, "hex", "utf8");
+    decryptedData += decipher.final("utf8");
+    window.localStorage.setItem("token", decryptedData);
+    navigate("/overview");
+    return decryptedData;
+  }
+
+  // Rest of your component code
 
   const onSubmitData: SubmitHandler<IFormInput> = (formResponse) => {
     loginUser({ variables: { input: formResponse } });

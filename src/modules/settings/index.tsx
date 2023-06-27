@@ -41,6 +41,8 @@ import TokenList from "./wallet";
 import ReactCrop, { centerCrop, makeAspectCrop, Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import CropModal from "../../shared/components/CropModal";
+import DialogComponent from "../../shared/components/Dialog";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 const web3 = new Web3();
 interface TabPanelProps {
@@ -119,34 +121,23 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
 
 const Settings = () => {
   const theme = useTheme();
-  const [imgSrc, setImgSrc] = useState("");
-  const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [scale, setScale] = useState(1);
-  const [rotate, setRotate] = useState(0);
-  const [aspect, setAspect] = useState<number | undefined>(1 / 1);
-
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true);
   const classes = useStyles();
   const [value, setValue] = useState(0);
-  const [file, setFile] = useState([]);
-  const [uploadFile, setUploadFile] = useState(null);
   const [presignedURL, setPresignedURL] = useState(null);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [loadingImage, setLoadingImage] = useState(false);
   const [openProfileStatus, setOpenProfileStatus] = useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
   const [updateProfile, { data: updateProfileData }] = useMutation(UPDATE_PROFILE);
-  const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
 
   const [src, setSrc] = useState(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState(null);
   const [openCropModal, setCropModal] = useState(false);
+  const [imageModal, setImageModal] = useState(false);
   const setCroppedImageUrlCallback = useCallback(
     (url) => {
+      setLoadingImage(false);
       setCroppedImageUrl(url);
     },
     [croppedImageUrl]
@@ -189,30 +180,6 @@ const Settings = () => {
     }
   }, [getAdminData, reset]);
 
-  useEffect(() => {
-    if (createPresignedUrl) {
-      setUploadFile(createPresignedUrl.GeneratePresignedUrl.presignedUrl);
-    }
-  }, [createPresignedUrl]);
-
-  useEffect(() => {
-    if (uploadFile) {
-      uploadImageFn(uploadFile, file);
-    }
-  }, [uploadFile]);
-
-  const handleFileChange = (event: any) => {
-    event.preventDefault();
-    setLoadingImage(true);
-    setFile(event.target.files[0]);
-    let payload = {
-      fileName: event.target.files[0].name,
-      fileType: event.target.files[0].type,
-      filePath: "sponsor",
-    };
-    generatePresignedUrl({ variables: { input: payload } });
-  };
-
   const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -225,36 +192,37 @@ const Settings = () => {
     const payload = {
       firstName: data.firstName,
       lastName: data.lastName,
-      profileImage: presignedURL ? presignedURL : null,
+      profileImage: presignedURL ? presignedURL : croppedImageUrl,
     };
     updateProfile({ variables: { input: payload } });
-  };
-
-  const uploadImageFn = async (url, data) => {
-    await fetch(url, {
-      method: "PUT",
-      body: data,
-      headers: {
-        "Content-Type": data.type,
-      },
-    });
-    setLoadingImage(false);
-    setPresignedURL(uploadFile.split("?")[0]);
   };
 
   const handleFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
-      reader.addEventListener(
-        "load",
-        () => {
-          setSrc(reader.result);
-          setCropModal(true);
-        },
-        false
-      );
+      reader.addEventListener("load", () => {
+        const img = new Image();
+        img.addEventListener("load", () => {
+          const width = img.width;
+          const height = img.height;
+
+          if (width < 300 || height < 300) {
+            setImageModal(true);
+            console.log("Please upload an image larger than 300x300");
+          } else {
+            setSrc(reader.result as string);
+            setCropModal(true);
+          }
+        });
+
+        img.src = reader.result as string;
+      });
       reader.readAsDataURL(e.target.files[0]);
     }
+  };
+
+  const handleClose = () => {
+    setImageModal(false);
   };
 
   return (
@@ -346,22 +314,13 @@ const Settings = () => {
                                 <TextField label="Wallet Address" {...register("walletAddress")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
                               )}
                             </Grid>
-                            <Grid item xs={12} md={12}>
-                              {/* <input type="file" onChange={handleFile} /> */}
-
-                              {/* {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallback} openCropModal={openCropModal} setCropModal={setCropModal} />}
-
-                              {croppedImageUrl && <img src={croppedImageUrl} width="200" height="200" alt="" />} */}
-                            </Grid>
                           </>
                         </Grid>
                         <Grid item xs={6} md={4}>
                           <Card className={classes.card}>
-                            {loadingImage ? (
-                              <CircularProgress />
-                            ) : croppedImageUrl ? (
+                            {croppedImageUrl ? (
                               <>
-                                <CardMedia className={classes.media} image={croppedImageUrl} />
+                                {loadingImage ? <CircularProgress /> : <CardMedia className={classes.media} image={croppedImageUrl} />}
                                 <IconButton
                                   component="label"
                                   sx={{
@@ -381,7 +340,9 @@ const Settings = () => {
                                   <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
                                   <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFile(e) })} hidden />
                                 </IconButton>
-                                {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallback} openCropModal={openCropModal} setCropModal={setCropModal} />}
+                                {src && (
+                                  <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallback} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />
+                                )}
                               </>
                             ) : (
                               <div>
@@ -400,6 +361,9 @@ const Settings = () => {
                                   <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
                                   <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { onChange: (e) => handleFile(e) })} hidden />
                                 </IconButton>
+                                {src && (
+                                  <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallback} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />
+                                )}
                               </div>
                             )}
                           </Card>
@@ -446,6 +410,21 @@ const Settings = () => {
           </Box>
         </DialogContent>
       </Dialog>
+      <DialogComponent
+        open={imageModal}
+        width={324}
+        height={240}
+        handleClose={handleClose}
+        content={
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <ErrorOutlineIcon color="error" sx={{ fontSize: 72, mb: 4 }} />
+            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+              <strong> Please choose image more than 300 * 300</strong>
+            </DialogContentText>
+          </Box>
+        }
+        actions={undefined}
+      />
     </>
   );
 };
