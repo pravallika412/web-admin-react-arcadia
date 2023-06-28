@@ -223,8 +223,7 @@ function TokenList({ address }) {
                 <TextField label="Wallet Address" {...register("walletAddress")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
               )}
             </Grid>
-            <Grid sx={{ display: "flex", justifyContent: "flex-start", mt: 2, gap: 2 }}>
-              <Button variant="outlined">Cancel</Button>
+            <Grid sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 2 }}>
               <Button variant="contained" type="submit">
                 Save
               </Button>

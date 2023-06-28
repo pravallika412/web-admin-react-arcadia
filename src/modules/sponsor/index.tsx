@@ -48,6 +48,10 @@ const sponsorshipStatus = [
     id: "inactive",
     name: "Inactive",
   },
+  {
+    id: "canceled",
+    name: "Cancelled",
+  },
 ];
 
 const Sponsor = () => {
@@ -124,7 +128,7 @@ const Sponsor = () => {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
 
-      const formattedDate = `${year}-${month}-${day}`;
+      const formattedDate = `${day}-${month}-${year}`;
       return formattedDate;
     } else {
       return "";

@@ -3,14 +3,14 @@ import { Box } from "@mui/system";
 import Label from "../../shared/components/Label";
 
 const DetailComponent = ({ sponsorData }) => {
-  const { sponsor, subscription_end_date, planDetails } = sponsorData;
+  const { sponsor, subscription_end_date, planDetails, status } = sponsorData;
 
   if (!sponsor) {
     return null; // or return a placeholder or error message
   }
 
   type Color = "error" | "info" | "secondary";
-  const getStatusLabel = (status: "active" | "inactive" | "suspended"): JSX.Element => {
+  const getStatusLabel = (status: "active" | "inactive" | "canceled"): JSX.Element => {
     let color = "";
     let text = "";
     switch (status) {
@@ -22,8 +22,8 @@ const DetailComponent = ({ sponsorData }) => {
         text = "Inactive";
         color = "secondary";
         break;
-      case "suspended":
-        text = "Suspended";
+      case "canceled":
+        text = "Cancelled";
         color = "error";
         break;
       default:
@@ -51,7 +51,7 @@ const DetailComponent = ({ sponsorData }) => {
                 {sponsor.name}
               </Typography>
               <Typography variant="body1" style={{ textAlign: "center" }}>
-                {getStatusLabel(sponsor.status) || "N/A"}
+                {getStatusLabel(status) || "N/A"}
               </Typography>
             </Box>
           </Grid>
