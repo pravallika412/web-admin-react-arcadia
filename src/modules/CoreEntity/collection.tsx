@@ -225,7 +225,42 @@ const Collection = () => {
 
   return (
     <>
-      {
+      {brandDetailsData ? ( // Check if brand details exist
+        <Grid container spacing={2}>
+          <Grid item xs={9} md={9}>
+            <TextField label="Name" margin="normal" value={brandDetailsData.name} disabled fullWidth />
+            <TextField label="Description" margin="normal" value={brandDetailsData.description} disabled fullWidth />
+            {brandDetailsData.brandProperties.map((property, index) => (
+              <Grid container spacing={2} key={index}>
+                <Grid item xs={6}>
+                  <TextField label="Property Name" margin="normal" value={property.trait_type} disabled fullWidth />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField label="Property Value" name="type" margin="normal" value={property.value} InputLabelProps={{ shrink: true }} disabled fullWidth />
+                </Grid>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Grid item xs={3} md={3}>
+            <Card className={classes.card}>
+              <CardMedia className={classes.media} image={brandDetailsData.image} />
+            </Card>
+          </Grid>
+        </Grid>
+      ) : loadingBrandDetails ? ( // Check if loading
+        <Grid container spacing={2}>
+          <Grid item xs={9} md={9}>
+            <Skeleton variant="text" height={50} />
+            <Skeleton variant="text" height={50} />
+            <Skeleton variant="text" height={50} />
+            <Skeleton variant="text" height={50} />
+          </Grid>
+          <Grid item xs={3} md={3}>
+            <Skeleton variant="rectangular" height={200} />
+          </Grid>
+        </Grid>
+      ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={9}>
@@ -236,7 +271,7 @@ const Collection = () => {
                 {...register("name", {
                   required: "Name is required",
                   pattern: {
-                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                    value: /^[a-zA-Z]+$/,
                     message: "Please enter valid name",
                   },
                   maxLength: {
@@ -387,7 +422,7 @@ const Collection = () => {
             Submit
           </Button>
         </form>
-      }
+      )}
 
       <DialogComponent
         open={dialog}

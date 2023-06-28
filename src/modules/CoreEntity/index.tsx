@@ -275,7 +275,7 @@ const CoreEntity = () => {
                                     message: "Collection Name is required",
                                   },
                                   pattern: {
-                                    value: /^[A-Za-z][A-Za-z\s]*$/,
+                                    value: /^[a-zA-Z]+$/,
                                     message: "Please enter valid collection name",
                                   },
                                   maxLength: {

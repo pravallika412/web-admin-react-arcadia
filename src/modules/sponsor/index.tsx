@@ -48,6 +48,10 @@ const sponsorshipStatus = [
     id: "inactive",
     name: "Inactive",
   },
+  {
+    id: "canceled",
+    name: "Cancelled",
+  },
 ];
 
 const Sponsor = () => {
