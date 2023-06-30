@@ -9,6 +9,15 @@ const CREATE_ENTITY = gql`
   }
 `;
 
+const UPDATE_ENTITY = gql`
+  mutation UpdateCoreEntity($input: UpdateCoreEntityDto!) {
+    UpdateCoreEntity(updateCoreEntityDto: $input) {
+      success
+      message
+    }
+  }
+`;
+
 const GET_DATATYPES = gql`
   query {
     retrieveDataTypes {
@@ -38,4 +47,4 @@ const CREATE_COLLECTION = gql`
   }
 `;
 
-export { CREATE_ENTITY, GET_DATATYPES, GET_COREENTITY, CREATE_COLLECTION };
+export { CREATE_ENTITY, GET_DATATYPES, GET_COREENTITY, CREATE_COLLECTION, UPDATE_ENTITY };
