@@ -26,13 +26,15 @@ import {
 } from "@mui/material";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { CREATE_ENTITY, GET_COREENTITY, GET_DATATYPES } from "../../shared/graphQL/core-entity/queries";
+import { CREATE_ENTITY, GET_COREENTITY, GET_DATATYPES, UPDATE_ENTITY } from "../../shared/graphQL/core-entity/queries";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { makeStyles } from "@mui/styles";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Collection from "./collection";
+import NestedArray from "./nestedArray";
+import EditIcon from "@mui/icons-material/Edit";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,40 +72,103 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
   },
 }));
-
+interface CoreEntityFields {
+  entity: {
+    fieldName: string;
+    dataType: number;
+    data: any;
+  }[];
+  basicInformation: {
+    fieldName: string;
+    dataType: number;
+    data: any;
+  }[];
+  aboutMe: {
+    fieldName: string;
+    dataType: number;
+    data: any;
+  }[];
+  section: {
+    [sectionName: string]: {
+      section_name: string;
+      section_details: {
+        fieldName: string;
+        dataType: number;
+        data: any;
+      }[];
+    };
+  };
+}
 const CoreEntity = () => {
   const classes = useStyles();
   const theme = useTheme();
-  const [value, setValue] = useState(0);
+  const [value, setValues] = useState(0);
   const [isCoreEntity, setIsCoreEntity] = useState(false);
+  const [coreEntityFields, setCoreEntityFields] = useState<CoreEntityFields>({
+    entity: [],
+    basicInformation: [],
+    aboutMe: [],
+    section: {},
+  });
   const [dataTypesEntity, setDataTypesEntity] = useState([]);
   const [openEntity, setOpenEntity] = useState(false);
-  const [coreEntityFields, setCoreEntityFields] = useState([]);
   const [getDataTypes, { data: getAllDataTypes }] = useLazyQuery(GET_DATATYPES);
   const [getCoreEntity, { data: getCoreEntityData, refetch }] = useLazyQuery(GET_COREENTITY);
   const [createEntity, { data: createEntityData }] = useMutation(CREATE_ENTITY);
+  const [updateEntity, { data: updateEntityData }] = useMutation(UPDATE_ENTITY);
   const [text, setText] = useState("");
   const [words, setWords] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [additionalFields, setAdditionalFields] = useState([]);
+  const [newFields, setNewFields] = useState([]);
+
+  const defaultValues = isEditMode
+    ? {
+        collectionName: "",
+        fields: [],
+        basicinfo: [],
+        aboutme: [],
+        test: [],
+      }
+    : {
+        collectionName: "",
+        fields: [],
+        basicinfo: [
+          {
+            fieldName: "",
+            dataType: 0,
+            data: "",
+          },
+        ],
+        aboutme: [
+          {
+            fieldName: "",
+            dataType: 0,
+            data: "",
+          },
+        ],
+        test: [
+          {
+            secName: "",
+            section: [
+              { fieldName: "", dataType: 0, data: "" },
+              { fieldName: "", dataType: 0, data: "" },
+            ],
+          },
+        ],
+      };
 
   const {
     control,
     register,
     handleSubmit,
     reset,
+    getValues,
+    setValue,
     watch,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      collectionName: "",
-      fields: [],
-      basicinfo: [
-        {
-          fieldName: "",
-          dataType: 0,
-          data: "",
-        },
-      ],
-    },
+    defaultValues,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -118,6 +183,24 @@ const CoreEntity = () => {
   } = useFieldArray({
     control,
     name: "basicinfo",
+  });
+
+  const {
+    fields: aboutmeFields,
+    append: appendAboutMe,
+    remove: removeAboutMe,
+  } = useFieldArray({
+    control,
+    name: "basicinfo",
+  });
+
+  const {
+    fields: secFields,
+    append: appendSec,
+    remove: removeSec,
+  } = useFieldArray({
+    control,
+    name: "test",
   });
 
   useEffect(() => {
@@ -135,10 +218,16 @@ const CoreEntity = () => {
   useEffect(() => {
     if (getCoreEntityData) {
       if (getCoreEntityData.RetrieveCoreEntity.product_schema) {
+        console.log(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
         setCoreEntityFields(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
         setIsCoreEntity(true);
       } else {
-        setCoreEntityFields([]);
+        setCoreEntityFields({
+          entity: [],
+          basicInformation: [],
+          aboutMe: [],
+          section: {},
+        });
         setIsCoreEntity(false);
       }
     }
@@ -151,7 +240,7 @@ const CoreEntity = () => {
   }, [getAllDataTypes]);
 
   const handleChange = (event: SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+    setValues(newValue);
   };
 
   const onSubmit = (data) => {
@@ -167,9 +256,31 @@ const CoreEntity = () => {
         e.data = words;
       }
     });
+    const restructuredData = {
+      entity: data.fields,
+      basicInformation: data.basicinfo,
+      aboutMe: data.aboutme,
+      section: {},
+    };
+
+    // Map over the `test` array to transform the section details
+    data.test.forEach((section, index) => {
+      const sectionName = `section${index + 1}`;
+      const sectionDetails = section.section.map((field) => ({
+        fieldName: field.fieldName,
+        dataType: field.dataType,
+        data: field.data,
+      }));
+
+      restructuredData.section[sectionName] = {
+        section_name: section.secName,
+        section_details: sectionDetails,
+      };
+    });
+    console.log(restructuredData);
     const payload = {
       collectionName: data.collectionName,
-      fields: JSON.stringify(data.fields),
+      fields: JSON.stringify(restructuredData),
     };
     createEntity({ variables: { input: payload } });
   };
@@ -202,39 +313,349 @@ const CoreEntity = () => {
     setOpenEntity(false);
   };
 
+  const handleUpdate = () => {
+    const formValues = getValues();
+    console.log(formValues);
+    const entity = formValues.fields.filter((field) => field.fieldName !== "");
+    const basicinfo = formValues.basicinfo.filter((field) => field.fieldName !== "");
+    const abtme = formValues.aboutme.filter((field) => field.fieldName !== "");
+
+    const restructuredData = {
+      entity: entity,
+      basicInformation: basicinfo,
+      aboutMe: abtme,
+      section: {},
+    };
+
+    formValues.test.forEach((section, index) => {
+      const sectionName = section.secName;
+      const sectionDetails = section.section.map((field) => ({
+        fieldName: field.fieldName,
+        dataType: field.dataType,
+        data: field.data,
+      }));
+
+      restructuredData.section[sectionName] = {
+        section_name: section.secName,
+        section_details: sectionDetails.filter((field) => field.fieldName !== ""),
+      };
+    });
+
+    console.log(restructuredData);
+    removeEmptyKeys(restructuredData);
+    console.log(removeEmptyKeys(restructuredData));
+    setNewFields(newFields);
+    const payload = {
+      fields: JSON.stringify(removeEmptyKeys(restructuredData)),
+    };
+    updateEntity({ variables: { input: payload } });
+  };
+
+  function removeEmptyKeys(obj) {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, value]) => {
+        if (Array.isArray(value) && value.length === 0) {
+          return false;
+        }
+        if (typeof value === "object" && value !== null && Object.keys(value).length === 0) {
+          return false;
+        }
+        return true;
+      })
+    );
+  }
+
   const MyComponent = () => (
     <>
-      <Grid item xs={12}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button onClick={() => setIsEditMode(!isEditMode)}>{isEditMode ? "View" : "Edit"}</Button>
+      </Box>
+      <Box>
+        <Typography variant="h4">Entity</Typography>
         <TextField label="Collection Name" margin="normal" value={getCoreEntityData && getCoreEntityData.RetrieveCoreEntity.product_table_name} disabled fullWidth />
-      </Grid>
-      {coreEntityFields &&
-        coreEntityFields.map((field, index) => {
-          const datatype = datatypesMap[field.dataType];
-
-          return (
+        {coreEntityFields.entity &&
+          coreEntityFields.entity.map((field, index) => (
             <Grid container spacing={2} key={index}>
               <Grid item xs={6}>
-                <TextField label="Entity Name" margin="normal" value={field.fieldName} disabled fullWidth />
+                <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
               </Grid>
-              <Grid item xs={6}>
-                <TextField label="Entity Type" name="type" margin="normal" value={datatype.name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+              <Grid item xs={isEditMode ? 5 : 6}>
+                <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
               </Grid>
-              {datatype.name === "Enum" && field.data.length > 0 && (
-                <>
-                  <Grid item xs={6}></Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="subtitle1">Data:</Typography>
-                    <div className={classes.chipTextArea}>
-                      {field.data.map((item, itemIndex) => (
-                        <Chip label={item} key={itemIndex} />
-                      ))}
-                    </div>
-                  </Grid>
-                </>
+              {isEditMode && index === coreEntityFields.entity.length - 1 && (
+                <Grid item xs={1}>
+                  <Button sx={{ mt: 2 }} onClick={() => append({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                    Add
+                  </Button>
+                </Grid>
               )}
             </Grid>
-          );
-        })}
+          ))}
+
+        {fields.map((field, index) => (
+          <div key={field.id}>
+            <Grid container spacing={2} my={1}>
+              <Grid item xs={6}>
+                <TextField label="Field Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
+              </Grid>
+              <Grid item xs={5}>
+                <Controller
+                  name={`fields.${index}.dataType`}
+                  control={control} // assuming you have `control` from useForm()
+                  render={({ field }) => (
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel id={`fields-${index}-label`}>Field Type</InputLabel>
+                      <Select labelId={`fields-${index}-label`} label="Field Type" {...field}>
+                        {dataTypesEntity.map((option) => (
+                          <MenuItem key={option.order} value={option.order}>
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+              {watch(`fields.${index}.dataType`) === 5 && (
+                <Grid item xs={11} md={11}>
+                  <TextField
+                    label="Enter text"
+                    fullWidth
+                    value={text}
+                    InputProps={{
+                      startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                    }}
+                    {...register(`fields.${index}.data`)}
+                    onChange={handleChangeEnumType}
+                    onKeyDown={handleKeyDown}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                <IconButton
+                  sx={{
+                    "&:hover": { background: theme.colors.error.lighter },
+                    color: theme.palette.error.main,
+                  }}
+                  color="inherit"
+                  size="small"
+                  onClick={() => remove(index)}
+                >
+                  <DeleteTwoToneIcon fontSize="small" />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </div>
+        ))}
+      </Box>
+      <Divider sx={{ my: 3 }} />
+      <Box>
+        <Typography variant="h4">About Me</Typography>
+        {coreEntityFields.aboutMe &&
+          coreEntityFields.aboutMe.map((field, index) => (
+            <Grid container spacing={2} key={index}>
+              <Grid item xs={6}>
+                <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
+              </Grid>
+              <Grid item xs={isEditMode ? 5 : 6}>
+                <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+              </Grid>
+              {isEditMode && index === coreEntityFields.aboutMe.length - 1 && (
+                <Grid item xs={1}>
+                  <Button sx={{ mt: 2 }} onClick={() => appendAboutMe({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                    Add
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
+          ))}
+        {isEditMode &&
+          aboutmeFields.map((field, index) => (
+            <div key={field.id}>
+              <Grid container spacing={2} my={1}>
+                <Grid item xs={6}>
+                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`aboutme.${index}.fieldName`)} />
+                </Grid>
+                <Grid item xs={5}>
+                  <Controller
+                    name={`aboutme.${index}.dataType`}
+                    control={control} // assuming you have `control` from useForm()
+                    render={({ field }) => (
+                      <FormControl variant="outlined" fullWidth>
+                        <InputLabel id={`aboutme-${index}-label`}>Field Type</InputLabel>
+                        <Select labelId={`aboutme-${index}-label`} label="Field Type" {...field}>
+                          {dataTypesEntity.map((option) => (
+                            <MenuItem key={option.order} value={option.order}>
+                              {option.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                </Grid>
+                {watch(`aboutme.${index}.dataType`) === 5 && (
+                  <Grid item xs={11} md={11}>
+                    <TextField
+                      label="Enter text"
+                      fullWidth
+                      value={text}
+                      InputProps={{
+                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                      }}
+                      {...register(`aboutme.${index}.data`)}
+                      onChange={handleChangeEnumType}
+                      onKeyDown={handleKeyDown}
+                    />
+                  </Grid>
+                )}
+                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                  <IconButton
+                    sx={{
+                      "&:hover": { background: theme.colors.error.lighter },
+                      color: theme.palette.error.main,
+                    }}
+                    color="inherit"
+                    size="small"
+                    onClick={() => removeAboutMe(index)}
+                  >
+                    <DeleteTwoToneIcon fontSize="small" />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </div>
+          ))}
+      </Box>
+      <Divider sx={{ my: 3 }} />
+      <Box>
+        <Typography variant="h4">Basic Info</Typography>
+        {coreEntityFields.basicInformation &&
+          coreEntityFields.basicInformation.map((field, index) => (
+            <Grid container spacing={2} key={index}>
+              <Grid item xs={6}>
+                <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
+              </Grid>
+              <Grid item xs={isEditMode ? 5 : 6}>
+                <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+              </Grid>
+              {isEditMode && index === coreEntityFields.basicInformation.length - 1 && (
+                <Grid item xs={1}>
+                  <Button sx={{ mt: 2 }} onClick={() => appendBasicInfo({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                    Add
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
+          ))}
+        {isEditMode &&
+          basicinfoFields.map((field, index) => (
+            <div key={field.id}>
+              <Grid container spacing={2} my={1}>
+                <Grid item xs={6}>
+                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`basicinfo.${index}.fieldName`)} />
+                </Grid>
+                <Grid item xs={5}>
+                  <Controller
+                    name={`basicinfo.${index}.dataType`}
+                    control={control} // assuming you have `control` from useForm()
+                    render={({ field }) => (
+                      <FormControl variant="outlined" fullWidth>
+                        <InputLabel id={`basicinfo-${index}-label`}>Field Type</InputLabel>
+                        <Select labelId={`basicinfo-${index}-label`} label="Field Type" {...field}>
+                          {dataTypesEntity.map((option) => (
+                            <MenuItem key={option.order} value={option.order}>
+                              {option.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                </Grid>
+                {watch(`basicinfo.${index}.dataType`) === 5 && (
+                  <Grid item xs={11} md={11}>
+                    <TextField
+                      label="Enter text"
+                      fullWidth
+                      value={text}
+                      InputProps={{
+                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                      }}
+                      {...register(`basicinfo.${index}.data`)}
+                      onChange={handleChangeEnumType}
+                      onKeyDown={handleKeyDown}
+                    />
+                  </Grid>
+                )}
+                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                  <IconButton
+                    sx={{
+                      "&:hover": { background: theme.colors.error.lighter },
+                      color: theme.palette.error.main,
+                    }}
+                    color="inherit"
+                    size="small"
+                    onClick={() => removeBasicInfo(index)}
+                  >
+                    <DeleteTwoToneIcon fontSize="small" />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </div>
+          ))}
+      </Box>
+      <Divider sx={{ my: 3 }} />
+      <Grid container>
+        <Grid item xs={10}>
+          <Typography variant="h3">Sections</Typography>
+        </Grid>
+        {isEditMode && (
+          <Grid item xs={2}>
+            <Button variant="outlined" onClick={() => appendSec({ secName: "", section: [{ fieldName: "", dataType: 0, data: "" }] })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+              Add Section
+            </Button>
+          </Grid>
+        )}
+        {coreEntityFields.section &&
+          Object.entries(coreEntityFields.section).map(([sectionName, section]) => (
+            <Grid item xs={12} key={sectionName}>
+              <Typography variant="h6">{section.section_name}</Typography>
+              {section.section_details.map((field, index) => (
+                <Grid container spacing={2} key={index}>
+                  <Grid item xs={6}>
+                    <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+                  </Grid>
+                </Grid>
+              ))}
+            </Grid>
+          ))}
+      </Grid>
+      {isEditMode &&
+        secFields.map((field, index) => (
+          <Box key={field.id} sx={{ mt: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={10}>
+                <TextField label="Section Name" variant="outlined" fullWidth {...register(`test.${index}.secName`)} />
+              </Grid>
+              <Grid item xs={2}>
+                <Button type="button" variant="outlined" onClick={() => removeSec(index)}>
+                  Remove Section
+                </Button>
+              </Grid>
+            </Grid>
+            <NestedArray nestIndex={index} {...{ control, register, dataTypesEntity }} />
+          </Box>
+        ))}
+      {isEditMode && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button variant="contained" onClick={handleUpdate}>
+            Update
+          </Button>
+        </Box>
+      )}
     </>
   );
 
@@ -256,7 +677,7 @@ const CoreEntity = () => {
                     <Collection />
                   </TabPanel>
                   <TabPanel value={value} index={1}>
-                    {isCoreEntity ? (
+                    {!isCoreEntity ? (
                       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                         <Box>
                           <Typography variant="h3">Entity</Typography>
@@ -288,26 +709,26 @@ const CoreEntity = () => {
                               />
                             </Grid>
                             <Grid item xs={6}>
-                              <TextField label="Entity Name" margin="normal" value="name" disabled fullWidth />
+                              <TextField label="Field Name" margin="normal" value="name" disabled fullWidth />
                             </Grid>
                             <Grid item xs={6}>
-                              <TextField label="Entity Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
-                            </Grid>
-                          </Grid>
-                          <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                              <TextField label="Entity Name" margin="normal" value="photo_url" disabled fullWidth />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <TextField label="Entity Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                              <TextField label="Field Type" name="type" margin="normal" value="String" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
                             </Grid>
                           </Grid>
                           <Grid container spacing={2}>
                             <Grid item xs={6}>
-                              <TextField label="Entity Name" margin="normal" value="status" disabled fullWidth />
+                              <TextField label="Field Name" margin="normal" value="photo_url" disabled fullWidth />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <TextField label="Field Type" name="type" margin="normal" value="File" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                            </Grid>
+                          </Grid>
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <TextField label="Field Name" margin="normal" value="status" disabled fullWidth />
                             </Grid>
                             <Grid item xs={5}>
-                              <TextField label="Entity Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                              <TextField label="Field Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
                             </Grid>
                             <Grid item xs={1}>
                               <Button sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
@@ -319,7 +740,7 @@ const CoreEntity = () => {
                             <div key={field.id}>
                               <Grid container spacing={2} my={1}>
                                 <Grid item xs={6}>
-                                  <TextField label="Entity Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
+                                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
                                 </Grid>
                                 <Grid item xs={5}>
                                   <Controller
@@ -327,8 +748,8 @@ const CoreEntity = () => {
                                     control={control} // assuming you have `control` from useForm()
                                     render={({ field }) => (
                                       <FormControl variant="outlined" fullWidth>
-                                        <InputLabel id={`fields-${index}-label`}>Entity Type</InputLabel>
-                                        <Select labelId={`fields-${index}-label`} label="Entity Type" {...field}>
+                                        <InputLabel id={`fields-${index}-label`}>Field Type</InputLabel>
+                                        <Select labelId={`fields-${index}-label`} label="Field Type" {...field}>
                                           {dataTypesEntity.map((option) => (
                                             <MenuItem key={option.order} value={option.order}>
                                               {option.name}
@@ -371,20 +792,14 @@ const CoreEntity = () => {
                             </div>
                           ))}
                         </Box>
+                        <Divider sx={{ my: 3 }} />
                         <Box>
                           <Typography variant="h3">Basic Information</Typography>
-                          <Grid container spacing={2}>
-                            <Grid item xs={1}>
-                              <Button sx={{ mt: 2.5 }} onClick={() => appendBasicInfo({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
-                                Add
-                              </Button>
-                            </Grid>
-                          </Grid>
                           {basicinfoFields.map((field, index) => (
                             <div key={field.id}>
                               <Grid container spacing={2} my={1}>
                                 <Grid item xs={6}>
-                                  <TextField label="Entity Name" variant="outlined" fullWidth {...register(`basicinfo.${index}.fieldName`)} />
+                                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`basicinfo.${index}.fieldName`)} />
                                 </Grid>
                                 <Grid item xs={5}>
                                   <Controller
@@ -392,8 +807,8 @@ const CoreEntity = () => {
                                     control={control} // assuming you have `control` from useForm()
                                     render={({ field }) => (
                                       <FormControl variant="outlined" fullWidth>
-                                        <InputLabel id={`basicinfo-${index}-label`}>Entity Type</InputLabel>
-                                        <Select labelId={`basicinfo-${index}-label`} label="Entity Type" {...field}>
+                                        <InputLabel id={`basicinfo-${index}-label`}>Field Type</InputLabel>
+                                        <Select labelId={`basicinfo-${index}-label`} label="Field Type" {...field}>
                                           {dataTypesEntity.map((option) => (
                                             <MenuItem key={option.order} value={option.order}>
                                               {option.name}
@@ -419,21 +834,132 @@ const CoreEntity = () => {
                                     />
                                   </Grid>
                                 )}
-                                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
-                                  <IconButton
-                                    sx={{
-                                      "&:hover": { background: theme.colors.error.lighter },
-                                      color: theme.palette.error.main,
-                                    }}
-                                    color="inherit"
-                                    size="small"
-                                    onClick={() => removeBasicInfo(index)}
-                                  >
-                                    <DeleteTwoToneIcon fontSize="small" />
-                                  </IconButton>
-                                </Grid>
+                                {index > 0 && (
+                                  <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <IconButton
+                                      sx={{
+                                        "&:hover": { background: theme.colors.error.lighter },
+                                        color: theme.palette.error.main,
+                                      }}
+                                      color="inherit"
+                                      size="small"
+                                      onClick={() => removeBasicInfo(index)}
+                                    >
+                                      <DeleteTwoToneIcon fontSize="small" />
+                                    </IconButton>
+                                  </Grid>
+                                )}
+                                {index === 0 && (
+                                  <Grid item xs={1}>
+                                    <Button onClick={() => appendBasicInfo({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                                      Add
+                                    </Button>
+                                  </Grid>
+                                )}
                               </Grid>
                             </div>
+                          ))}
+                        </Box>
+                        <Divider sx={{ my: 3 }} />
+                        <Box>
+                          <Typography variant="h3">About me</Typography>
+                          {aboutmeFields.map((field, index) => (
+                            <div key={field.id}>
+                              <Grid container spacing={2} my={1}>
+                                <Grid item xs={6}>
+                                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`aboutme.${index}.fieldName`)} />
+                                </Grid>
+                                <Grid item xs={5}>
+                                  <Controller
+                                    name={`aboutme.${index}.dataType`}
+                                    control={control} // assuming you have `control` from useForm()
+                                    render={({ field }) => (
+                                      <FormControl variant="outlined" fullWidth>
+                                        <InputLabel id={`aboutme-${index}-label`}>Field Type</InputLabel>
+                                        <Select labelId={`aboutme-${index}-label`} label="Field Type" {...field}>
+                                          {dataTypesEntity.map((option) => (
+                                            <MenuItem key={option.order} value={option.order}>
+                                              {option.name}
+                                            </MenuItem>
+                                          ))}
+                                        </Select>
+                                      </FormControl>
+                                    )}
+                                  />
+                                </Grid>
+                                {watch(`aboutme.${index}.dataType`) === 5 && (
+                                  <Grid item xs={11} md={11}>
+                                    <TextField
+                                      label="Enter text"
+                                      fullWidth
+                                      value={text}
+                                      InputProps={{
+                                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                                      }}
+                                      {...register(`aboutme.${index}.data`)}
+                                      onChange={handleChangeEnumType}
+                                      onKeyDown={handleKeyDown}
+                                    />
+                                  </Grid>
+                                )}
+                                {index > 0 && (
+                                  <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <IconButton
+                                      sx={{
+                                        "&:hover": { background: theme.colors.error.lighter },
+                                        color: theme.palette.error.main,
+                                      }}
+                                      color="inherit"
+                                      size="small"
+                                      onClick={() => removeAboutMe(index)}
+                                    >
+                                      <DeleteTwoToneIcon fontSize="small" />
+                                    </IconButton>
+                                  </Grid>
+                                )}
+                                {index === 0 && (
+                                  <Grid item xs={1}>
+                                    <Button onClick={() => appendAboutMe({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                                      Add
+                                    </Button>
+                                  </Grid>
+                                )}
+                              </Grid>
+                            </div>
+                          ))}
+                        </Box>
+                        <Divider sx={{ my: 3 }} />
+                        <Box>
+                          <Grid container spacing={2}>
+                            <Grid item xs={10}>
+                              <Typography variant="h3">Section</Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Button
+                                variant="outlined"
+                                onClick={() => appendSec({ secName: "", section: [{ fieldName: "", dataType: 0, data: "" }] })}
+                                startIcon={<AddTwoToneIcon fontSize="small" />}
+                              >
+                                Add Section
+                              </Button>
+                            </Grid>
+                          </Grid>
+                          {secFields.map((field, index) => (
+                            <Box key={field.id} sx={{ mt: 3 }}>
+                              <Grid container spacing={2}>
+                                <Grid item xs={10}>
+                                  <TextField label="Section Name" variant="outlined" fullWidth {...register(`test.${index}.secName`)} />
+                                </Grid>
+                                <Grid item xs={2}>
+                                  {index > 0 && (
+                                    <Button type="button" variant="outlined" onClick={() => removeSec(index)}>
+                                      Remove Section
+                                    </Button>
+                                  )}
+                                </Grid>
+                              </Grid>
+                              <NestedArray nestIndex={index} {...{ control, register, dataTypesEntity }} />
+                            </Box>
                           ))}
                         </Box>
                         <Grid sx={{ display: "flex", justifyContent: "flex-end" }}>
