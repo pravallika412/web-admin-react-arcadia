@@ -121,6 +121,7 @@ const CoreEntity = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [additionalFields, setAdditionalFields] = useState([]);
   const [newFields, setNewFields] = useState([]);
+  const fieldNamePattern = /^[A-Za-z]+$/;
 
   const defaultValues = isEditMode
     ? {
@@ -244,22 +245,33 @@ const CoreEntity = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
     const initialFields = [
       { fieldName: "name", dataType: 1, data: "" },
       { fieldName: "image", dataType: 7, data: "" },
       { fieldName: "status", dataType: 5, data: ["active", "inactive"] },
     ];
-    data.fields.push(...initialFields);
-    data.fields.forEach((e) => {
-      if (e.dataType == 5 && typeof e.data == "string") {
-        e.data = words;
+    data.fields.unshift(...initialFields);
+
+    const restructureDataField = (field) => {
+      if (field.dataType === 5 && typeof field.data === "string") {
+        field.data = words;
+      } else if (field.dataType === 2 && field.data === "") {
+        field.data = null;
       }
-    });
+    };
+    // Update data.fields
+    data.fields.forEach(restructureDataField);
+
+    // Update basicInformation
+    data.basicinfo.forEach(restructureDataField);
+
+    // Update aboutMe
+    data.aboutme.forEach(restructureDataField);
+
     const restructuredData = {
-      entity: data.fields,
-      basicInformation: data.basicinfo,
-      aboutMe: data.aboutme,
+      entity: data.fields.filter((field) => field.fieldName !== ""),
+      basicInformation: data.basicinfo.filter((field) => field.fieldName !== ""),
+      aboutMe: data.aboutme.filter((field) => field.fieldName !== ""),
       section: {},
     };
 
@@ -269,15 +281,18 @@ const CoreEntity = () => {
       const sectionDetails = section.section.map((field) => ({
         fieldName: field.fieldName,
         dataType: field.dataType,
-        data: field.data,
+        data: field.dataType === 2 && field.data === "" ? null : field.data,
       }));
 
-      restructuredData.section[sectionName] = {
-        section_name: section.secName,
-        section_details: sectionDetails,
-      };
+      if (section.secName != "") {
+        restructuredData.section[sectionName] = {
+          section_name: section.secName,
+          section_details: sectionDetails.filter((field) => field.fieldName !== ""),
+        };
+      }
     });
     console.log(restructuredData);
+
     const payload = {
       collectionName: data.collectionName,
       fields: JSON.stringify(restructuredData),
@@ -392,61 +407,62 @@ const CoreEntity = () => {
             </Grid>
           ))}
 
-        {fields.map((field, index) => (
-          <div key={field.id}>
-            <Grid container spacing={2} my={1}>
-              <Grid item xs={6}>
-                <TextField label="Field Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
-              </Grid>
-              <Grid item xs={5}>
-                <Controller
-                  name={`fields.${index}.dataType`}
-                  control={control} // assuming you have `control` from useForm()
-                  render={({ field }) => (
-                    <FormControl variant="outlined" fullWidth>
-                      <InputLabel id={`fields-${index}-label`}>Field Type</InputLabel>
-                      <Select labelId={`fields-${index}-label`} label="Field Type" {...field}>
-                        {dataTypesEntity.map((option) => (
-                          <MenuItem key={option.order} value={option.order}>
-                            {option.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </Grid>
-              {watch(`fields.${index}.dataType`) === 5 && (
-                <Grid item xs={11} md={11}>
-                  <TextField
-                    label="Enter text"
-                    fullWidth
-                    value={text}
-                    InputProps={{
-                      startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
-                    }}
-                    {...register(`fields.${index}.data`)}
-                    onChange={handleChangeEnumType}
-                    onKeyDown={handleKeyDown}
+        {isEditMode &&
+          fields.map((field, index) => (
+            <div key={field.id}>
+              <Grid container spacing={2} my={1}>
+                <Grid item xs={6}>
+                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
+                </Grid>
+                <Grid item xs={5}>
+                  <Controller
+                    name={`fields.${index}.dataType`}
+                    control={control} // assuming you have `control` from useForm()
+                    render={({ field }) => (
+                      <FormControl variant="outlined" fullWidth>
+                        <InputLabel id={`fields-${index}-label`}>Field Type</InputLabel>
+                        <Select labelId={`fields-${index}-label`} label="Field Type" {...field}>
+                          {dataTypesEntity.map((option) => (
+                            <MenuItem key={option.order} value={option.order}>
+                              {option.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
                   />
                 </Grid>
-              )}
-              <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
-                <IconButton
-                  sx={{
-                    "&:hover": { background: theme.colors.error.lighter },
-                    color: theme.palette.error.main,
-                  }}
-                  color="inherit"
-                  size="small"
-                  onClick={() => remove(index)}
-                >
-                  <DeleteTwoToneIcon fontSize="small" />
-                </IconButton>
+                {watch(`fields.${index}.dataType`) === 5 && (
+                  <Grid item xs={11} md={11}>
+                    <TextField
+                      label="Enter text"
+                      fullWidth
+                      value={text}
+                      InputProps={{
+                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
+                      }}
+                      {...register(`fields.${index}.data`)}
+                      onChange={handleChangeEnumType}
+                      onKeyDown={handleKeyDown}
+                    />
+                  </Grid>
+                )}
+                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+                  <IconButton
+                    sx={{
+                      "&:hover": { background: theme.colors.error.lighter },
+                      color: theme.palette.error.main,
+                    }}
+                    color="inherit"
+                    size="small"
+                    onClick={() => remove(index)}
+                  >
+                    <DeleteTwoToneIcon fontSize="small" />
+                  </IconButton>
+                </Grid>
               </Grid>
-            </Grid>
-          </div>
-        ))}
+            </div>
+          ))}
       </Box>
       <Divider sx={{ my: 3 }} />
       <Box>
@@ -616,8 +632,9 @@ const CoreEntity = () => {
             </Button>
           </Grid>
         )}
+
         {coreEntityFields.section &&
-          Object.entries(coreEntityFields.section).map(([sectionName, section]) => (
+          Object.entries(coreEntityFields.section).map(([sectionName, section], index) => (
             <Grid item xs={12} key={sectionName}>
               <Typography variant="h6">{section.section_name}</Typography>
               {section.section_details.map((field, index) => (
@@ -649,6 +666,7 @@ const CoreEntity = () => {
             <NestedArray nestIndex={index} {...{ control, register, dataTypesEntity }} />
           </Box>
         ))}
+
       {isEditMode && (
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button variant="contained" onClick={handleUpdate}>
@@ -799,7 +817,19 @@ const CoreEntity = () => {
                             <div key={field.id}>
                               <Grid container spacing={2} my={1}>
                                 <Grid item xs={6}>
-                                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`basicinfo.${index}.fieldName`)} />
+                                  <TextField
+                                    label="Field Name"
+                                    variant="outlined"
+                                    fullWidth
+                                    {...register(`basicinfo.${index}.fieldName`, {
+                                      pattern: {
+                                        value: fieldNamePattern,
+                                        message: "Field Name should only contain alphabets",
+                                      },
+                                    })}
+                                    error={Boolean(errors?.basicinfo?.[index]?.fieldName)}
+                                    helperText={errors?.basicinfo?.[index]?.fieldName?.message}
+                                  />
                                 </Grid>
                                 <Grid item xs={5}>
                                   <Controller
@@ -867,7 +897,19 @@ const CoreEntity = () => {
                             <div key={field.id}>
                               <Grid container spacing={2} my={1}>
                                 <Grid item xs={6}>
-                                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`aboutme.${index}.fieldName`)} />
+                                  <TextField
+                                    label="Field Name"
+                                    variant="outlined"
+                                    fullWidth
+                                    {...register(`aboutme.${index}.fieldName`, {
+                                      pattern: {
+                                        value: fieldNamePattern,
+                                        message: "Field Name should only contain alphabets",
+                                      },
+                                    })}
+                                    error={Boolean(errors?.aboutme?.[index]?.fieldName)}
+                                    helperText={errors?.aboutme?.[index]?.fieldName?.message}
+                                  />
                                 </Grid>
                                 <Grid item xs={5}>
                                   <Controller
@@ -948,7 +990,19 @@ const CoreEntity = () => {
                             <Box key={field.id} sx={{ mt: 3 }}>
                               <Grid container spacing={2}>
                                 <Grid item xs={10}>
-                                  <TextField label="Section Name" variant="outlined" fullWidth {...register(`test.${index}.secName`)} />
+                                  <TextField
+                                    label="Section Name"
+                                    variant="outlined"
+                                    fullWidth
+                                    {...register(`test.${index}.secName`, {
+                                      pattern: {
+                                        value: fieldNamePattern,
+                                        message: "Section Name should only contain alphabets",
+                                      },
+                                    })}
+                                    error={Boolean(errors?.test?.[index]?.secName)}
+                                    helperText={errors?.test?.[index]?.secName?.message}
+                                  />
                                 </Grid>
                                 <Grid item xs={2}>
                                   {index > 0 && (

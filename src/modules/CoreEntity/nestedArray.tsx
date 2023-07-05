@@ -9,7 +9,11 @@ const NestedArray = ({ nestIndex, control, register, dataTypesEntity }) => {
   const theme = useTheme();
   const [text, setText] = useState("");
   const [words, setWords] = useState([]);
-  const { watch } = useForm();
+  const fieldNamePattern = /^[A-Za-z]+$/;
+  const {
+    watch,
+    formState: { errors },
+  } = useForm();
 
   const {
     fields,
@@ -46,7 +50,19 @@ const NestedArray = ({ nestIndex, control, register, dataTypesEntity }) => {
           <div key={field.id}>
             <Grid container spacing={2} my={1}>
               <Grid item xs={6}>
-                <TextField label="Field Name" variant="outlined" fullWidth {...register(`test.${nestIndex}.section.${index}.fieldName`)} />
+                <TextField
+                  label="Field Name"
+                  variant="outlined"
+                  fullWidth
+                  {...register(`test.${nestIndex}.section.${index}.fieldName`, {
+                    pattern: {
+                      value: fieldNamePattern,
+                      message: "Section Name should only contain alphabets",
+                    },
+                  })}
+                  error={Boolean(errors?.test?.[nestIndex]?.section?.[index]?.fieldName)}
+                  helperText={errors?.test?.[nestIndex]?.section?.[index]?.fieldName?.message || ""}
+                />
               </Grid>
               <Grid item xs={5}>
                 <Controller
