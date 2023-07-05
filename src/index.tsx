@@ -64,7 +64,7 @@ const ErrorProvider = ({ children }) => {
     const expirationTimestamp = parseInt(expiresIn, 10) * 1000; // Convert expiresIn to milliseconds
     const currentTimestamp = Date.now();
     if (expirationTimestamp < currentTimestamp) {
-      window.localStorage.removeItem("token");
+      window.localStorage.clear();
       navigate("/");
       return null;
     }

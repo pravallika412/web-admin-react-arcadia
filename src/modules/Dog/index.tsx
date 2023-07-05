@@ -375,7 +375,7 @@ const Dog = () => {
           </Typography>
         </Grid>
         <Grid item>
-          <Link to="/dog/addDog">
+          <Link to="/dog/stepper">
             <Button sx={{ my: 2 }} variant="contained" onClick={handleOpen} startIcon={<AddTwoToneIcon fontSize="small" />}>
               Add Dog
             </Button>

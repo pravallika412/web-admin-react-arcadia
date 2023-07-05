@@ -13,6 +13,8 @@ import ForgetPassword from "./modules/Login/forgetpassword";
 import OTPValidation from "./modules/Login/otp-validate";
 import ResetPassword from "./modules/Login/reset-password";
 import DogDetails from "./modules/Dog/dogDetails";
+import { Stepper } from "@mui/material";
+import StepperForm from "./modules/Dog/stepper";
 
 const Loader = (Component) => (props) =>
   (
@@ -106,10 +108,11 @@ const routes: RouteObject[] = [
         path: "dog",
         element: <Dog />,
       },
-      {
-        path: "dog/addDog",
-        element: <AddDog />,
-      },
+      // {
+      //   path: "dog/addDog",
+      //   element: <AddDog />,
+      // },
+      { path: "/dog/stepper", element: <StepperForm /> },
       {
         path: "/dogdetails/:id",
         element: <DogDetails />,
