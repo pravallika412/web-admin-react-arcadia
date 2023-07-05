@@ -26,13 +26,19 @@ const Step1 = ({ onNext, dogData, fields }) => {
       console.log("errors");
       return; // Do not proceed if there are validation errors
     }
-
     const updatedFormData = {
-      entity: fields.map((field) => ({
-        fieldName: field.fieldName,
-        dataType: field.dataType,
-        data: formData[field.fieldName],
-      })),
+      entity: fields.map((field) => {
+        let data = formData[field.fieldName];
+        if (field.dataType === 2) {
+          // Convert data to number if dataType is 2
+          data = parseFloat(data);
+        }
+        return {
+          fieldName: field.fieldName,
+          dataType: field.dataType,
+          data: data,
+        };
+      }),
     };
 
     console.log(updatedFormData);

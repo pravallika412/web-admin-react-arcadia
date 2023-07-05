@@ -177,7 +177,7 @@ const Transaction = () => {
       transactionHash: data?.transaction_hash ? data?.transaction_hash.slice(0, 3) + "*******" + data?.transaction_hash.slice(-4) : "",
       gasfee: data?.gasFees ? parseFloat(data?.gasFees).toFixed(6) : 0,
       createdAt: formatDate(data.createdAt),
-      type: data?.status ? transactionStatus.find((item) => item.id === data?.status).name : "",
+      type: data?.status ? transactionStatus.find((item) => item.id === data?.status)?.name || "" : "",
       status: data?.transaction_status ? getStatusLabel(data.transaction_status) : "",
     };
   });
