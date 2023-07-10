@@ -1,6 +1,9 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import Label from "../../shared/components/Label";
+import { IconButton } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { useCallback } from "react";
 
 const DetailComponent = ({ sponsorData }) => {
   const { sponsor, subscription_end_date, planDetails, status } = sponsorData;
@@ -33,6 +36,10 @@ const DetailComponent = ({ sponsorData }) => {
     }
     return <Label color={color as Color}>{text}</Label>;
   };
+
+  const copyToClipboard = useCallback((text) => {
+    navigator.clipboard.writeText(text);
+  }, []);
 
   return (
     <Box>
@@ -69,12 +76,17 @@ const DetailComponent = ({ sponsorData }) => {
                     Wallet Address:
                   </Typography>
                   <Typography variant="body1">{sponsor?.walletAddress ? sponsor?.walletAddress.slice(0, 3) + "*******" + sponsor.walletAddress.slice(-4) : ""}</Typography>
+                  {sponsor?.walletAddress && (
+                    <IconButton onClick={() => copyToClipboard(sponsor.walletAddress)} sx={{ p: 0, ml: 1 }}>
+                      <ContentCopyIcon sx={{ fontSize: "1rem" }} />
+                    </IconButton>
+                  )}
                 </Box>
                 <Box sx={{ display: "flex", my: 1 }}>
                   <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                     TVL:
                   </Typography>
-                  <Typography variant="body1">{sponsor.tvl}</Typography>
+                  <Typography variant="body1">$ {sponsor.tvl}</Typography>
                 </Box>
               </Grid>
               <Box sx={{ width: "0.5px", backgroundColor: "rgba(204, 204, 204, 1)", my: 3, mx: 2 }} /> {/* Vertical line */}

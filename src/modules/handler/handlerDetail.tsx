@@ -2,6 +2,7 @@ import { useLazyQuery } from "@apollo/client";
 import { Box, Paper, Tab, Tabs, Typography } from "@mui/material";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { RETRIEVE_HANDLERS } from "../../shared/graphQL/handler/queries";
 import { GET_SPONSORS_DETAILS, GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
 import HandlerPosts from "./handlerPost";
@@ -58,6 +59,7 @@ const HandlerDetailComponent = () => {
 
   return (
     <Box sx={{ m: 2 }}>
+      {handlerDetailsLoading && <SuspenseLoader left={10} />}
       <HandlerProfileComponent handlerData={handlerData} />
       <Box sx={{ width: "100%", mt: 2 }}>
         <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">

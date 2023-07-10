@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Container, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, TextareaAutosize, TextField } from "@mui/material";
+import { Button, Container, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, TextareaAutosize, TextField, Typography } from "@mui/material";
 import RenderField from "./RenderField";
 import { Box } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { isEqual } from "lodash";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
+import moment from "moment";
 
 const Step2 = ({ onBack, onNext, dogData, fields }) => {
   console.log(fields);
@@ -14,6 +15,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   const [basicInformation, setBasicInformation] = useState(fields.basicInformation);
   const [aboutMe, setAboutMe] = useState(fields.aboutMe);
   const [sections, setSections] = useState(fields.section);
+  const [fieldFiles, setFieldFiles] = useState({});
   const [basicInformationUpdated, setBasicInformationUpdated] = useState(false);
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
   const {
@@ -82,7 +84,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     }
   }, [dogData, basicInformation, aboutMe, sections, basicInformationUpdated]);
 
-  const generatePresignedUrls = async (files, sectionKey, fieldIndex) => {
+  const generatePresignedUrls = async (files, sectionKey, fieldIndex, datatype) => {
     const updatedSections = { ...sections };
     console.log(files, sectionKey, fieldIndex);
     const uploadPromises = files.map(async (file) => {
@@ -108,7 +110,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     try {
       const uploadedUrls = await Promise.all(uploadPromises);
       console.log(uploadedUrls);
-      if (uploadedUrls.length === 1) {
+      if (datatype === 7) {
         // Single File
         const imageurl = uploadedUrls[0].split("?")[0];
         if (sectionKey === "basicInformation") {
@@ -123,7 +125,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           updatedSections[sectionKey].section_details[fieldIndex].data = imageurl;
           setSections(updatedSections);
         }
-      } else if (uploadedUrls.length > 1) {
+      } else if (datatype === 8) {
         // Multiple Files
         const cleanedUrls = uploadedUrls.map((url) => url.split("?")[0]);
         console.log(cleanedUrls);
@@ -145,18 +147,26 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     }
   };
 
-  const handleChange = async (e, sectionKey, fieldIndex) => {
-    console.log(e.target.files, e.target.value);
+  const handleChange = async (e, sectionKey, fieldIndex, dataType) => {
+    console.log(dataType);
     const files = e.target.files;
     const updatedSections = { ...sections };
 
     if (e.target.files && e.target.files.length > 0) {
-      if (files.length === 1) {
-        generatePresignedUrls([files[0]], sectionKey, fieldIndex);
-      } else if (files.length > 1) {
+      setFieldFiles((prevFieldFiles) => ({
+        ...prevFieldFiles,
+        [sectionKey]: {
+          ...prevFieldFiles[sectionKey],
+          [fieldIndex]: Array.from(files),
+        },
+      }));
+      if (dataType === 7) {
+        generatePresignedUrls([files[0]], sectionKey, fieldIndex, dataType);
+      } else if (dataType === 8) {
         console.log("Multiple Files");
+
         const newFiles = Array.from(files);
-        generatePresignedUrls(newFiles, sectionKey, fieldIndex);
+        generatePresignedUrls(newFiles, sectionKey, fieldIndex, dataType);
       }
     } else {
       if (sectionKey === "basicInformation") {
@@ -186,21 +196,31 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
     switch (dataType) {
       case 1:
-        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} />;
+        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />;
         break;
       case 2:
-        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth type="number" value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} />;
+        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth type="number" value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />;
         break;
       case 3:
+        const formattedDate = data && moment(data).format("YYYY-MM-DD");
+        console.log(formattedDate);
         fieldComponent = (
-          <TextField label={fieldName} margin="normal" fullWidth type="date" value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} InputLabelProps={{ shrink: true }} />
+          <TextField
+            label={fieldName}
+            margin="normal"
+            fullWidth
+            type="date"
+            value={formattedDate ? formattedDate : ""}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
+            InputLabelProps={{ shrink: true }}
+          />
         );
         break;
       case 4:
         fieldComponent = (
           <div>
             <label>
-              <input type="checkbox" checked={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} />
+              <input type="checkbox" checked={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />
               {fieldName}
             </label>
           </div>
@@ -210,7 +230,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         fieldComponent = (
           <FormControl fullWidth variant="outlined" sx={{ mt: 1 }}>
             <InputLabel>{fieldName}</InputLabel>
-            <Select label={fieldName} value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} fullWidth>
+            <Select label={fieldName} value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} fullWidth>
               {typeof data === "string" ? (
                 <MenuItem value={data}>{data}</MenuItem>
               ) : (
@@ -226,7 +246,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         break;
       case 6:
         fieldComponent = (
-          <TextField aria-label={fieldName} minRows={3} placeholder={fieldName} multiline margin="normal" fullWidth value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} />
+          <TextField aria-label={fieldName} minRows={3} placeholder={fieldName} multiline margin="normal" fullWidth value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />
         );
         break;
       case 7:
@@ -249,8 +269,17 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           >
             <IconButton component="label">
               <CloudUploadIcon fontSize="large" />
-              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} />
+              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />
             </IconButton>
+            {fieldFiles[sectionKey]?.[fieldIndex]?.[0]?.name ? (
+              <Typography variant="subtitle2" mt={1}>
+                {fieldFiles[sectionKey][fieldIndex][0].name}
+              </Typography>
+            ) : (
+              <Typography variant="subtitle2" mt={1}>
+                {data ? data.split("/").pop() : "Upload a file"}
+              </Typography>
+            )}
           </Box>
         );
         break;
@@ -274,8 +303,17 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           >
             <IconButton component="label">
               <CloudUploadIcon fontSize="large" />
-              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex)} multiple />
+              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} multiple />
             </IconButton>
+            {fieldFiles[sectionKey]?.[fieldIndex]?.length > 0 ? (
+              <Typography variant="subtitle2" mt={1}>
+                {fieldFiles[sectionKey][fieldIndex].map((file) => file.name).join(", ")}
+              </Typography>
+            ) : (
+              <Typography variant="subtitle2" mt={1}>
+                {data && data.length > 0 ? data.map((url) => url.split("/").pop()).join(", ") : "Upload a file"}
+              </Typography>
+            )}
           </Box>
         );
         break;

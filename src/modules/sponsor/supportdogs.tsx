@@ -1,6 +1,7 @@
 import { useLazyQuery } from "@apollo/client";
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
@@ -64,7 +65,7 @@ const SupportDogs = ({ id }) => {
   const [filters, setFilters] = useState({
     dogStatus: null,
   });
-
+  const navigate = useNavigate();
   const [getSponsorProductDetails, { data: getSponsorProductDetailsData, loading: sponsorProductLoading }] = useLazyQuery(GET_SPONSORS_PRODUCT_DETAILS, { fetchPolicy: "no-cache" });
 
   useEffect(() => {
@@ -76,6 +77,7 @@ const SupportDogs = ({ id }) => {
   useEffect(() => {
     if (getSponsorProductDetailsData) {
       const parsedProducts = JSON.parse(getSponsorProductDetailsData.SponsorProducts.products[0].products);
+      console.log(parsedProducts);
       setSponsorProductData(parsedProducts);
       setTotalCount(getSponsorProductDetailsData.SponsorProducts.totalCount);
     }
@@ -149,6 +151,11 @@ const SupportDogs = ({ id }) => {
     return <Label color={color as Color}>{text}</Label>;
   };
 
+  const handleRowClick = (id) => {
+    console.log(id);
+    navigate(`/dogdetails/${id}`);
+  };
+
   const formattedData = sponsorProductData.map((row) => {
     let imageUrl = row.image || "";
 
@@ -157,6 +164,7 @@ const SupportDogs = ({ id }) => {
     }
 
     return {
+      id: row.custom_id,
       dogName: (
         <>
           <div style={{ display: "flex" }}>
@@ -203,8 +211,8 @@ const SupportDogs = ({ id }) => {
       onSearch={handleSearch}
       searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
       searchFilterVisible={true}
-      selectableRows={false}
-      onRowClick={undefined}
+      selectableRows={true}
+      onRowClick={handleRowClick}
     />
   );
 };

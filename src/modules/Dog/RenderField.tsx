@@ -114,7 +114,7 @@ const RenderField = ({ field, register, errors, setValue }) => {
           {...register(fieldName, {
             ...(fieldName === "name" && { required: `Please enter a ${fieldName}` }), // Add required validation conditionally
             pattern: {
-              value: /^[a-zA-Z]+$/,
+              value: /^(?! )[A-Za-z ]*$/,
               message: `Please enter a valid ${fieldName}`,
             },
             validate: (value) => value.length <= 20 || `Max length exceeded for ${fieldName}`,
@@ -197,7 +197,7 @@ const RenderField = ({ field, register, errors, setValue }) => {
             </Typography>
           ) : (
             <Typography variant="subtitle2" mt={1}>
-              Upload a file
+              {data ? data.split("/").pop() : "Upload a file"}
             </Typography>
           )}
         </Box>
@@ -224,9 +224,15 @@ const RenderField = ({ field, register, errors, setValue }) => {
             <CloudUploadIcon fontSize="large" />
             <input type="file" name={fieldName} style={{ display: "none" }} onChange={(e) => handleFileChange(e, fieldName)} multiple />
           </IconButton>
-          <Typography variant="subtitle2" mt={1}>
-            {fieldFiles[fieldName]?.length > 0 ? fieldFiles[fieldName].map((file) => file.name).join(", ") : "Upload Files"}
-          </Typography>
+          {fieldFiles[fieldName]?.length > 0 ? (
+            <Typography variant="subtitle2" mt={1}>
+              {fieldFiles[fieldName].map((file) => file.name).join(", ")}
+            </Typography>
+          ) : (
+            <Typography variant="subtitle2" mt={1}>
+              {data && data.length > 0 ? data.map((url) => url.split("/").pop()).join(", ") : "Upload a file"}
+            </Typography>
+          )}
         </Box>
       );
     default:

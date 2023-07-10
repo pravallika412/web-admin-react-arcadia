@@ -1,10 +1,11 @@
 import { useLazyQuery } from "@apollo/client";
-import { Box, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS_CRYPTO_DETAILS, GET_SPONSORS_STRIPE_DETAILS } from "../../shared/graphQL/sponsor";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 const paymentGateway = [
   { id: 1, name: "Stripe", value: "stripe" },
@@ -87,7 +88,7 @@ const TransactionHistory = ({ id }) => {
     { id: "amount", label: "Amount", minWidth: 170 },
     { id: "transactionType", label: "Transaction Type", minWidth: 170 },
     { id: "transactionDate", label: "Transaction Date", type: "date", minWidth: 170 },
-    { id: "status", label: "Status", minWidth: 170 },
+    { id: "status", label: "Payment Status", minWidth: 170 },
   ];
 
   const columnsCrypto = [
@@ -149,6 +150,10 @@ const TransactionHistory = ({ id }) => {
     }
   };
 
+  const copyToClipboard = useCallback((text) => {
+    navigator.clipboard.writeText(text);
+  }, []);
+
   const formatDate = (dateToFormat) => {
     if (dateToFormat) {
       const date = new Date(dateToFormat);
@@ -189,8 +194,18 @@ const TransactionHistory = ({ id }) => {
   if (filters.gateway === "stripe") {
     isLoading = sponsorStripeLoading;
     formattedData = sponsorStripeData.map((row) => ({
-      stripeID: row?.logs ? row.logs.paymentIntent : "",
-      amount: "$" + row?.amount_paid ? row?.amount_paid : "",
+      stripeID: (
+        <>
+          {row?.logs?.paymentIntent ? row.logs.paymentIntent : "N/A"}
+          {row.logs.paymentIntent && (
+            <IconButton onClick={() => copyToClipboard(row?.logs ? row.logs.paymentIntent : "")} size="small" style={{ marginLeft: 8 }}>
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          )}
+        </>
+      ),
+      amount: row?.amount_paid ? "$" + row.amount_paid : "N/A",
+
       transactionType: row?.subscription_status ? row?.subscription_status : "",
       transactionDate: formatDate(row?.createdAt),
       status: getStatusLabel(row?.payment_status),
@@ -198,7 +213,16 @@ const TransactionHistory = ({ id }) => {
   } else {
     isLoading = sponsorCryptoLoading;
     formattedData = sponsorCryptoData.map((row) => ({
-      cryptoID: row?.transaction_hash ? row?.transaction_hash.slice(0, 3) + "*******" + row?.transaction_hash.slice(-4) : "",
+      cryptoID: (
+        <>
+          {row?.transaction_hash ? row?.transaction_hash.slice(0, 3) + "*******" + row?.transaction_hash.slice(-4) : "N/A"}
+          {row?.transaction_hash && (
+            <IconButton onClick={() => copyToClipboard(row?.transaction_hash ? row.transaction_hash : "")} size="small" style={{ marginLeft: 8 }}>
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          )}
+        </>
+      ),
       amount: row?.amount_paid ? parseFloat(row?.amount_paid).toFixed(2) : "" + " " + row?.currency == null ? "" : row?.currency,
       transactionType: row?.subscription_status ? row?.subscription_status : "",
       transactionDate: formatDate(row?.createdAt),
