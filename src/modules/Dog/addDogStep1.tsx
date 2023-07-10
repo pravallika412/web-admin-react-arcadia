@@ -4,7 +4,7 @@ import { Button, Checkbox, Container, FormControlLabel, Paper, TextField } from 
 import RenderField from "./RenderField";
 
 const Step1 = ({ onNext, dogData, fields }) => {
-  console.log(fields, "dogData");
+  console.log(dogData, "dogData");
   const {
     register,
     handleSubmit,
@@ -12,13 +12,14 @@ const Step1 = ({ onNext, dogData, fields }) => {
     formState: { errors },
   } = useForm();
 
-  // useEffect(() => {
-  //   if (dogData) {
-  //     Object.keys(dogData).forEach((fieldName) => {
-  //       setValue(fieldName, dogData[fieldName]);
-  //     });
-  //   }
-  // }, [dogData, setValue]);
+  useEffect(() => {
+    if (dogData) {
+      console.log("dogData", dogData);
+      Object.keys(dogData).forEach((fieldName) => {
+        setValue(fieldName, dogData[fieldName]);
+      });
+    }
+  }, [dogData, setValue]);
 
   const onSubmit = (formData) => {
     console.log(formData);
@@ -29,14 +30,21 @@ const Step1 = ({ onNext, dogData, fields }) => {
     const updatedFormData = {
       entity: fields.map((field) => {
         let data = formData[field.fieldName];
+        // let option;
         if (field.dataType === 2) {
           // Convert data to number if dataType is 2
           data = parseFloat(data);
         }
+        // if (field.dataType === 5) {
+        //   // Add the "option" key-value pair for enum fields
+        //   option = data;
+        //   data = field.data ? field.data : undefined;
+        // }
         return {
           fieldName: field.fieldName,
           dataType: field.dataType,
           data: data,
+          // option: option,
         };
       }),
     };

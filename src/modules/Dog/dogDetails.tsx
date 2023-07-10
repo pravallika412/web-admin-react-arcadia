@@ -9,6 +9,10 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import QRCode from "react-qr-code";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import DialogComponent from "../../shared/components/Dialog";
+import { CloudDownload } from "@mui/icons-material";
+import JSZip from "jszip";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import { Link } from "react-router-dom";
 
 const DogDetails = () => {
   const theme = useTheme();
@@ -95,6 +99,85 @@ const DogDetails = () => {
     setOpenDelete(false);
   };
 
+  const handleEditClick = (row) => {
+    console.log(row);
+    navigate("/dog/stepper", { state: { row } });
+  };
+
+  const downloadFile = (fileUrl, fileName) => {
+    console.log(fileUrl);
+    fetch(fileUrl)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("File download failed:", error);
+      });
+  };
+
+  const downloadFilesAsZip = async (fileUrls) => {
+    const zip = new JSZip();
+
+    for (let i = 0; i < fileUrls.length; i++) {
+      const fileUrl = fileUrls[i];
+      const response = await fetch(fileUrl);
+      const fileBlob = await response.blob();
+      const fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+      zip.file(fileName, fileBlob);
+    }
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      const url = URL.createObjectURL(content);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "files.zip";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+  };
+
+  const formatValue = (value) => {
+    console.log(value);
+    const isDateUrl = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value);
+    const isURL = /^(ftp|http|https):\/\/[^ "]+$/;
+
+    if (isURL.test(value) && !Array.isArray(value)) {
+      const fileName = value.substring(value.lastIndexOf("/") + 1);
+      return (
+        <span style={{ cursor: "pointer" }} onClick={() => downloadFile(value, fileName)}>
+          <CloudDownload />
+        </span>
+      );
+    }
+
+    if (Array.isArray(value) && value.every((item) => isURL.test(item))) {
+      return (
+        <span style={{ cursor: "pointer" }} onClick={() => downloadFilesAsZip(value)}>
+          <CloudDownload />
+        </span>
+      );
+    }
+
+    if (isDateUrl) {
+      const date = new Date(value);
+      const formattedDate = `${date.getUTCDate()}-${date.getUTCMonth() + 1}-${date.getUTCFullYear()}`;
+      return formattedDate;
+    }
+    return value;
+  };
+
   return (
     <Box sx={{ m: 2 }}>
       <Box>
@@ -104,17 +187,34 @@ const DogDetails = () => {
               <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
                 Details of {productData.name}
               </Typography>
-              <IconButton
-                sx={{
-                  "&:hover": { background: theme.colors.error.lighter },
-                  color: theme.palette.error.main,
-                }}
-                color="inherit"
-                size="small"
-                onClick={() => handleDeleteClick(productData)}
-              >
-                <DeleteTwoToneIcon fontSize="small" />
-              </IconButton>
+
+              <div style={{ marginLeft: "auto" }}>
+                <IconButton
+                  sx={{
+                    "&:hover": {
+                      background: theme.colors.primary.lighter,
+                    },
+                    color: theme.palette.primary.main,
+                  }}
+                  color="inherit"
+                  size="small"
+                  onClick={() => handleEditClick(productData)}
+                >
+                  <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+                </IconButton>
+
+                <IconButton
+                  sx={{
+                    "&:hover": { background: theme.colors.error.lighter },
+                    color: theme.palette.error.main,
+                  }}
+                  color="inherit"
+                  size="small"
+                  onClick={() => handleDeleteClick(productData)}
+                >
+                  <DeleteTwoToneIcon fontSize="small" />
+                </IconButton>
+              </div>
             </Box>
             <Paper elevation={3} sx={{ padding: 1.5 }}>
               <Grid container spacing={2}>
@@ -131,68 +231,40 @@ const DogDetails = () => {
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={10} sx={{ display: "flex", mt: 2 }}>
+                <Grid item xs={10} sx={{ mt: 2 }}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12} md={6}>
                       <Box sx={{ display: "flex", my: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Breed:
+                          Custom ID:
                         </Typography>
-                        <Typography variant="body1">{productData.breed}</Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", my: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Age:
+                        <Typography variant="body1" sx={{ fontSize: 16 }}>
+                          {productData.custom_id}
                         </Typography>
-                        <Typography variant="body1">{productData?.age}</Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", my: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Height:
-                        </Typography>
-                        <Typography variant="body1">{productData?.height}</Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", my: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Weight:
-                        </Typography>
-                        <Typography variant="body1">{productData?.weight}</Typography>
                       </Box>
                     </Grid>
-                    <Box sx={{ width: "0.5px", backgroundColor: "rgba(204, 204, 204, 1)", my: 3, mx: 2 }} />
-                    <Grid item xs={12} md={5}>
-                      <Box sx={{ display: "flex", my: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Gender:
-                        </Typography>
-                        <Typography variant="body1">{productData.gender}</Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", my: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Color:
-                        </Typography>
-                        <Typography variant="body1">{productData?.color}</Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", my: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                          Created on:
-                        </Typography>
-                        <Typography variant="body1">{new Date(productData.adoption_date).toLocaleString()}</Typography>
-                      </Box>
+                    <Grid item xs={12} md={6}>
                       <Box sx={{ display: "flex", my: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                           Total Posts:
                         </Typography>
-                        <Typography variant="body1">{productData.totalPosts}</Typography>
+                        <Typography variant="body1" sx={{ fontSize: 16 }}>
+                          {productData.totalPosts}
+                        </Typography>
                       </Box>
                     </Grid>
-                    <Grid item xs={6} md={1} display="flex" justifyContent="flex-end">
-                      <QRCode
-                        value={productData._id} // bind the QR code with dog id
-                        size={64} // size of the QR code, you can adjust based on your needs
-                        level="Q" // Error correction level of the QR Code, can be L, M, Q, H
-                      />
-                    </Grid>
+                    {Object.entries(productData.basicInformation).map(([label, value], index) => (
+                      <Grid item xs={12} md={6} key={label}>
+                        <Box sx={{ display: "flex", my: 1 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
+                            {label}:
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontSize: 16 }}>
+                            {value}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
                   </Grid>
                 </Grid>
               </Grid>
@@ -200,18 +272,51 @@ const DogDetails = () => {
             <Paper elevation={3} sx={{ padding: 1.5, mt: 2 }}>
               <Grid container spacing={2} gap={4}>
                 <Grid item xs={12} md={5} ml={3}>
-                  <Box sx={{ my: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                      Dog Sotry:
-                    </Typography>
-                    <Typography variant="body1">{productData.more_info.story}</Typography>
-                  </Box>
-                  <Box sx={{ my: 1 }}>
+                  {Object.entries(productData.aboutMe).map(([label, value], index) => (
+                    <Box sx={{ my: 1 }} key={label}>
+                      <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150, my: 1 }}>
+                        {label}:
+                      </Typography>
+                      <Typography variant="body1">{value}</Typography>
+                    </Box>
+                  ))}
+                  <Grid container spacing={2}>
+                    {Object.values(productData.section).map((section: any, index) => (
+                      <Grid item xs={12} key={index}>
+                        <Typography variant="h6" sx={{ fontWeight: "bold", my: 1, fontSize: 16 }}>
+                          {section.section_name}
+                        </Typography>
+                        {Object.keys(section.section_details[0] || {}).length > 0 ? (
+                          section.section_details.map((details, detailsIndex) => (
+                            <Grid container spacing={2} key={`${detailsIndex}-${details.title}`}>
+                              {Object.entries(details).map(([key, value]) => (
+                                <Grid item xs={12} sm={6} md={12} key={`${key}-${detailsIndex}`}>
+                                  <Box sx={{ display: "flex" }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
+                                      {key}:
+                                    </Typography>
+                                    <Typography variant="body1" key={`${key}-${detailsIndex}`}>
+                                      {formatValue(value)}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          ))
+                        ) : (
+                          <Typography variant="body1" key={`no-details-${index}`}>
+                            No details available
+                          </Typography>
+                        )}
+                      </Grid>
+                    ))}
+                  </Grid>
+                  {/* <Box sx={{ my: 1 }}>
                     <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                       Service History:
                     </Typography>
                     <List>
-                      {productData.more_info.history.map((historyItem, index) => (
+                      {productData?.section?.history.map((historyItem, index) => (
                         <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
                           <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
                             <FiberManualRecordIcon fontSize="inherit" />
@@ -236,7 +341,7 @@ const DogDetails = () => {
                       Awards Information:
                     </Typography>
                     <List>
-                      {productData.more_info.awards.map((awardsItem, index) => (
+                      {productData?.section?.awards.map((awardsItem, index) => (
                         <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
                           <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
                             <FiberManualRecordIcon fontSize="inherit" />
@@ -252,16 +357,16 @@ const DogDetails = () => {
                         </ListItem>
                       ))}
                     </List>
-                  </Box>
+                  </Box> */}
                 </Grid>
-                <Box sx={{ width: "0.5px", backgroundColor: "rgba(204, 204, 204, 1)", my: 3, mx: 2 }} />
+                {/* <Box sx={{ width: "0.5px", backgroundColor: "rgba(204, 204, 204, 1)", my: 3, mx: 2 }} />
                 <Grid item xs={12} md={5}>
                   <Box sx={{ my: 1 }}>
                     <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
                       Medical reports:
                     </Typography>
 
-                    {productData.more_info.reports.map((reportsItem, index) => (
+                    {productData?.section?.reports.map((reportsItem, index) => (
                       <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
                         <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
                           <FiberManualRecordIcon fontSize="inherit" />
@@ -280,27 +385,7 @@ const DogDetails = () => {
                       </ListItem>
                     ))}
                   </Box>
-                  <Box sx={{ my: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                      Others:
-                    </Typography>
-                    {productData.more_info.others.map((otherItem, index) => (
-                      <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
-                        <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
-                          <FiberManualRecordIcon fontSize="inherit" />
-                        </Box>
-                        <Box>
-                          <Typography variant="body1" sx={{ color: "#0A3B8A", fontSize: 14, fontWeight: 500 }}>
-                            {otherItem.documentName}
-                          </Typography>
-                          <Typography variant="body1" sx={{ fontSize: 10 }}>
-                            {otherItem.documentType}
-                          </Typography>
-                        </Box>
-                      </ListItem>
-                    ))}
-                  </Box>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Paper>
           </>
