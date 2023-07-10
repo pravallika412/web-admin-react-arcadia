@@ -1,25 +1,37 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Checkbox, Container, FormControlLabel, Paper, TextField } from "@mui/material";
 import RenderField from "./RenderField";
 
 const Step1 = ({ onNext, dogData, fields }) => {
-  console.log(dogData, "dogData");
+  console.log(fields, "fields");
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm();
-
+  const [entity, setEntity] = useState(fields);
   useEffect(() => {
     if (dogData) {
-      console.log("dogData", dogData);
-      Object.keys(dogData).forEach((fieldName) => {
-        setValue(fieldName, dogData[fieldName]);
+      const updatedFields = fields.map((field) => {
+        const { fieldName } = field;
+        let fieldValue = null;
+
+        if (fieldName === "name" || fieldName === "image" || fieldName === "status") {
+          fieldValue = dogData[fieldName];
+        }
+
+        return {
+          ...field,
+          data: fieldValue,
+        };
       });
+
+      console.log(updatedFields);
+      setEntity(updatedFields);
     }
-  }, [dogData, setValue]);
+  }, [dogData, fields]);
 
   const onSubmit = (formData) => {
     console.log(formData);
@@ -57,11 +69,17 @@ const Step1 = ({ onNext, dogData, fields }) => {
     <Container component="main">
       <Paper elevation={3} sx={{ p: 2 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          {fields.map((field) => (
-            <div key={field.fieldName}>
-              <RenderField field={field} register={register} errors={errors} setValue={setValue} />
-            </div>
-          ))}
+          {dogData
+            ? entity.map((field) => (
+                <div key={field.fieldName}>
+                  <RenderField field={field} register={register} errors={errors} setValue={setValue} />
+                </div>
+              ))
+            : fields.map((field) => (
+                <div key={field.fieldName}>
+                  <RenderField field={field} register={register} errors={errors} setValue={setValue} />
+                </div>
+              ))}
           <Button type="submit" disabled={Object.keys(errors).length > 0}>
             Next
           </Button>

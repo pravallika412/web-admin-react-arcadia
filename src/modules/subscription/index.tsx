@@ -469,69 +469,70 @@ const Subscription = () => {
         </DialogTitle>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: 500 }}>
           <DialogContent>
-            <div>
-              <Controller
-                name="name"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: "Name is required",
-                  pattern: {
-                    value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
-                    message: "Please enter a valid name",
-                  },
-                  maxLength: {
-                    value: 20,
-                    message: "Max length exceeded",
-                  },
-                }}
-                render={({ field }) => <TextField {...field} label="Plan Name" margin="normal" fullWidth error={!!errors.name} helperText={errors?.name?.message} />}
-              />
-            </div>
+            <Box sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto" }}>
+              <div>
+                <Controller
+                  name="name"
+                  control={control}
+                  defaultValue=""
+                  rules={{
+                    required: "Name is required",
+                    pattern: {
+                      value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
+                      message: "Please enter a valid name",
+                    },
+                    maxLength: {
+                      value: 20,
+                      message: "Max length exceeded",
+                    },
+                  }}
+                  render={({ field }) => <TextField {...field} label="Plan Name" margin="normal" fullWidth error={!!errors.name} helperText={errors?.name?.message} />}
+                />
+              </div>
 
-            <div>
-              {fields.map((item, index) => (
-                <div key={item.id} style={{ display: "flex", alignItems: "center" }}>
-                  <Controller
-                    control={control}
-                    name={`descriptions.${index}.description`}
-                    defaultValue=""
-                    rules={{
-                      required: "Description is required",
-                      maxLength: {
-                        value: 100,
-                        message: "Max length exceeded",
-                      },
-                    }}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="Plan Description"
-                        margin="normal"
-                        fullWidth
-                        error={!!errors.descriptions?.[index]?.description}
-                        helperText={errors.descriptions?.[index]?.description?.message}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton onClick={() => remove(index)}>
-                                <DeleteIcon sx={{ color: theme.palette.error.main }} />
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    )}
-                  />
-                </div>
-              ))}
+              <div>
+                {fields.map((item, index) => (
+                  <div key={item.id} style={{ display: "flex", alignItems: "center" }}>
+                    <Controller
+                      control={control}
+                      name={`descriptions.${index}.description`}
+                      defaultValue=""
+                      rules={{
+                        required: "Description is required",
+                        maxLength: {
+                          value: 100,
+                          message: "Max length exceeded",
+                        },
+                      }}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="Plan Description"
+                          margin="normal"
+                          fullWidth
+                          error={!!errors.descriptions?.[index]?.description}
+                          helperText={errors.descriptions?.[index]?.description?.message}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton onClick={() => remove(index)}>
+                                  <DeleteIcon sx={{ color: theme.palette.error.main }} />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                ))}
 
-              <Button onClick={() => append({ description: "" })} sx={{ fontSize: 13, fontWeight: 400 }} color="secondary" startIcon={<AddTwoToneIcon fontSize="small" />}>
-                Add New Item
-              </Button>
-            </div>
+                <Button onClick={() => append({ description: "" })} sx={{ fontSize: 13, fontWeight: 400 }} color="secondary" startIcon={<AddTwoToneIcon fontSize="small" />}>
+                  Add New Item
+                </Button>
+              </div>
 
-            {/* <div>
+              {/* <div>
               <TextField
                 label="Plan Image"
                 name="planImage"
@@ -555,34 +556,34 @@ const Subscription = () => {
                 helperText={errors?.planImage?.message}
               />
             </div> */}
-            <Card className={classes.card}>
-              {
-                <>
-                  {loadingImage ? <SuspenseLoader /> : <CardMedia className={classes.media} image={croppedImageUrl} />}
-                  <IconButton
-                    component="label"
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      "&:hover": {
-                        background: theme.colors.primary.lighter,
-                      },
-                    }}
-                    color="inherit"
-                    htmlFor="profileImageInput"
-                    size="large"
-                  >
-                    <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                    <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
-                  </IconButton>
-                  {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />}
-                </>
-              }
-            </Card>
-            {/* <div>
+              <Card className={classes.card}>
+                {
+                  <>
+                    {loadingImage ? <SuspenseLoader /> : <CardMedia className={classes.media} image={croppedImageUrl} />}
+                    <IconButton
+                      component="label"
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        "&:hover": {
+                          background: theme.colors.primary.lighter,
+                        },
+                      }}
+                      color="inherit"
+                      htmlFor="profileImageInput"
+                      size="large"
+                    >
+                      <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                      <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
+                    </IconButton>
+                    {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />}
+                  </>
+                }
+              </Card>
+              {/* <div>
               <Card className={classes.card}>
                 {croppedImageUrl && <CardMedia className={classes.media} image={croppedImageUrl} />}
                 <IconButton
@@ -609,7 +610,7 @@ const Subscription = () => {
                 {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
               </Card>
             </div> */}
-            {/* <div>
+              {/* <div>
               <Controller
                 name="planImage"
                 control={control}
@@ -655,74 +656,75 @@ const Subscription = () => {
                 )}
               />
             </div> */}
-            <Controller
-              name="mtdescription"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: "Description is required",
-                pattern: {
-                  value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
-                  message: "Please enter a valid description",
-                },
-                maxLength: {
-                  value: 200,
-                  message: "Max length exceeded",
-                },
-              }}
-              render={({ field }) => <TextField {...field} label="Metadata Description" margin="normal" fullWidth error={!!errors.mtdescription} helperText={errors?.mtdescription?.message} />}
-            />
-
-            <div>
               <Controller
-                name="price"
-                control={control}
-                defaultValue="$"
-                rules={{
-                  required: "Price is required",
-                  pattern: {
-                    value: /^[1-9]\d*\.?\d*$/,
-                    message: "Please enter a positive number",
-                  },
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    type="number"
-                    label="Price"
-                    margin="normal"
-                    fullWidth
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                    }}
-                    error={!!errors.price}
-                    helperText={errors?.price?.message}
-                  />
-                )}
-              />
-            </div>
-
-            <div>
-              <Controller
-                name="supportableProductCount"
+                name="mtdescription"
                 control={control}
                 defaultValue=""
                 rules={{
-                  required: "Supportable Product Count is required",
+                  required: "Description is required",
                   pattern: {
-                    value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                    message: "Please enter a valid Product Count",
+                    value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
+                    message: "Please enter a valid description",
                   },
                   maxLength: {
-                    value: 3,
+                    value: 200,
                     message: "Max length exceeded",
                   },
                 }}
-                render={({ field }) => (
-                  <TextField {...field} label="Product Count" margin="normal" fullWidth error={!!errors.supportableProductCount} helperText={errors?.supportableProductCount?.message} />
-                )}
+                render={({ field }) => <TextField {...field} label="Metadata Description" margin="normal" fullWidth error={!!errors.mtdescription} helperText={errors?.mtdescription?.message} />}
               />
-            </div>
+
+              <div>
+                <Controller
+                  name="price"
+                  control={control}
+                  defaultValue="$"
+                  rules={{
+                    required: "Price is required",
+                    pattern: {
+                      value: /^[1-9]\d*\.?\d*$/,
+                      message: "Please enter a positive number",
+                    },
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      type="number"
+                      label="Price"
+                      margin="normal"
+                      fullWidth
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                      }}
+                      error={!!errors.price}
+                      helperText={errors?.price?.message}
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <Controller
+                  name="supportableProductCount"
+                  control={control}
+                  defaultValue=""
+                  rules={{
+                    required: "Supportable Product Count is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
+                      message: "Please enter a valid Product Count",
+                    },
+                    maxLength: {
+                      value: 3,
+                      message: "Max length exceeded",
+                    },
+                  }}
+                  render={({ field }) => (
+                    <TextField {...field} label="Product Count" margin="normal" fullWidth error={!!errors.supportableProductCount} helperText={errors?.supportableProductCount?.message} />
+                  )}
+                />
+              </div>
+            </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
