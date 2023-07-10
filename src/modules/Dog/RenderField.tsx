@@ -1,14 +1,15 @@
-import { TextField, FormControlLabel, Checkbox, Card, IconButton, CardMedia, useTheme, DialogContentText } from "@mui/material";
+import { TextField, FormControlLabel, Checkbox, Card, IconButton, CardMedia, useTheme, DialogContentText, Select, MenuItem, InputLabel, FormControl, Box, Typography } from "@mui/material";
 import CropModal from "../../shared/components/CropModal";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { makeStyles } from "@mui/styles";
 import { useCallback, useEffect, useState } from "react";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import DialogComponent from "../../shared/components/Dialog";
-import { Box } from "@mui/system";
+
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const useStyles = makeStyles({
   root: {
@@ -37,8 +38,9 @@ const useStyles = makeStyles({
 });
 
 const RenderField = ({ field, register, errors, setValue }) => {
+  console.log(field);
   const classes = useStyles();
-  const { fieldName, dataType, data } = field;
+  const { fieldName, dataType, data, option } = field;
   const theme = useTheme();
   const [fieldFiles, setFieldFiles] = useState({});
   const [presignedUrls, setPresignedUrls] = useState({ image: "" });
@@ -54,12 +56,13 @@ const RenderField = ({ field, register, errors, setValue }) => {
     console.log(fieldName);
     if (dataType === 7) {
       // Single File
-      // setFieldFiles({ ...fieldFiles, [fieldName]: [files[0]] });
+      setFieldFiles({ ...fieldFiles, [fieldName]: [files[0]] });
       generatePresignedUrls([files[0]], fieldName);
     } else if (dataType === 8) {
+      console.log("files");
       // Multiple Files
       const newFiles = Array.from(files);
-      // setFieldFiles({ ...fieldFiles, [fieldName]: [...(fieldFiles[fieldName] || []), ...newFiles] });
+      setFieldFiles({ ...fieldFiles, [fieldName]: [...(fieldFiles[fieldName] || []), ...newFiles] });
       generatePresignedUrls(newFiles, fieldName);
     }
   };
@@ -90,7 +93,15 @@ const RenderField = ({ field, register, errors, setValue }) => {
       const uploadedUrls = await Promise.all(uploadPromises);
       setPresignedUrls((prevUrls) => ({ ...prevUrls, [fieldName]: uploadedUrls }));
       console.log(uploadedUrls);
-      setValue(fieldName, uploadedUrls[0].split("?")[0]);
+      if (dataType === 7) {
+        // Single File
+        setValue(fieldName, uploadedUrls[0].split("?")[0]);
+      } else if (dataType === 8) {
+        // Multiple Files
+        const cleanedUrls = uploadedUrls.map((url) => url.split("?")[0]);
+        console.log(cleanedUrls);
+        setValue(fieldName, cleanedUrls);
+      }
     } catch (error) {
       console.error("Error uploading files:", error);
     }
@@ -101,6 +112,7 @@ const RenderField = ({ field, register, errors, setValue }) => {
       return (
         <TextField
           {...register(fieldName, {
+            ...(fieldName === "name" && { required: `Please enter a ${fieldName}` }), // Add required validation conditionally
             pattern: {
               value: /^[a-zA-Z]+$/,
               message: `Please enter a valid ${fieldName}`,
@@ -126,63 +138,96 @@ const RenderField = ({ field, register, errors, setValue }) => {
           type="number"
           margin="normal"
           fullWidth
+          defaultValue={data || ""}
           error={!!errors[fieldName]}
           helperText={errors?.[fieldName]?.message}
         />
       );
     case 3:
-      return <TextField {...register(fieldName)} label={fieldName} type="date" margin="normal" fullWidth error={!!errors[fieldName]} helperText={errors?.[fieldName]?.message} />;
+      return (
+        <TextField {...register(fieldName)} label={fieldName} type="date" margin="normal" defaultValue={data || ""} fullWidth error={!!errors[fieldName]} helperText={errors?.[fieldName]?.message} />
+      );
     case 4: // boolean
       return <FormControlLabel control={<Checkbox {...register(fieldName)} />} label={fieldName} />;
+
+    // ...
+
     case 5: // enum
       return (
-        <TextField
-          {...register(fieldName)}
-          select
-          label={fieldName}
-          SelectProps={{
-            native: true,
-          }}
-          margin="normal"
-          fullWidth
-        >
-          {Array.isArray(data) &&
-            data.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-        </TextField>
+        <FormControl fullWidth variant="outlined" sx={{ mt: 1 }}>
+          <InputLabel>{fieldName}</InputLabel>
+          <Select {...register(fieldName)} displayEmpty defaultValue={option || ""} label={fieldName} fullWidth>
+            {Array.isArray(data) &&
+              data.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
       );
+
     case 6: // textarea
-      return <TextField {...register(fieldName)} label={fieldName} multiline margin="normal" fullWidth />;
+      return <TextField {...register(fieldName)} defaultValue={data || ""} label={fieldName} multiline margin="normal" fullWidth />;
     case 7: // file
       return (
-        <TextField
-          label={fieldName}
-          name={fieldName}
-          margin="normal"
-          fullWidth
-          onChange={(e) => handleFileChange(e, fieldName)}
-          type="file"
-          InputLabelProps={{ shrink: true }}
-          error={!!errors[fieldName]}
-          helperText={errors?.[fieldName]?.message}
-        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            border: 1,
+            borderRadius: 1,
+            borderStyle: "dashed",
+            borderColor: "var(--font-400, #808080)",
+            bgcolor: "var(--font-025, #FFF)",
+            height: 100,
+            width: "100%",
+            p: 2,
+          }}
+        >
+          <IconButton component="label">
+            <CloudUploadIcon fontSize="large" />
+            <input type="file" name={fieldName} style={{ display: "none" }} onChange={(e) => handleFileChange(e, fieldName)} />
+          </IconButton>
+          {fieldFiles[fieldName]?.[0]?.name ? (
+            <Typography variant="subtitle2" mt={1}>
+              {fieldFiles[fieldName][0].name}
+            </Typography>
+          ) : (
+            <Typography variant="subtitle2" mt={1}>
+              Upload a file
+            </Typography>
+          )}
+        </Box>
       );
     case 8: // files
       return (
-        <TextField
-          label={fieldName}
-          name={fieldName}
-          margin="normal"
-          fullWidth
-          onChange={(e) => handleFileChange(e, fieldName)}
-          type="files"
-          InputLabelProps={{ shrink: true }}
-          error={!!errors[fieldName]}
-          helperText={errors?.[fieldName]?.message}
-        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            border: 1,
+            borderRadius: 1,
+            borderStyle: "dashed",
+            borderColor: "var(--font-400, #808080)",
+            bgcolor: "var(--font-025, #FFF)",
+            height: 100,
+            width: "100%",
+            p: 2,
+          }}
+        >
+          <IconButton component="label">
+            <CloudUploadIcon fontSize="large" />
+            <input type="file" name={fieldName} style={{ display: "none" }} onChange={(e) => handleFileChange(e, fieldName)} multiple />
+          </IconButton>
+          <Typography variant="subtitle2" mt={1}>
+            {fieldFiles[fieldName]?.length > 0 ? fieldFiles[fieldName].map((file) => file.name).join(", ") : "Upload Files"}
+          </Typography>
+        </Box>
       );
     default:
       return null;

@@ -6,7 +6,7 @@ import SidebarLayout from "./layouts/SidebarLayout";
 import BaseLayout from "./layouts/BaseLayout";
 
 import SuspenseLoader from "./shared/components/SuspenseLoader";
-import AddDog from "./modules/Dog/addDog";
+
 import SponsorDetailComponent from "./modules/sponsor/sponsorDetail";
 import HandlerDetailComponent from "./modules/handler/handlerDetail";
 import ForgetPassword from "./modules/Login/forgetpassword";
@@ -108,10 +108,6 @@ const routes: RouteObject[] = [
         path: "dog",
         element: <Dog />,
       },
-      // {
-      //   path: "dog/addDog",
-      //   element: <AddDog />,
-      // },
       { path: "/dog/stepper", element: <StepperForm /> },
       {
         path: "/dogdetails/:id",

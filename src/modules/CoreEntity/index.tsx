@@ -394,74 +394,10 @@ const CoreEntity = () => {
               <Grid item xs={6}>
                 <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
               </Grid>
-              <Grid item xs={isEditMode ? 5 : 6}>
+              <Grid item xs={6}>
                 <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
               </Grid>
-              {isEditMode && index === coreEntityFields.entity.length - 1 && (
-                <Grid item xs={1}>
-                  <Button sx={{ mt: 2 }} onClick={() => append({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
-                    Add
-                  </Button>
-                </Grid>
-              )}
             </Grid>
-          ))}
-
-        {isEditMode &&
-          fields.map((field, index) => (
-            <div key={field.id}>
-              <Grid container spacing={2} my={1}>
-                <Grid item xs={6}>
-                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
-                </Grid>
-                <Grid item xs={5}>
-                  <Controller
-                    name={`fields.${index}.dataType`}
-                    control={control} // assuming you have `control` from useForm()
-                    render={({ field }) => (
-                      <FormControl variant="outlined" fullWidth>
-                        <InputLabel id={`fields-${index}-label`}>Field Type</InputLabel>
-                        <Select labelId={`fields-${index}-label`} label="Field Type" {...field}>
-                          {dataTypesEntity.map((option) => (
-                            <MenuItem key={option.order} value={option.order}>
-                              {option.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                {watch(`fields.${index}.dataType`) === 5 && (
-                  <Grid item xs={11} md={11}>
-                    <TextField
-                      label="Enter text"
-                      fullWidth
-                      value={text}
-                      InputProps={{
-                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
-                      }}
-                      {...register(`fields.${index}.data`)}
-                      onChange={handleChangeEnumType}
-                      onKeyDown={handleKeyDown}
-                    />
-                  </Grid>
-                )}
-                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
-                  <IconButton
-                    sx={{
-                      "&:hover": { background: theme.colors.error.lighter },
-                      color: theme.palette.error.main,
-                    }}
-                    color="inherit"
-                    size="small"
-                    onClick={() => remove(index)}
-                  >
-                    <DeleteTwoToneIcon fontSize="small" />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </div>
           ))}
       </Box>
       <Divider sx={{ my: 3 }} />
@@ -748,67 +684,7 @@ const CoreEntity = () => {
                             <Grid item xs={5}>
                               <TextField label="Field Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
                             </Grid>
-                            <Grid item xs={1}>
-                              <Button sx={{ mt: 2.5 }} onClick={() => append({ fieldName: "", dataType: 0, data: "" })} startIcon={<AddTwoToneIcon fontSize="small" />}>
-                                Add
-                              </Button>
-                            </Grid>
                           </Grid>
-                          {fields.map((field, index) => (
-                            <div key={field.id}>
-                              <Grid container spacing={2} my={1}>
-                                <Grid item xs={6}>
-                                  <TextField label="Field Name" variant="outlined" fullWidth {...register(`fields.${index}.fieldName`)} />
-                                </Grid>
-                                <Grid item xs={5}>
-                                  <Controller
-                                    name={`fields.${index}.dataType`}
-                                    control={control} // assuming you have `control` from useForm()
-                                    render={({ field }) => (
-                                      <FormControl variant="outlined" fullWidth>
-                                        <InputLabel id={`fields-${index}-label`}>Field Type</InputLabel>
-                                        <Select labelId={`fields-${index}-label`} label="Field Type" {...field}>
-                                          {dataTypesEntity.map((option) => (
-                                            <MenuItem key={option.order} value={option.order}>
-                                              {option.name}
-                                            </MenuItem>
-                                          ))}
-                                        </Select>
-                                      </FormControl>
-                                    )}
-                                  />
-                                </Grid>
-                                {watch(`fields.${index}.dataType`) === 5 && (
-                                  <Grid item xs={11} md={11}>
-                                    <TextField
-                                      label="Enter text"
-                                      fullWidth
-                                      value={text}
-                                      InputProps={{
-                                        startAdornment: words.map((word, index) => <Chip key={index} label={word} onDelete={() => handleDelete(index)} />),
-                                      }}
-                                      {...register(`fields.${index}.data`)}
-                                      onChange={handleChangeEnumType}
-                                      onKeyDown={handleKeyDown}
-                                    />
-                                  </Grid>
-                                )}
-                                <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
-                                  <IconButton
-                                    sx={{
-                                      "&:hover": { background: theme.colors.error.lighter },
-                                      color: theme.palette.error.main,
-                                    }}
-                                    color="inherit"
-                                    size="small"
-                                    onClick={() => remove(index)}
-                                  >
-                                    <DeleteTwoToneIcon fontSize="small" />
-                                  </IconButton>
-                                </Grid>
-                              </Grid>
-                            </div>
-                          ))}
                         </Box>
                         <Divider sx={{ my: 3 }} />
                         <Box>
