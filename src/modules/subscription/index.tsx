@@ -47,7 +47,7 @@ const useStyles = makeStyles({
     maxHeight: 50,
   },
   card: {
-    width: 450,
+    width: 500,
     height: 130,
     display: "flex",
     justifyContent: "center",
@@ -467,7 +467,7 @@ const Subscription = () => {
         <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 24px" }}>
           {isEditing ? "Update Plan" : "Add Plan"}
         </DialogTitle>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: 500 }}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: 550 }}>
           <DialogContent>
             <Box sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto" }}>
               <div>

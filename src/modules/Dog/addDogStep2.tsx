@@ -17,6 +17,9 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   const [sections, setSections] = useState(fields.section);
   const [fieldFiles, setFieldFiles] = useState({});
   const [basicInformationUpdated, setBasicInformationUpdated] = useState(false);
+  const [aboutMeUpdated, setAboutMeUpdated] = useState(false);
+  const [sectionUpdated, setSectionUpdated] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
   const {
     register,
@@ -27,7 +30,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
   useEffect(() => {
     if (dogData) {
-      if (dogData && !basicInformationUpdated) {
+      if (!basicInformationUpdated) {
         const updatedBasicInformation = basicInformation.map((field) => {
           const { fieldName } = field;
           const key = fieldName.toLowerCase();
@@ -41,10 +44,10 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           return field;
         });
 
-        console.log(updatedBasicInformation);
         setBasicInformation(updatedBasicInformation);
         setBasicInformationUpdated(true);
-
+      }
+      if (!aboutMeUpdated) {
         const updatedAboutMe = aboutMe.map((field) => {
           const { fieldName } = field;
           const key = fieldName.toLowerCase();
@@ -57,9 +60,10 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           }
           return field;
         });
-
         setAboutMe(updatedAboutMe);
-
+        setAboutMeUpdated(true);
+      }
+      if (!sectionUpdated) {
         const updatedSections = { ...sections };
         Object.keys(updatedSections).forEach((sectionKey) => {
           if (sectionKey in dogData.section && Array.isArray(dogData.section[sectionKey].section_details)) {
@@ -78,15 +82,14 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           }
         });
 
-        console.log("updatedSections", updatedSections);
         setSections(updatedSections);
+        setSectionUpdated(true);
       }
     }
   }, [dogData, basicInformation, aboutMe, sections, basicInformationUpdated]);
 
   const generatePresignedUrls = async (files, sectionKey, fieldIndex, datatype) => {
     const updatedSections = { ...sections };
-    console.log(files, sectionKey, fieldIndex);
     const uploadPromises = files.map(async (file) => {
       const signedUrlDto = {
         fileName: file.name,
@@ -109,7 +112,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
     try {
       const uploadedUrls = await Promise.all(uploadPromises);
-      console.log(uploadedUrls);
       if (datatype === 7) {
         // Single File
         const imageurl = uploadedUrls[0].split("?")[0];
@@ -128,7 +130,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
       } else if (datatype === 8) {
         // Multiple Files
         const cleanedUrls = uploadedUrls.map((url) => url.split("?")[0]);
-        console.log(cleanedUrls);
         if (sectionKey === "basicInformation") {
           const updatedBasicInformation = [...basicInformation];
           updatedBasicInformation[fieldIndex].data = cleanedUrls;
@@ -148,9 +149,28 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   };
 
   const handleChange = async (e, sectionKey, fieldIndex, dataType) => {
-    console.log(dataType);
     const files = e.target.files;
     const updatedSections = { ...sections };
+    const value = e.target.value;
+    let error = "";
+
+    // Perform field-specific validation
+    if (dataType === 1 && !/^(?! )[A-Za-z ]*$/.test(value)) {
+      error = "Invalid input. Only letters and spaces are allowed.";
+    } else if (dataType === 2 && value < 0) {
+      error = "Invalid input. Only positive numbers are allowed.";
+    }
+    if (dataType === 3) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // Regex pattern for dd/mm/yyyy format
+      if (!dateRegex.test(value)) {
+        error = "Invalid date format. Please enter a date in the format dd/mm/yyyy.";
+      }
+    }
+
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      [`${sectionKey}-${fieldIndex}`]: error, // Store the error for the specific field
+    }));
 
     if (e.target.files && e.target.files.length > 0) {
       setFieldFiles((prevFieldFiles) => ({
@@ -163,8 +183,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
       if (dataType === 7) {
         generatePresignedUrls([files[0]], sectionKey, fieldIndex, dataType);
       } else if (dataType === 8) {
-        console.log("Multiple Files");
-
         const newFiles = Array.from(files);
         generatePresignedUrls(newFiles, sectionKey, fieldIndex, dataType);
       }
@@ -185,25 +203,65 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   };
 
   const onSubmit = () => {
-    // Handle form submission with updated sections data
-    console.log(fields);
-    onNext(fields);
+    let hasErrors = false;
+
+    // Check if any field has an error
+    Object.values(fieldErrors).forEach((error) => {
+      if (error && error !== "") {
+        hasErrors = true;
+      }
+    });
+
+    if (!hasErrors) {
+      const formData = {
+        basicInformation,
+        aboutMe,
+        section: sections,
+      };
+      console.log(formData);
+      onNext(formData);
+    } else {
+      console.log("Form has errors. Please fix the errors before submitting.");
+      return;
+    }
   };
 
   const renderField = (field, fieldIndex, sectionKey) => {
     const { fieldName, dataType, data } = field;
     let fieldComponent = null;
-
+    const errorKey = `${sectionKey}-${fieldIndex}`;
+    const errorMessage = fieldErrors[errorKey];
+    const showError = errorMessage && errorMessage !== "";
+    const errorColor = "#FF5E68";
+    const fieldBorderColor = showError ? errorColor : "";
     switch (dataType) {
       case 1:
-        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />;
+        fieldComponent = (
+          <TextField
+            label={fieldName}
+            margin="normal"
+            fullWidth
+            value={data}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
+            helperText={showError ? <span style={{ color: errorColor }}>{errorMessage}</span> : ""}
+          />
+        );
         break;
       case 2:
-        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth type="number" value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />;
+        fieldComponent = (
+          <TextField
+            label={fieldName}
+            margin="normal"
+            fullWidth
+            type="number"
+            value={data}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
+            helperText={showError ? <span style={{ color: errorColor }}>{errorMessage}</span> : ""}
+          />
+        );
         break;
       case 3:
         const formattedDate = data && moment(data).format("YYYY-MM-DD");
-        console.log(formattedDate);
         fieldComponent = (
           <TextField
             label={fieldName}
@@ -213,6 +271,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
             value={formattedDate ? formattedDate : ""}
             onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
             InputLabelProps={{ shrink: true }}
+            helperText={showError ? <span style={{ color: errorColor }}>{errorMessage}</span> : ""}
           />
         );
         break;
@@ -321,7 +380,12 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         break;
     }
 
-    return <div key={fieldIndex}>{fieldComponent}</div>;
+    return (
+      <div key={fieldIndex}>
+        {fieldComponent}
+        {/* {showError && <Box sx={{ color: "#FF5E68" }}>{errorMessage}</Box>} */}
+      </div>
+    );
   };
 
   return (
