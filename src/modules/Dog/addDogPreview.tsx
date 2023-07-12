@@ -32,6 +32,7 @@ import "react-image-crop/dist/ReactCrop.css";
 import { makeStyles } from "@mui/styles";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const useStyles = makeStyles({
   card: {
@@ -199,6 +200,20 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
     } catch (error) {
       console.error("Error uploading files:", error);
     }
+  };
+
+  const handleFileDeselect = (fileIndex, sectionKey, fieldIndex) => {
+    const updatedFiles = [...fieldFiles[sectionKey][fieldIndex]];
+    updatedFiles.splice(fileIndex, 1);
+    console.log(updatedFiles);
+    setFieldFiles((prevFieldFiles) => ({
+      ...prevFieldFiles,
+      [sectionKey]: {
+        ...prevFieldFiles[sectionKey],
+        [fieldIndex]: updatedFiles.length > 0 ? updatedFiles : undefined,
+      },
+    }));
+    generatePresignedUrls(updatedFiles, sectionKey, fieldIndex, 8);
   };
 
   const handleChange = async (e, sectionKey, fieldIndex, dataType) => {
@@ -392,10 +407,17 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
               <CloudUploadIcon fontSize="large" />
               <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} multiple />
             </IconButton>
-            {fieldFiles[sectionKey]?.[fieldIndex]?.length > 0 ? (
-              <Typography variant="subtitle2" mt={1}>
-                {fieldFiles[sectionKey][fieldIndex].map((file) => file.name).join(", ")}
-              </Typography>
+            {fieldFiles[fieldName]?.length > 0 ? (
+              fieldFiles[sectionKey]?.[fieldIndex]?.map((file, fileIndex) => (
+                <div key={fileIndex} style={{ display: "flex", alignItems: "center" }}>
+                  <Typography variant="subtitle2" mt={1} style={{ marginRight: "8px" }}>
+                    {file.name}
+                  </Typography>
+                  <IconButton size="small" onClick={() => handleFileDeselect(fileIndex, sectionKey, fieldIndex)} style={{ padding: "4px" }}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </div>
+              ))
             ) : (
               <Typography variant="subtitle2" mt={1}>
                 {data && data.length > 0 ? data.map((url) => url.split("/").pop()).join(", ") : "Upload a file"}

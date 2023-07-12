@@ -8,6 +8,7 @@ import { isEqual } from "lodash";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
 import moment from "moment";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const Step2 = ({ onBack, onNext, dogData, fields }) => {
   console.log(fields);
@@ -150,6 +151,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
   const handleChange = async (e, sectionKey, fieldIndex, dataType) => {
     const files = e.target.files;
+    console.log(files);
     const updatedSections = { ...sections };
     const value = e.target.value;
     let error = "";
@@ -184,6 +186,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         generatePresignedUrls([files[0]], sectionKey, fieldIndex, dataType);
       } else if (dataType === 8) {
         const newFiles = Array.from(files);
+        console.log(newFiles);
         generatePresignedUrls(newFiles, sectionKey, fieldIndex, dataType);
       }
     } else {
@@ -224,6 +227,20 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
       console.log("Form has errors. Please fix the errors before submitting.");
       return;
     }
+  };
+
+  const handleFileDeselect = (fileIndex, sectionKey, fieldIndex) => {
+    const updatedFiles = [...fieldFiles[sectionKey][fieldIndex]];
+    updatedFiles.splice(fileIndex, 1);
+    console.log(updatedFiles);
+    setFieldFiles((prevFieldFiles) => ({
+      ...prevFieldFiles,
+      [sectionKey]: {
+        ...prevFieldFiles[sectionKey],
+        [fieldIndex]: updatedFiles.length > 0 ? updatedFiles : undefined,
+      },
+    }));
+    generatePresignedUrls(updatedFiles, sectionKey, fieldIndex, 8);
   };
 
   const renderField = (field, fieldIndex, sectionKey) => {
@@ -355,7 +372,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
               borderStyle: "dashed",
               borderColor: "var(--font-400, #808080)",
               bgcolor: "var(--font-025, #FFF)",
-              height: 100,
+              height: 200,
               width: "100%",
               p: 2,
             }}
@@ -364,10 +381,17 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
               <CloudUploadIcon fontSize="large" />
               <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} multiple />
             </IconButton>
-            {fieldFiles[sectionKey]?.[fieldIndex]?.length > 0 ? (
-              <Typography variant="subtitle2" mt={1}>
-                {fieldFiles[sectionKey][fieldIndex].map((file) => file.name).join(", ")}
-              </Typography>
+            {fieldFiles[fieldName]?.length > 0 ? (
+              fieldFiles[sectionKey]?.[fieldIndex]?.map((file, fileIndex) => (
+                <div key={fileIndex} style={{ display: "flex", alignItems: "center" }}>
+                  <Typography variant="subtitle2" mt={1} style={{ marginRight: "8px" }}>
+                    {file.name}
+                  </Typography>
+                  <IconButton size="small" onClick={() => handleFileDeselect(fileIndex, sectionKey, fieldIndex)} style={{ padding: "4px" }}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </div>
+              ))
             ) : (
               <Typography variant="subtitle2" mt={1}>
                 {data && data.length > 0 ? data.map((url) => url.split("/").pop()).join(", ") : "Upload a file"}
@@ -380,12 +404,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         break;
     }
 
-    return (
-      <div key={fieldIndex}>
-        {fieldComponent}
-        {/* {showError && <Box sx={{ color: "#FF5E68" }}>{errorMessage}</Box>} */}
-      </div>
-    );
+    return <div key={fieldIndex}>{fieldComponent}</div>;
   };
 
   return (

@@ -389,7 +389,28 @@ const Collection = () => {
                 ) : (
                   <>
                     {presignedURL ? (
-                      <CardMedia className={classes.media} image={presignedURL} />
+                      <>
+                        <CardMedia className={classes.media} image={presignedURL} />
+                        <IconButton
+                          component="label"
+                          sx={{
+                            position: "absolute",
+                            top: "10%",
+                            left: "90%",
+                            transform: "translate(-50%, -50%)",
+                            backgroundColor: "rgba(255, 255, 255, 0.8)",
+                            "&:hover": {
+                              background: theme.colors.primary.lighter,
+                            },
+                          }}
+                          color="inherit"
+                          htmlFor="profileImageInput"
+                          size="large"
+                        >
+                          <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                          <input id="profileImageInput" type="file" accept="image/*" {...register("profileImagenew", { onChange: (e) => handleFileChange(e) })} hidden />
+                        </IconButton>
+                      </>
                     ) : (
                       <div>
                         <IconButton
@@ -408,27 +429,6 @@ const Collection = () => {
                           <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { required: "Image is required", onChange: (e) => handleFileChange(e) })} hidden />
                         </IconButton>
                       </div>
-                    )}
-                    {presignedURL && (
-                      <IconButton
-                        component="label"
-                        sx={{
-                          position: "absolute",
-                          top: "10%",
-                          left: "90%",
-                          transform: "translate(-50%, -50%)",
-                          backgroundColor: "rgba(255, 255, 255, 0.8)",
-                          "&:hover": {
-                            background: theme.colors.primary.lighter,
-                          },
-                        }}
-                        color="inherit"
-                        htmlFor="profileImageInput"
-                        size="large"
-                      >
-                        <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                        <input id="profileImageInput" type="file" accept="image/*" {...register("profileImage", { required: "Image is required", onChange: (e) => handleFileChange(e) })} hidden />
-                      </IconButton>
                     )}
                   </>
                 )}

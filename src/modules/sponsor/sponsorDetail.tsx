@@ -41,8 +41,6 @@ const SponsorDetailComponent = () => {
 
   const [getSponsorsDetails, { data: getSponsorDetailsData, loading: sponsorDetailsLoading, refetch }] = useLazyQuery(GET_SPONSORS_DETAILS);
 
-  // const [getSponsorProductDetails, { data: getSponsorProductDetailsData, loading: sponsorProductDetailsLoading }] = useLazyQuery(GET_SPONSORS_PRODUCT_DETAILS);
-
   useEffect(() => {
     getSponsorsDetails({ variables: { input: { sponsorId: id } } });
   }, []);

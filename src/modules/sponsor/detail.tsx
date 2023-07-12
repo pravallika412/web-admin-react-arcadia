@@ -4,6 +4,12 @@ import Label from "../../shared/components/Label";
 import { IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useCallback } from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useLocation, useNavigate } from "react-router";
+
+interface LocationState {
+  page: any;
+}
 
 const DetailComponent = ({ sponsorData }) => {
   const { sponsor, subscription_end_date, planDetails, status } = sponsorData;
@@ -40,9 +46,21 @@ const DetailComponent = ({ sponsorData }) => {
   const copyToClipboard = useCallback((text) => {
     navigator.clipboard.writeText(text);
   }, []);
+  const navigate = useNavigate();
+  // const location = useLocation();
+  // const state = location.state as LocationState;
+  // const row = state?.page;
+  const handleBack = () => {
+    // console.log(row);
+    navigate("/sponsors");
+    // navigate("/sponsors", { state: { page: row } });
+  };
 
   return (
     <Box>
+      <IconButton onClick={handleBack} sx={{ marginBottom: 1 }}>
+        <ArrowBackIcon />
+      </IconButton>
       <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
         Details of {sponsor.name}
       </Typography>
