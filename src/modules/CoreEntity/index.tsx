@@ -192,7 +192,7 @@ const CoreEntity = () => {
     remove: removeAboutMe,
   } = useFieldArray({
     control,
-    name: "basicinfo",
+    name: "aboutme",
   });
 
   const {
@@ -297,6 +297,7 @@ const CoreEntity = () => {
       collectionName: data.collectionName,
       fields: JSON.stringify(restructuredData),
     };
+    return;
     createEntity({ variables: { input: payload } });
   };
 
@@ -681,7 +682,7 @@ const CoreEntity = () => {
                             <Grid item xs={6}>
                               <TextField label="Field Name" margin="normal" value="status" disabled fullWidth />
                             </Grid>
-                            <Grid item xs={5}>
+                            <Grid item xs={6}>
                               <TextField label="Field Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
                             </Grid>
                           </Grid>
