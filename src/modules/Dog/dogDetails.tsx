@@ -171,6 +171,7 @@ const DogDetails = () => {
     }
 
     if (isDateUrl) {
+      console.log("date", value);
       const date = new Date(value);
       const formattedDate = `${date.getUTCDate()}-${date.getUTCMonth() + 1}-${date.getUTCFullYear()}`;
       return formattedDate;
