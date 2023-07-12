@@ -469,7 +469,7 @@ const Subscription = () => {
         </DialogTitle>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: 550 }}>
           <DialogContent>
-            <Box sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto" }}>
+            <Box sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto", maxWidth: "100%" }}>
               <div>
                 <Controller
                   name="name"

@@ -314,7 +314,7 @@ const Dog = () => {
       createdAt: formatDate(row.createdAt),
       barcode: (
         <QRCode
-          value={row._id} // bind the QR code with dog id
+          value={row.custom_id} // bind the QR code with dog id
           size={34} // size of the QR code, you can adjust based on your needs
           level="Q" // Error correction level of the QR Code, can be L, M, Q, H
         />

@@ -58,22 +58,27 @@ const HandlerDetailComponent = () => {
   };
 
   return (
-    <Box sx={{ m: 2 }}>
-      {handlerDetailsLoading && <SuspenseLoader left={10} />}
-      <HandlerProfileComponent handlerData={handlerData} />
-      <Box sx={{ width: "100%", mt: 2 }}>
-        <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">
-          <Tab label="User Activities" {...a11yProps(0)} />
-          <Tab label="Posts" {...a11yProps(1)} />
-        </Tabs>
-        <TabPanel value={value} index={0}>
-          <UserActivities id={id} />
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <HandlerPosts id={id} />
-        </TabPanel>
-      </Box>
-    </Box>
+    <>
+      {handlerDetailsLoading ? (
+        <SuspenseLoader left={10} />
+      ) : (
+        <Box sx={{ m: 2 }}>
+          <HandlerProfileComponent handlerData={handlerData} />
+          <Box sx={{ width: "100%", mt: 2 }}>
+            <Tabs variant="scrollable" scrollButtons="auto" textColor="primary" indicatorColor="primary" value={value} onChange={handleChange} aria-label="core entity">
+              <Tab label="User Activities" {...a11yProps(0)} />
+              <Tab label="Posts" {...a11yProps(1)} />
+            </Tabs>
+            <TabPanel value={value} index={0}>
+              <UserActivities id={id} />
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              <HandlerPosts id={id} />
+            </TabPanel>
+          </Box>
+        </Box>
+      )}
+    </>
   );
 };
 
