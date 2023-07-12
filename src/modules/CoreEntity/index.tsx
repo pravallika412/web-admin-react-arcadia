@@ -297,7 +297,7 @@ const CoreEntity = () => {
       collectionName: data.collectionName,
       fields: JSON.stringify(restructuredData),
     };
-    return;
+
     createEntity({ variables: { input: payload } });
   };
 
@@ -873,7 +873,7 @@ const CoreEntity = () => {
                                     fullWidth
                                     {...register(`test.${index}.secName`, {
                                       pattern: {
-                                        value: fieldNamePattern,
+                                        value: /^(?! )[A-Za-z ]*$/,
                                         message: "Section Name should only contain alphabets",
                                       },
                                     })}
