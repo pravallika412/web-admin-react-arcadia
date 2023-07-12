@@ -5,7 +5,7 @@ import Step2 from "./addDogStep2";
 import Preview from "./addDogPreview";
 import { CREATE_ENTITY, GET_COREENTITY } from "../../shared/graphQL/core-entity/queries";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { CREATE_PRODUCT } from "../../shared/graphQL/dog/queries";
+import { CREATE_PRODUCT, UPDATE_PRODUCT } from "../../shared/graphQL/dog/queries";
 import { useLocation, useNavigate } from "react-router";
 import DialogComponent from "../../shared/components/Dialog";
 import { Box } from "@mui/system";
@@ -40,6 +40,7 @@ const StepperForm = () => {
   const navigate = useNavigate();
   const [getCoreEntity, { data: getCoreEntityData }] = useLazyQuery(GET_COREENTITY);
   const [createProduct, { data: createProductData }] = useMutation(CREATE_PRODUCT);
+  const [updateProduct, { data: updateProductData }] = useMutation(UPDATE_PRODUCT);
 
   useEffect(() => {
     getCoreEntity();
@@ -50,6 +51,12 @@ const StepperForm = () => {
       setDialog(true);
     }
   }, [createProductData]);
+
+  useEffect(() => {
+    if (updateProductData) {
+      setDialog(true);
+    }
+  }, [updateProductData]);
 
   useEffect(() => {
     if (getCoreEntityData && getCoreEntityData.RetrieveCoreEntity.product_schema) {
@@ -82,8 +89,11 @@ const StepperForm = () => {
       }
     }
     console.log("finalstring", data);
-
-    createProduct({ variables: { input: data } });
+    if (dogData) {
+      updateProduct({ variables: { id: { id: dogData._id }, input: data } });
+    } else {
+      createProduct({ variables: { input: data } });
+    }
   };
 
   const handleClose = () => {
@@ -117,9 +127,6 @@ const StepperForm = () => {
 
   return (
     <div>
-      <Button onClick={handleAddDog}>Add Dog</Button>
-      {dogData && <Button onClick={() => handleEditDog(dogData)}>Edit</Button>}
-
       <Stepper activeStep={activeStep}>
         {steps.map((label, index) => (
           <Step key={label}>
@@ -138,7 +145,7 @@ const StepperForm = () => {
           <Box display="flex" flexDirection="column" alignItems="center">
             <CheckCircleIcon color="success" sx={{ fontSize: 60, m: 2 }} />
             <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
-              <strong> Dog Created Successfully</strong>
+              <strong> Dog {dogData ? "Updated" : "Created"} Successfully</strong>
             </DialogContentText>
           </Box>
         }

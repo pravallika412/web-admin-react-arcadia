@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
@@ -54,6 +54,10 @@ const sponsorshipStatus = [
   },
 ];
 
+interface LocationState {
+  page: any;
+}
+
 const Sponsor = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
@@ -68,8 +72,11 @@ const Sponsor = () => {
   const [getPlans, { data: getAllPlans, loading: planLoader }] = useLazyQuery(GET_PLANS, { fetchPolicy: "no-cache" });
 
   const navigate = useNavigate();
-
+  // const location = useLocation();
+  // const state = location.state as LocationState;
+  // const row = state?.page;
   useEffect(() => {
+    // console.log(row);
     getPlans({ variables: { input: { pageDto: { page: 1, limit: 50 } } } });
   }, []);
 
@@ -174,6 +181,8 @@ const Sponsor = () => {
   };
 
   const handleRowClick = (id) => {
+    // localStorage.setItem("sponsor_page", page.toString());
+    // navigate(`/sponsordetails/${id}`, { state: { page: page } });
     navigate(`/sponsordetails/${id}`);
   };
 

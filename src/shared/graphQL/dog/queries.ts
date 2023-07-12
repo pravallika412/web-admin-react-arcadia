@@ -27,8 +27,8 @@ const GET_PRODUCT_DETAILS = gql`
 `;
 
 const UPDATE_PRODUCT = gql`
-  mutation updateProduct($id: IdDto!, $input: UpdateProductDto!) {
-    updateProduct(productId: $id, updateProductDto: $input) {
+  mutation editProduct($id: IdDto!, $input: EditProductDto!) {
+    editProduct(productId: $id, editProductDto: $input) {
       success
       message
     }

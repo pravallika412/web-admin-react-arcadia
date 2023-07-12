@@ -205,7 +205,6 @@ const TransactionHistory = ({ id }) => {
         </>
       ),
       amount: row?.amount_paid ? "$" + row.amount_paid : "N/A",
-
       transactionType: row?.subscription_status ? row?.subscription_status : "",
       transactionDate: formatDate(row?.createdAt),
       status: getStatusLabel(row?.payment_status),
