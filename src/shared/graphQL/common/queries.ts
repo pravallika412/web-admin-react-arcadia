@@ -5,6 +5,17 @@ const LOGIN_ADMIN = gql`
     signIn(loginDto: $input) {
       jwtToken
       expiresIn
+      refreshToken
+    }
+  }
+`;
+
+const REFRESH_TOKEN = gql`
+  query RefreshToken($input: JwtTokenDto!) {
+    RefreshToken(refreshTokenDto: $input) {
+      jwtToken
+      expiresIn
+      refreshToken
     }
   }
 `;
@@ -81,4 +92,4 @@ const GET_USER_COUNT = gql`
   }
 `;
 
-export { LOGIN_ADMIN, GENERATE_PRESIGNED_URL, FORGET_PASSWORD, VERIFY_OTP, RESEND_OTP, RESET_PASSWORD, SPONSOR_STATS, GET_USER_COUNT };
+export { LOGIN_ADMIN, GENERATE_PRESIGNED_URL, FORGET_PASSWORD, VERIFY_OTP, RESEND_OTP, RESET_PASSWORD, SPONSOR_STATS, GET_USER_COUNT, REFRESH_TOKEN };

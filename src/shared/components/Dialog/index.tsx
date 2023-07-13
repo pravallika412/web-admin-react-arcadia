@@ -21,8 +21,8 @@ const DialogComponent = (props) => {
           </IconButton>
         )}
       </Box>
-      <DialogContent sx={{ overflow: "hidden" }}>{content}</DialogContent>
-      <DialogActions>{actions}</DialogActions>
+      {content && <DialogContent sx={{ overflow: "hidden" }}>{content}</DialogContent>}
+      {actions && <DialogActions>{actions}</DialogActions>}
     </Dialog>
   );
 };

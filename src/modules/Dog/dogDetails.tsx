@@ -1,10 +1,10 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Button, DialogActions, DialogContent, DialogContentText, Grid, Icon, IconButton, List, ListItem, ListItemText, Paper, Typography, useTheme } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogContentText, Grid, Icon, IconButton, InputLabel, List, ListItem, ListItemText, Paper, TextField, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import { useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Label from "../../shared/components/Label";
-import { DELETE_PRODUCT, GET_PRODUCT_DETAILS } from "../../shared/graphQL/dog/queries";
+import { DELETE_PRODUCT, GET_PRODUCT_DETAILS, UPDATE_RFID } from "../../shared/graphQL/dog/queries";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import QRCode from "react-qr-code";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
@@ -13,6 +13,23 @@ import { CloudDownload } from "@mui/icons-material";
 import JSZip from "jszip";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import { Link } from "react-router-dom";
+import InfoIcon from "@mui/icons-material/Info";
+import { useForm } from "react-hook-form";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+
+const instructions = [
+  "Open the NFC Tools application and locate the 'Write' button",
+  "Click on the 'Write' button and a prompt will appear",
+  "Select 'Add a record' from the prompt options",
+  "On the new screen, click on the text field and enter the dog ID",
+  "After entering the dog ID, confirm the input and return to the previous screen",
+  "On the previous screen, click 'OK' to save the record. A new record will appear at the bottom",
+  "Locate the 'Write/11 bytes' option and select it",
+  "Now, prepare to scan the RF-ID by positioning it near the back of your phone",
+  "The NFC Tools application will automatically close after successfully scanning the RF-ID",
+];
+
+const verificationSteps = ["After clicking on the 'Write' button, enter the dog ID in the designated field", "Then, click on the 'Read' button to display the RF-ID along with the associated dog ID"];
 
 const DogDetails = () => {
   const theme = useTheme();
@@ -21,7 +38,18 @@ const DogDetails = () => {
   const [productData, setProductData] = useState(null);
   const [getProductDetails, { data: getProductDetailsData, loading: productDetailsLoading, refetch }] = useLazyQuery(GET_PRODUCT_DETAILS);
   const [deleteProduct, { data: deleteProductData }] = useMutation(DELETE_PRODUCT);
+  const [updateRFID, { data: updateRFIDData }] = useMutation(UPDATE_RFID);
   const navigate = useNavigate();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openRfidg, setOpenRfid] = useState(false);
+  const [rfidData, setRfidData] = useState("");
+  const [rfidError, setRfidError] = useState(false);
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     getProductDetails({ variables: { input: { customId: id } } });
@@ -39,6 +67,13 @@ const DogDetails = () => {
       navigate(`/dog`);
     }
   }, [deleteProductData]);
+
+  useEffect(() => {
+    if (updateRFIDData) {
+      refetch();
+      setOpenRfid(false);
+    }
+  }, [updateRFIDData]);
 
   const formatDate = (dateToFormat) => {
     if (dateToFormat) {
@@ -92,6 +127,7 @@ const DogDetails = () => {
 
   const handleClose = (rw) => {
     setOpenDelete(false);
+    setOpenRfid(false);
   };
 
   const handleDelete = () => {
@@ -102,6 +138,10 @@ const DogDetails = () => {
   const handleEditClick = (row) => {
     console.log(row);
     navigate("/dog/stepper", { state: { row } });
+  };
+
+  const handleRFID = () => {
+    setOpenRfid(true);
   };
 
   const downloadFile = (fileUrl, fileName) => {
@@ -179,6 +219,31 @@ const DogDetails = () => {
     return value;
   };
 
+  const handleInfoClick = () => {
+    setOpenDialog(true);
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    updateRFID({ variables: { input: { productId: productData._id, rfidTag: data.rfidData } } });
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const copyToClipboard = useCallback((text) => {
+    navigator.clipboard.writeText(text);
+  }, []);
+
+  const InstructionListItem = ({ text }) => (
+    <li>
+      <Typography variant="body1" sx={{ fontWeight: 500, fontSize: 16 }}>
+        {text}
+      </Typography>
+    </li>
+  );
+
   return (
     <Box sx={{ m: 2 }}>
       <Box>
@@ -219,7 +284,7 @@ const DogDetails = () => {
             </Box>
             <Paper elevation={3} sx={{ padding: 1.5 }}>
               <Grid container spacing={2}>
-                <Grid item xs={2} display="flex" flexDirection="column">
+                <Grid item xs={2} md={2} display="flex" flexDirection="column">
                   <Box flexGrow={1} display="flex" flexDirection="column" sx={{ pe: 2 }}>
                     <Paper style={{ marginBottom: "16px", height: 164, width: 164 }}>
                       {productData.image && <img src={productData.image} alt="Sponsor" style={{ width: "100%", height: "100%" }} />}
@@ -232,8 +297,8 @@ const DogDetails = () => {
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={10} sx={{ mt: 2 }}>
-                  <Grid container spacing={2}>
+                <Grid item xs={7} md={7} sx={{ mt: 2 }}>
+                  <Grid container spacing={1}>
                     <Grid item xs={12} md={6}>
                       <Box sx={{ display: "flex", my: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
@@ -250,7 +315,7 @@ const DogDetails = () => {
                           Total Posts:
                         </Typography>
                         <Typography variant="body1" sx={{ fontSize: 16 }}>
-                          {productData.totalPosts}
+                          {productData?.totalPosts}
                         </Typography>
                       </Box>
                     </Grid>
@@ -268,14 +333,64 @@ const DogDetails = () => {
                     ))}
                   </Grid>
                 </Grid>
+                <Grid item xs={3} md={3} sx={{ mt: 2 }}>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Box sx={{ borderRadius: 0.5, border: "1px solid var(--font-400, #808080)", px: 1, pt: 1, pb: 0.5 }}>
+                      <QRCode
+                        value={productData.custom_id} // bind the QR code with dog id
+                        size={40} // size of the QR code, you can adjust based on your needs
+                        level="Q" // Error correction level of the QR Code, can be L, M, Q, H
+                      />
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: 1 }}>
+                    <Typography variant="body1">RF-ID</Typography>
+                    <IconButton onClick={handleInfoClick}>
+                      <InfoIcon sx={{ color: "#999999" }} fontSize="small" />
+                      <span style={{ fontSize: "small" }}>:</span>
+                    </IconButton>
+                    {productData.rfid_tag != null && (
+                      <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
+                        <Typography
+                          variant="h5"
+                          sx={{ borderRadius: 1, border: "1px solid var(--primary-300, #1EA2FF)", color: "#FFFFFF", background: "var(--primary-300, #1EA2FF)", padding: "3px 6px" }}
+                        >
+                          {productData.rfid_tag.length > 6 ? `${productData.rfid_tag.substring(0, 3)}...${productData.rfid_tag.substring(productData.rfid_tag.length - 3)}` : productData.rfid_tag}
+                          <IconButton onClick={() => copyToClipboard(productData.rfid_tag ? productData.rfid_tag : "")} size="small">
+                            <ContentCopyIcon fontSize="small" sx={{ color: "#FFFFFF" }} />
+                          </IconButton>
+                        </Typography>
+                      </Box>
+                    )}
+                    <Box sx={{ borderRadius: 1, border: "1px solid var(--primary-500, #0360A1);" }}>
+                      <IconButton
+                        sx={{
+                          "&:hover": {
+                            background: theme.colors.primary.lighter,
+                          },
+                          color: theme.palette.primary.main,
+                        }}
+                        color="inherit"
+                        size="small"
+                        onClick={handleRFID}
+                      >
+                        <EditTwoToneIcon fontSize="small" sx={{ color: "#0481D9" }} />
+                        {productData.rfid_tag === null && <Typography>Add</Typography>}
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </Grid>
               </Grid>
             </Paper>
             <Paper elevation={3} sx={{ padding: 1.5, mt: 2 }}>
               <Grid container spacing={2} gap={4}>
-                <Grid item xs={12} md={5} ml={3}>
+                <Grid item xs={12} md={12} ml={3}>
+                  <Typography variant="h6" sx={{ fontWeight: "bold", my: 1, fontSize: 16 }}>
+                    About Me
+                  </Typography>
                   {Object.entries(productData.aboutMe).map(([label, value], index) => (
-                    <Box sx={{ my: 1 }} key={label}>
-                      <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150, my: 1 }}>
+                    <Box sx={{ my: 1, display: "flex" }} key={label}>
+                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
                         {label}:
                       </Typography>
                       <Typography variant="body1">{value}</Typography>
@@ -289,18 +404,23 @@ const DogDetails = () => {
                         </Typography>
                         {Object.keys(section.section_details[0] || {}).length > 0 ? (
                           section.section_details.map((details, detailsIndex) => (
-                            <Grid container spacing={2} key={`${detailsIndex}-${details.title}`}>
-                              {Object.entries(details).map(([key, value]) => (
-                                <Grid item xs={12} sm={6} md={12} key={`${key}-${detailsIndex}`}>
-                                  <Box sx={{ display: "flex" }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
-                                      {key}:
-                                    </Typography>
-                                    <Typography variant="body1" key={`${key}-${detailsIndex}`}>
-                                      {formatValue(value)}
-                                    </Typography>
-                                  </Box>
-                                </Grid>
+                            <Grid container spacing={2}>
+                              {section.section_details.map((details, detailsIndex) => (
+                                <Fragment key={`${detailsIndex}-${details.title}`}>
+                                  {Object.entries(details).map(([key, value]) => (
+                                    <Grid item xs={12} sm={6} md={6} key={`${key}-${detailsIndex}`}>
+                                      <Box sx={{ display: "flex" }}>
+                                        <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
+                                          {key}:
+                                        </Typography>
+                                        <Typography variant="body1" key={`${key}-${detailsIndex}`}>
+                                          {formatValue(value)}
+                                        </Typography>
+                                      </Box>
+                                    </Grid>
+                                  ))}
+                                  {detailsIndex === 2 && <Grid item xs={12} sm={6} md={6} />}
+                                </Fragment>
                               ))}
                             </Grid>
                           ))
@@ -312,87 +432,79 @@ const DogDetails = () => {
                       </Grid>
                     ))}
                   </Grid>
-                  {/* <Box sx={{ my: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                      Service History:
-                    </Typography>
-                    <List>
-                      {productData?.section?.history.map((historyItem, index) => (
-                        <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
-                          <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
-                            <FiberManualRecordIcon fontSize="inherit" />
-                          </Box>
-                          <Box>
-                            <Typography variant="body1" sx={{ color: "#0A3B8A", fontSize: 14, fontWeight: 500 }}>
-                              {historyItem.title}
-                            </Typography>
-                            <Typography variant="body1" sx={{ color: "#808080", fontSize: 10 }}>
-                              {formatDate(historyItem.fromDate)} - {formatDate(historyItem.toDate)}
-                            </Typography>
-                            <Typography variant="body1" sx={{ fontSize: 10 }}>
-                              {historyItem.description}
-                            </Typography>
-                          </Box>
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-                  <Box sx={{ my: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                      Awards Information:
-                    </Typography>
-                    <List>
-                      {productData?.section?.awards.map((awardsItem, index) => (
-                        <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
-                          <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
-                            <FiberManualRecordIcon fontSize="inherit" />
-                          </Box>
-                          <Box>
-                            <Typography variant="body1" sx={{ color: "#0A3B8A", fontSize: 14, fontWeight: 500 }}>
-                              {awardsItem.title}
-                            </Typography>
-                            <Typography variant="body1" sx={{ color: "#808080", fontSize: 10 }}>
-                              {formatDate(awardsItem.fromDate)} - {formatDate(awardsItem.toDate)}
-                            </Typography>
-                          </Box>
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box> */}
                 </Grid>
-                {/* <Box sx={{ width: "0.5px", backgroundColor: "rgba(204, 204, 204, 1)", my: 3, mx: 2 }} />
-                <Grid item xs={12} md={5}>
-                  <Box sx={{ my: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                      Medical reports:
-                    </Typography>
-
-                    {productData?.section?.reports.map((reportsItem, index) => (
-                      <ListItem key={index} disablePadding sx={{ display: "flex", alignItems: "start" }}>
-                        <Box sx={{ color: "#00385F", paddingRight: "10px", paddingTop: "5px", fontSize: 12 }}>
-                          <FiberManualRecordIcon fontSize="inherit" />
-                        </Box>
-                        <Box>
-                          <Typography variant="body1" sx={{ color: "#0A3B8A", fontSize: 14, fontWeight: 500 }}>
-                            {reportsItem.title}
-                          </Typography>
-                          <Typography variant="body1" sx={{ color: "#808080", fontSize: 10 }}>
-                            {formatDate(reportsItem.fromDate)} - {formatDate(reportsItem.toDate)}
-                          </Typography>
-                          <Typography variant="body1" sx={{ fontSize: 10 }}>
-                            {reportsItem.description}
-                          </Typography>
-                        </Box>
-                      </ListItem>
-                    ))}
-                  </Box>
-                </Grid> */}
               </Grid>
             </Paper>
           </>
         )}
       </Box>
 
+      <DialogComponent
+        open={openRfidg}
+        width={496}
+        height={286}
+        handleClose={handleClose}
+        content={
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <InputLabel sx={{ fontSize: 20, fontWeight: 700, color: "#1A1A1A" }}>RF-ID</InputLabel>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="rfidData"
+                  type="text"
+                  fullWidth
+                  {...register("rfidData", { required: true })}
+                  error={!!errors["rfidData"]}
+                  helperText={errors.rfidData ? "RFID  is required" : rfidError ? "RFID  is required" : ""}
+                />
+                <DialogActions>
+                  <Button onClick={handleClose} variant="outlined">
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="contained" autoFocus>
+                    Save
+                  </Button>
+                </DialogActions>
+              </form>
+            </DialogContentText>
+          </DialogContent>
+        }
+        actions={undefined}
+      />
+
+      <DialogComponent
+        open={openDialog}
+        width={720}
+        height={750}
+        handleClose={handleCloseDialog}
+        content={
+          <Box sx={{ maxHeight: "600px", overflowY: "auto" }}>
+            <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 18, textAlign: "center" }}>
+              Instructions
+            </Typography>
+            <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 18, marginBottom: "10px", mt: 1 }}>
+              Steps
+            </Typography>
+            <ol style={{ listStyleType: "unset" }}>
+              {instructions.map((step, index) => (
+                <InstructionListItem key={index} text={step} />
+              ))}
+            </ol>
+
+            <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 18, marginBottom: "10px", mt: 1 }}>
+              Verification Steps
+            </Typography>
+            <ol style={{ listStyleType: "unset" }}>
+              {verificationSteps.map((step, index) => (
+                <InstructionListItem key={index} text={step} />
+              ))}
+            </ol>
+          </Box>
+        }
+        actions={undefined}
+      />
       <DialogComponent
         open={openDelete}
         width={324}
