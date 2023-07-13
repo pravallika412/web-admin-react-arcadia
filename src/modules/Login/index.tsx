@@ -40,13 +40,30 @@ export default function SignIn() {
   const email = watch("email");
 
   useEffect(() => {
-    if (data) {
-      window.localStorage.setItem("expiresIn", data?.signIn.expiresIn);
-      const encryptedToken = data?.signIn.jwtToken; // Your encrypted JWT token
-      if (encryptedToken) {
-        decryptMessage(encryptedToken);
+    async function fetchData() {
+      if (data) {
+        const signInData = data.signIn;
+        if (signInData) {
+          const expiresIn = signInData.expiresIn;
+          window.localStorage.setItem("expiresIn", expiresIn);
+          const encryptedToken = signInData.jwtToken;
+          const encryptedRefreshToken = signInData.refreshToken;
+
+          if (expiresIn && encryptedToken) {
+            const decryptedToken = await decryptMessage(encryptedToken);
+            window.localStorage.setItem("token", decryptedToken);
+            navigate("/overview");
+          }
+
+          if (encryptedRefreshToken) {
+            const decryptedRefreshToken = await decryptMessage(encryptedRefreshToken);
+            window.localStorage.setItem("refreshtoken", decryptedRefreshToken);
+          }
+        }
       }
     }
+
+    fetchData();
   }, [navigate, data]);
 
   async function decryptMessage(encryptedData) {
@@ -54,13 +71,11 @@ export default function SignIn() {
     const keyBuffer = Buffer.from(secretKey, "hex");
     const initVector = Buffer.from(iv, "hex");
     const decipher = crypto.createDecipheriv(algorithm, keyBuffer, initVector);
-    decipher.setEncoding("hex");
+    decipher.setEncoding("utf8");
 
     // Decrypt the data
     let decryptedData = decipher.update(encryptedData, "hex", "utf8");
     decryptedData += decipher.final("utf8");
-    window.localStorage.setItem("token", decryptedData);
-    navigate("/overview");
     return decryptedData;
   }
 

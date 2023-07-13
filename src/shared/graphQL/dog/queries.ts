@@ -44,4 +44,13 @@ const DELETE_PRODUCT = gql`
   }
 `;
 
-export { CREATE_PRODUCT, GET_PRODUCTS, UPDATE_PRODUCT, DELETE_PRODUCT, GET_PRODUCT_DETAILS };
+const UPDATE_RFID = gql`
+  mutation UpdateRFIDTag($input: UpdateRFIDTagDto!) {
+    UpdateRFIDTag(updateRFIDTagDto: $input) {
+      success
+      message
+    }
+  }
+`;
+
+export { CREATE_PRODUCT, GET_PRODUCTS, UPDATE_PRODUCT, DELETE_PRODUCT, GET_PRODUCT_DETAILS, UPDATE_RFID };
