@@ -671,7 +671,7 @@ const Subscription = () => {
                     message: "Max length exceeded",
                   },
                 }}
-                render={({ field }) => <TextField {...field} label="Metadata Description" margin="normal" fullWidth error={!!errors.mtdescription} helperText={errors?.mtdescription?.message} />}
+                render={({ field }) => <TextField {...field} label="NFT Metadata Description" margin="normal" fullWidth error={!!errors.mtdescription} helperText={errors?.mtdescription?.message} />}
               />
 
               <div>
@@ -720,7 +720,14 @@ const Subscription = () => {
                     },
                   }}
                   render={({ field }) => (
-                    <TextField {...field} label="Product Count" margin="normal" fullWidth error={!!errors.supportableProductCount} helperText={errors?.supportableProductCount?.message} />
+                    <TextField
+                      {...field}
+                      label="Product Count (no. of items accessible)"
+                      margin="normal"
+                      fullWidth
+                      error={!!errors.supportableProductCount}
+                      helperText={errors?.supportableProductCount?.message}
+                    />
                   )}
                 />
               </div>

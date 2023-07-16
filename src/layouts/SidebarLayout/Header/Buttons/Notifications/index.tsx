@@ -9,6 +9,7 @@ import { MARK_ALL_READ, MARK_READ, SHOW_ADMIN_NOTIFICATIONS } from "../../../../
 import Dummy from "../../../../../assets/images/dummy.png";
 import { useNavigate } from "react-router";
 import { List } from "react-virtualized";
+import { io } from "socket.io-client";
 
 const NotificationsBadge = styled(Badge)(
   ({ theme }) => `
@@ -44,6 +45,24 @@ function HeaderNotifications() {
   const [showNotifications, { data: showNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(SHOW_ADMIN_NOTIFICATIONS, { fetchPolicy: "no-cache" });
   const navigate = useNavigate();
   const [totalCount, setTotalCount] = useState<number>(0);
+  const socket_url = process.env.WEBSOCKET_URL;
+  const socket = io(socket_url);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("connect", () => {
+        socket.emit("userhandler", { userId: "64b0086edbdcd02f63d4cea3", role: "admin" }, (response) => {
+          console.log("userHandler", response);
+        });
+        socket.on("userConnected", (data) => {
+          console.log("userConnected", data);
+        });
+        socket.on("receivedNotification", (data) => {
+          console.log("receivedNotification", data);
+        });
+      });
+    }
+  });
 
   useEffect(() => {
     showNotifications({ variables: { input1: { page: 1, limit: 200 }, input2: {} } });
