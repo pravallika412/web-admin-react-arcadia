@@ -35,6 +35,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Collection from "./collection";
 import NestedArray from "./nestedArray";
 import EditIcon from "@mui/icons-material/Edit";
+import SecEdit from "./sectionEditArray";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -122,6 +123,7 @@ const CoreEntity = () => {
   const [additionalFields, setAdditionalFields] = useState([]);
   const [newFields, setNewFields] = useState([]);
   const fieldNamePattern = /^[A-Za-z]+$/;
+  const [secOld, setSecOld] = useState({});
 
   const defaultValues = isEditMode
     ? {
@@ -129,6 +131,7 @@ const CoreEntity = () => {
         fields: [],
         basicinfo: [],
         aboutme: [],
+        secEdit: [],
         test: [],
       }
     : {
@@ -148,6 +151,7 @@ const CoreEntity = () => {
             data: "",
           },
         ],
+        secEdit: [],
         test: [
           {
             secName: "",
@@ -196,6 +200,15 @@ const CoreEntity = () => {
   });
 
   const {
+    fields: secEditFields,
+    append: appendSecEdit,
+    remove: removeSecEdit,
+  } = useFieldArray({
+    control,
+    name: "secEdit",
+  });
+
+  const {
     fields: secFields,
     append: appendSec,
     remove: removeSec,
@@ -220,6 +233,7 @@ const CoreEntity = () => {
     if (getCoreEntityData) {
       if (getCoreEntityData.RetrieveCoreEntity.product_schema) {
         console.log(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
+        setSecOld(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema).section);
         setCoreEntityFields(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
         setIsCoreEntity(true);
       } else {
@@ -329,9 +343,38 @@ const CoreEntity = () => {
     setOpenEntity(false);
   };
 
+  function findUpdatedSection(newSec: any, oldSec: any): any {
+    const updatedSection: any = {};
+
+    for (const key in newSec) {
+      if (newSec.hasOwnProperty(key)) {
+        const newSectionDetails = newSec[key].section_details;
+        const oldSectionDetails = oldSec[key].section_details;
+
+        const updatedDetails = newSectionDetails.filter((newDetail: any) => {
+          return !oldSectionDetails.some((oldDetail: any) => {
+            return newDetail.fieldName === oldDetail.fieldName && newDetail.dataType === oldDetail.dataType && newDetail.data === oldDetail.data;
+          });
+        });
+
+        if (updatedDetails.length > 0) {
+          updatedSection[key] = {
+            section_name: newSec[key].section_name,
+            section_details: updatedDetails.map((detail: any) => {
+              const { isNew, ...updatedDetail } = detail;
+              return updatedDetail;
+            }),
+          };
+        }
+      }
+    }
+
+    return updatedSection;
+  }
+
   const handleUpdate = () => {
     const formValues = getValues();
-    console.log(formValues);
+    const updatedSection = findUpdatedSection(coreEntityFields.section, secOld);
     const entity = formValues.fields.filter((field) => field.fieldName !== "");
     const basicinfo = formValues.basicinfo.filter((field) => field.fieldName !== "");
     const abtme = formValues.aboutme.filter((field) => field.fieldName !== "");
@@ -340,7 +383,7 @@ const CoreEntity = () => {
       entity: entity,
       basicInformation: basicinfo,
       aboutMe: abtme,
-      section: {},
+      section: updatedSection,
     };
 
     formValues.test.forEach((section, index) => {
@@ -357,19 +400,21 @@ const CoreEntity = () => {
       };
     });
 
+    restructuredData.section = removeEmptyKeys(restructuredData.section) as any;
     console.log(restructuredData);
-    removeEmptyKeys(restructuredData);
-    console.log(removeEmptyKeys(restructuredData));
     setNewFields(newFields);
     const payload = {
-      fields: JSON.stringify(removeEmptyKeys(restructuredData)),
+      fields: JSON.stringify(restructuredData),
     };
     updateEntity({ variables: { input: payload } });
   };
 
   function removeEmptyKeys(obj) {
+    const cleanedObj = { ...obj };
+
+    delete cleanedObj[""];
     return Object.fromEntries(
-      Object.entries(obj).filter(([_, value]) => {
+      Object.entries(cleanedObj).filter(([key, value]) => {
         if (Array.isArray(value) && value.length === 0) {
           return false;
         }
@@ -381,11 +426,19 @@ const CoreEntity = () => {
     );
   }
 
+  const handleSectionDataChange = (newSectionData) => {
+    setCoreEntityFields((prevFields) => ({
+      ...prevFields,
+      section: newSectionData,
+    }));
+  };
+
   const MyComponent = () => (
     <>
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button onClick={() => setIsEditMode(!isEditMode)}>{isEditMode ? "View" : "Edit"}</Button>
       </Box>
+
       <Box>
         <Typography variant="h4">Entity</Typography>
         <TextField label="Collection Name" margin="normal" value={getCoreEntityData && getCoreEntityData.RetrieveCoreEntity.product_table_name} disabled fullWidth />
@@ -397,6 +450,7 @@ const CoreEntity = () => {
               </Grid>
               <Grid item xs={6}>
                 <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+                {field.dataType === 5 && <TextField label="Data" name="data" margin="normal" value={field.data.join("\n")} multiline rows={4} variant="outlined" fullWidth disabled />}
               </Grid>
             </Grid>
           ))}
@@ -569,24 +623,28 @@ const CoreEntity = () => {
             </Button>
           </Grid>
         )}
+        <SecEdit datatypesMap={datatypesMap} sectionData={coreEntityFields.section} onSectionDataChange={handleSectionDataChange} isEditMode={isEditMode} />
 
-        {coreEntityFields.section &&
-          Object.entries(coreEntityFields.section).map(([sectionName, section], index) => (
-            <Grid item xs={12} key={sectionName}>
-              <Typography variant="h6">{section.section_name}</Typography>
-              {section.section_details.map((field, index) => (
-                <Grid container spacing={2} key={index}>
-                  <Grid item xs={6}>
-                    <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
+        {/* {coreEntityFields.section &&
+          Object.entries(coreEntityFields.section).map(([sectionName, section], index1) => (
+            <>
+              <Grid item xs={12} key={sectionName}>
+                <Typography variant="h6">{section.section_name}</Typography>
+                {section.section_details.map((field, index) => (
+                  <Grid container spacing={2} key={index}>
+                    <Grid item xs={6}>
+                      <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
+                    </Grid>
+                    <Grid item xs={isEditMode ? 5 : 6}>
+                      <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
-                  </Grid>
-                </Grid>
-              ))}
-            </Grid>
-          ))}
+                ))}
+              </Grid>
+            </>
+          ))} */}
       </Grid>
+
       {isEditMode &&
         secFields.map((field, index) => (
           <Box key={field.id} sx={{ mt: 3 }}>
@@ -632,7 +690,7 @@ const CoreEntity = () => {
                     <Collection />
                   </TabPanel>
                   <TabPanel value={value} index={1}>
-                    {!isCoreEntity ? (
+                    {isCoreEntity ? (
                       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                         <Box>
                           <Typography variant="h3">Entity</Typography>
@@ -663,6 +721,8 @@ const CoreEntity = () => {
                                 helperText={errors?.collectionName?.message}
                               />
                             </Grid>
+                          </Grid>
+                          <Grid container spacing={2}>
                             <Grid item xs={6}>
                               <TextField label="Field Name" margin="normal" value="name" disabled fullWidth />
                             </Grid>

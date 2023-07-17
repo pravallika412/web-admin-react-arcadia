@@ -91,6 +91,7 @@ module.exports = {
         ALCHEMY_API_KEY: JSON.stringify(process.env.ALCHEMY_API_KEY),
         TOKEN_SECURITY_KEY: JSON.stringify(process.env.TOKEN_SECURITY_KEY),
         INIT_VECTOR: JSON.stringify(process.env.INIT_VECTOR),
+        WEBSOCKET_URL: JSON.stringify(process.env.WEBSOCKET_URL),
       },
     }),
   ],

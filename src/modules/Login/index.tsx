@@ -135,7 +135,7 @@ export default function SignIn() {
           <Typography component="h1" className={classes.font48} sx={{ color: "white" }}>
             Welcome Back!
           </Typography>
-          <Typography className={`${classes.font18} ${classes.tertiary200}`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</Typography>
+          <Typography className={`${classes.font18} ${classes.tertiary200}`}>Login here to manage your content, view your supporters and analytics.</Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 3, width: 468 }}>
             <TextField
               margin="normal"
@@ -207,7 +207,7 @@ export default function SignIn() {
             />
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Typography className={`${classes.font12} ${classes.pointer}`} color="white" onClick={handleForgetPasswordClick}>
-                Forget password?
+                Forgot password?
               </Typography>
             </Box>
             <Button

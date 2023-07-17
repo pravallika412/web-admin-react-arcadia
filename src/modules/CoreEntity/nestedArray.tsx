@@ -5,7 +5,6 @@ import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 
 const NestedArray = ({ nestIndex, control, register, dataTypesEntity }) => {
-  console.log(nestIndex, control, register);
   const theme = useTheme();
   const [text, setText] = useState("");
   const [words, setWords] = useState([]);

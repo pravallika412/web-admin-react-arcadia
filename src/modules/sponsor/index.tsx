@@ -252,7 +252,7 @@ const Sponsor = () => {
           </Box>
           <Box width={170} sx={{ m: 1 }}>
             <FormControl fullWidth variant="outlined">
-              <InputLabel>Sponsorhsip Status</InputLabel>
+              <InputLabel>Sponsorship Status</InputLabel>
               <Select onChange={(e) => handleStatusChange(e, "status")} label="Sponsorship Status" defaultValue={""} autoWidth>
                 {sponsorshipStatus.map((statusOption) => (
                   <MenuItem key={statusOption.id} value={statusOption.id}>
