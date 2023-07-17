@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { TextField, Select, MenuItem, IconButton, Grid, Typography, Button, useTheme } from "@mui/material";
+import { TextField, Select, MenuItem, IconButton, Grid, Typography, Button, useTheme, FormControl, InputLabel, Box } from "@mui/material";
 
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
@@ -23,7 +23,7 @@ const SecEdit = ({ datatypesMap, sectionData, onSectionDataChange, isEditMode })
   const handleAddRow = (sectionKey) => {
     const newField = {
       fieldName: "",
-      dataType: 1,
+      dataType: 0,
       data: "",
       isNew: true,
     };
@@ -90,25 +90,44 @@ const SecEdit = ({ datatypesMap, sectionData, onSectionDataChange, isEditMode })
                   />
                 </Grid>
                 <Grid item xs={isEditMode ? 5 : 6}>
-                  <Select label="Field Type" name="type" value={field.dataType} disabled={!field.isNew} onChange={(e) => handleChange(sectionKey, index, "dataType", e.target.value)} fullWidth>
-                    {Object.keys(datatypesMap).map((key) => (
-                      <MenuItem key={key} value={Number(key)}>
-                        {datatypesMap[key].name}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  {field.isNew ? (
+                    <Box sx={{ pt: 2 }}>
+                      <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Field Type</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="type"
+                          label="Field Type"
+                          name="type"
+                          value={field.dataType}
+                          onChange={(e) => handleChange(sectionKey, index, "dataType", e.target.value)}
+                        >
+                          {Object.keys(datatypesMap).map((key) => (
+                            <MenuItem key={key} value={Number(key)}>
+                              {datatypesMap[key].name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  ) : (
+                    <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
+                  )}
                 </Grid>
+
                 {field.isNew && isEditMode && (
                   <Grid item xs={1}>
-                    <IconButton
-                      sx={{
-                        "&:hover": { background: theme.colors.error.lighter },
-                        color: theme.palette.error.main,
-                      }}
-                      onClick={() => handleRemoveRow(sectionKey, index)}
-                    >
-                      <DeleteTwoToneIcon fontSize="small" />
-                    </IconButton>
+                    <Box sx={{ pt: 2.5 }}>
+                      <IconButton
+                        sx={{
+                          "&:hover": { background: theme.colors.error.lighter },
+                          color: theme.palette.error.main,
+                        }}
+                        onClick={() => handleRemoveRow(sectionKey, index)}
+                      >
+                        <DeleteTwoToneIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </Grid>
                 )}
               </Grid>

@@ -114,7 +114,7 @@ const CoreEntity = () => {
   const [dataTypesEntity, setDataTypesEntity] = useState([]);
   const [openEntity, setOpenEntity] = useState(false);
   const [getDataTypes, { data: getAllDataTypes }] = useLazyQuery(GET_DATATYPES);
-  const [getCoreEntity, { data: getCoreEntityData, refetch }] = useLazyQuery(GET_COREENTITY);
+  const [getCoreEntity, { data: getCoreEntityData, refetch }] = useLazyQuery(GET_COREENTITY, { fetchPolicy: "no-cache" });
   const [createEntity, { data: createEntityData }] = useMutation(CREATE_ENTITY);
   const [updateEntity, { data: updateEntityData }] = useMutation(UPDATE_ENTITY);
   const [text, setText] = useState("");
@@ -230,6 +230,13 @@ const CoreEntity = () => {
   }, [createEntityData]);
 
   useEffect(() => {
+    if (updateEntityData) {
+      setOpenEntity(true);
+      refetch();
+    }
+  }, [updateEntityData]);
+
+  useEffect(() => {
     if (getCoreEntityData) {
       if (getCoreEntityData.RetrieveCoreEntity.product_schema) {
         console.log(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
@@ -341,6 +348,8 @@ const CoreEntity = () => {
 
   const handleEntityClose = () => {
     setOpenEntity(false);
+    setIsEditMode(false);
+    refetch();
   };
 
   function findUpdatedSection(newSec: any, oldSec: any): any {
@@ -690,7 +699,7 @@ const CoreEntity = () => {
                     <Collection />
                   </TabPanel>
                   <TabPanel value={value} index={1}>
-                    {isCoreEntity ? (
+                    {!isCoreEntity ? (
                       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                         <Box>
                           <Typography variant="h3">Entity</Typography>
@@ -973,7 +982,7 @@ const CoreEntity = () => {
         <DialogContent>
           <Box display="flex" flexDirection="column" alignItems="center">
             <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, m: 2 }} />
-            <DialogContentText id="alert-dialog-description">Entity created successfully</DialogContentText>
+            <DialogContentText id="alert-dialog-description">Entity {isEditMode ? "updated" : "created"} successfully</DialogContentText>
           </Box>
         </DialogContent>
         <DialogActions>
