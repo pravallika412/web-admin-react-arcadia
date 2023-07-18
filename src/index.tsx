@@ -30,8 +30,6 @@ const iv = process.env.INIT_VECTOR;
 const ErrorProvider = ({ children }) => {
   const navigate = useNavigate();
   const [networkError, setNetworkError] = useState(false);
-  const [refreshingToken, setRefreshingToken] = useState(false);
-  const [tokenRefreshed, setTokenRefreshed] = useState(false);
   const handleNetworkError = (message) => {
     if (message === "No connection established") {
       setNetworkError(true);
@@ -94,40 +92,27 @@ const ErrorProvider = ({ children }) => {
 
       const decryptedToken = await decryptMessage(jwtToken);
 
-      // Update the token and expiration in localStorage
       window.localStorage.setItem("token", decryptedToken);
       window.localStorage.setItem("expiresIn", expiresIn);
     } catch (error) {
       // Handle error if refresh token API call fails
       console.error("Error refreshing token:", error);
       window.localStorage.clear();
-      // Optionally, you can redirect the user to the login page
       navigate("/");
-    } finally {
-      setRefreshingToken(false);
     }
   };
 
   useEffect(() => {
-    const expiresIn = localStorage.getItem("expiresIn");
-    const expirationTimestamp = parseInt(expiresIn, 10) * 1000; // Convert expiresIn to milliseconds
-    const currentTimestamp = Date.now();
-    const difference = Number(expirationTimestamp) - Number(currentTimestamp);
-    if (difference < 300000 && !refreshingToken && !tokenRefreshed) {
-      setRefreshingToken(true);
-
-      refreshToken()
-        .then(() => {
-          setRefreshingToken(false);
-          setTokenRefreshed(true);
-        })
-        .catch((error) => {
-          console.error("Error refreshing token:", error);
-          window.localStorage.clear();
-          navigate("/");
-        });
-    }
-  }, [navigate, refreshingToken, tokenRefreshed]);
+    setInterval(() => {
+      const expiresIn = localStorage.getItem("expiresIn");
+      const expirationTimestamp = parseInt(expiresIn, 10) * 1000;
+      const currentTimestamp = Date.now();
+      const difference = Number(expirationTimestamp) - Number(currentTimestamp);
+      if (difference < 300000) {
+        refreshToken();
+      }
+    }, 300000);
+  }, []);
 
   const handleCloseDialog = () => {
     setNetworkError(false);

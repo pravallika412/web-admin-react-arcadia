@@ -64,6 +64,8 @@ const Collection = () => {
   const [membershipCA, setMembershipCA] = useState(localStorage.getItem("membership_address"));
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN, { fetchPolicy: "no-cache" });
   const web3 = new Web3(`https://polygon-mumbai.g.alchemy.com/v2/${alchemy_api_key}`);
+  const wdfs3Url = process.env.WDFS3URL;
+
   const {
     register,
     handleSubmit,
@@ -176,7 +178,8 @@ const Collection = () => {
       },
     });
     setLoadingImage(false);
-    setPresignedURL(uploadFile.split("?")[0]);
+    const updatedUrl = uploadFile.split("?")[0] ? uploadFile.split("?")[0].replace("https://wdf-dev.s3.amazonaws.com", wdfs3Url) : "";
+    setPresignedURL(updatedUrl);
   };
 
   const onSubmit = async (data) => {

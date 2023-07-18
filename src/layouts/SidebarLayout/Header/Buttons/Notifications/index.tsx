@@ -49,9 +49,10 @@ function HeaderNotifications() {
   const socket = io(socket_url);
 
   useEffect(() => {
-    if (socket) {
+    const id = localStorage.getItem("adminId");
+    if (socket && id) {
       socket.on("connect", () => {
-        socket.emit("userhandler", { userId: "64b0086edbdcd02f63d4cea3", role: "admin" }, (response) => {
+        socket.emit("userhandler", { userId: id, role: "admin" }, (response) => {
           console.log("userHandler", response);
         });
         socket.on("userConnected", (data) => {
@@ -59,10 +60,19 @@ function HeaderNotifications() {
         });
         socket.on("receivedNotification", (data) => {
           console.log("receivedNotification", data);
+          setUnReadCount((prevCount) => prevCount + 1);
         });
       });
     }
-  });
+    socket.on("connect_error", (data) => {
+      console.log("connect_error", data);
+    });
+
+    return () => {
+      socket.disconnect();
+      console.log("disconnected");
+    };
+  }, [socket]);
 
   useEffect(() => {
     showNotifications({ variables: { input1: { page: 1, limit: 200 }, input2: {} } });
@@ -71,7 +81,7 @@ function HeaderNotifications() {
   useEffect(() => {
     if (showNotificationData) {
       setNotificationData(showNotificationData.AdminInAppNotifications.notifications);
-      setUnReadCount(showNotificationData.AdminInAppNotifications.unread_count);
+
       setTotalCount(showNotificationData.AdminInAppNotifications.totalCount);
     }
   }, [showNotificationData]);
@@ -89,6 +99,7 @@ function HeaderNotifications() {
   }, [markAllReadData]);
 
   const handleOpen = (): void => {
+    setUnReadCount(0);
     setOpen(true);
   };
 
