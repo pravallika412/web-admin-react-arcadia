@@ -30,14 +30,17 @@ const iv = process.env.INIT_VECTOR;
 const ErrorProvider = ({ children }) => {
   const navigate = useNavigate();
   const [networkError, setNetworkError] = useState(false);
+  var intervalId: any;
+
   const handleNetworkError = (message, statusCode) => {
-    console.log(statusCode, message);
-    if (message === "No connection established") {
+    console.log(message, statusCode);
+    if (statusCode === "INTERNAL_SERVER_ERROR") {
       setNetworkError(true);
     } else if (statusCode === 401) {
       // Unauthorized error
       window.localStorage.clear();
-      navigate("/"); // Redirect to login page
+      navigate("/");
+      clearInterval(intervalId);
     } else {
       toast(
         <Snackbar open={true} autoHideDuration={3000} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
@@ -52,10 +55,15 @@ const ErrorProvider = ({ children }) => {
 
   const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, extensions }) => {
-        const statusCode =
-          (extensions as { response: { status?: number; statusCode?: number } })?.response?.status || (extensions as { response: { status?: number; statusCode?: number } })?.response?.statusCode;
-        handleNetworkError(message, statusCode);
+      console.log(graphQLErrors);
+      graphQLErrors.forEach((data: any) => {
+        console.log(data, data?.statusCode);
+        const statusCode = data?.statusCode;
+        const message = data?.message;
+        if (statusCode) {
+          console.log(statusCode);
+          handleNetworkError(message, statusCode);
+        }
       });
     }
     if (networkError) console.log(`[Network error]: ${networkError}`);
@@ -95,6 +103,7 @@ const ErrorProvider = ({ children }) => {
         },
         fetchPolicy: "no-cache",
       });
+
       const { jwtToken, expiresIn } = data.RefreshToken;
 
       const decryptedToken = await decryptMessage(jwtToken);
@@ -121,11 +130,7 @@ const ErrorProvider = ({ children }) => {
       }
     };
 
-    const intervalId = setInterval(refreshTokenIfNeeded, 180000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
+    intervalId = setInterval(refreshTokenIfNeeded, 180000);
   }, []);
 
   const handleCloseDialog = () => {

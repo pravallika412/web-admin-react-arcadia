@@ -61,41 +61,17 @@ const columns = [
   { id: "action", label: "Action", minWidth: 170 },
 ];
 
-const dogStatus = [
-  {
-    id: "all",
-    name: "All",
-  },
-  {
-    id: "active",
-    name: "Active",
-  },
-  {
-    id: "inactive",
-    name: "Inactive",
-  },
-  {
-    id: "adopted",
-    name: "Adopted",
-  },
-  {
-    id: "atheaven",
-    name: "At Heaven",
-  },
-  {
-    id: "suspended",
-    name: "Suspended",
-  },
-];
+const SearchFilter = ({ handleStatusChange, storedStatusData }) => {
+  const statusData = storedStatusData ? JSON.parse(storedStatusData) : null;
+  const transformedArray = statusData.map((status) => ({ name: status }));
 
-const SearchFilter = ({ handleStatusChange }) => {
   return (
-    <Box width={160} sx={{ m: 1 }}>
+    <Box width={140} sx={{ m: 1 }}>
       <FormControl fullWidth variant="outlined">
-        <InputLabel>Dog Status</InputLabel>
-        <Select onChange={(e) => handleStatusChange(e)} label="Post Status" defaultValue={""} autoWidth>
-          {dogStatus.map((statusOption) => (
-            <MenuItem key={statusOption.id} value={statusOption.id}>
+        <InputLabel id="dog-status">Dog Status</InputLabel>
+        <Select labelId="dog-status" id="dog-statusid" onChange={(e) => handleStatusChange(e)} label="Dog Status" defaultValue={""} autoWidth>
+          {transformedArray.map((statusOption) => (
+            <MenuItem key={statusOption.name} value={statusOption.name}>
               {statusOption.name}
             </MenuItem>
           ))}
@@ -124,6 +100,7 @@ const Dog = () => {
   });
   const [deleteProduct, { data: deleteProductData }] = useMutation(DELETE_PRODUCT);
   const [getProducts, { data: getAllProducts, refetch, loading: productLoading }] = useLazyQuery(GET_PRODUCTS, { fetchPolicy: "no-cache" });
+  const storedStatusData = localStorage.getItem("statusData");
 
   const {
     control,
@@ -393,7 +370,7 @@ const Dog = () => {
         onPageChange={handlePageChange}
         onRowsPerPageChange={handleRowsPerPageChange}
         onSearch={handleSearch}
-        searchFilter={<SearchFilter handleStatusChange={handleStatusChange} />}
+        searchFilter={storedStatusData ? <SearchFilter handleStatusChange={handleStatusChange} storedStatusData={storedStatusData} /> : undefined}
         searchFilterVisible={true}
         selectableRows={false}
         onRowClick={undefined}

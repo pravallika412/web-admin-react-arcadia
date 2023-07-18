@@ -240,6 +240,11 @@ const CoreEntity = () => {
     if (getCoreEntityData) {
       if (getCoreEntityData.RetrieveCoreEntity.product_schema) {
         console.log(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
+        const entityObject = JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema).entity;
+        const statusData = entityObject.find((field) => field.fieldName === "status")?.data || [];
+
+        // Store statusData in localStorage
+        localStorage.setItem("statusData", JSON.stringify(statusData));
         setSecOld(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema).section);
         setCoreEntityFields(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
         setIsCoreEntity(true);
