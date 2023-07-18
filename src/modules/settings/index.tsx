@@ -130,6 +130,7 @@ const Settings = () => {
   const [openProfileStatus, setOpenProfileStatus] = useState(false);
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
   const [updateProfile, { data: updateProfileData }] = useMutation(UPDATE_PROFILE);
+  const wdfs3Url = process.env.WDFS3URL;
 
   const [src, setSrc] = useState(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState(null);
@@ -167,7 +168,8 @@ const Settings = () => {
   useEffect(() => {
     if (getAdminData) {
       let data = getAdminData.getAdmin;
-      setCroppedImageUrl(data.profile_image);
+      const updatedUrl = data.profile_image ? data.profile_image.replace("https://wdf-dev.s3.amazonaws.com", wdfs3Url) : "";
+      setCroppedImageUrl(updatedUrl);
       let initial_values = {
         firstName: data.first_name,
         lastName: data.last_name,

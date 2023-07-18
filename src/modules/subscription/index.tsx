@@ -463,7 +463,7 @@ const Subscription = () => {
         onRowClick={undefined}
       ></SharedTable>
 
-      <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
+      <Dialog open={open} onClose={handleClose} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description" sx={{ overflowX: "hidden" }}>
         <DialogTitle id="scroll-dialog-title" sx={{ padding: "16px 24px 0px 24px" }}>
           {isEditing ? "Update Plan" : "Add Plan"}
         </DialogTitle>

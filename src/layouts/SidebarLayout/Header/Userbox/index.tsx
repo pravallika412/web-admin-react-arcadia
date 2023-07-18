@@ -9,8 +9,9 @@ import ExpandMoreTwoToneIcon from "@mui/icons-material/ExpandMoreTwoTone";
 import AccountBoxTwoToneIcon from "@mui/icons-material/AccountBoxTwoTone";
 import LockOpenTwoToneIcon from "@mui/icons-material/LockOpenTwoTone";
 import AccountTreeTwoToneIcon from "@mui/icons-material/AccountTreeTwoTone";
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { GET_ADMIN } from "../../../../shared/graphQL/settings/queries";
+import { LOGOUT } from "../../../../shared/graphQL/common/queries";
 
 const UserBoxButton = styled(Button)(
   ({ theme }) => `
@@ -50,6 +51,15 @@ const UserBoxDescription = styled(Typography)(
 function HeaderUserbox() {
   const [userData, setUserData] = useState({ first_name: "", profile_image: "" });
   const [getAdmin, { data: getAdminData, refetch }] = useLazyQuery(GET_ADMIN);
+  const [adminLogout] = useMutation(LOGOUT, {
+    onCompleted: (data) => {
+      window.localStorage.clear();
+      navigate("/");
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
   useEffect(() => {
     getAdmin();
   }, []);
@@ -57,6 +67,7 @@ function HeaderUserbox() {
   useEffect(() => {
     if (getAdminData) {
       setUserData(getAdminData.getAdmin);
+      localStorage.setItem("adminId", getAdminData.getAdmin._id);
       localStorage.setItem("membership_address", getAdminData.getAdmin.brandDetails.membership_contract_address);
     }
   }, [getAdminData]);
@@ -78,8 +89,7 @@ function HeaderUserbox() {
     setOpen(false);
   };
   const logout = () => {
-    window.localStorage.clear();
-    navigate("/");
+    adminLogout();
     // client.resetStore()
   };
 

@@ -92,6 +92,7 @@ module.exports = {
         TOKEN_SECURITY_KEY: JSON.stringify(process.env.TOKEN_SECURITY_KEY),
         INIT_VECTOR: JSON.stringify(process.env.INIT_VECTOR),
         WEBSOCKET_URL: JSON.stringify(process.env.WEBSOCKET_URL),
+        WDFS3URL: JSON.stringify(process.env.WDFS3URL),
       },
     }),
   ],
