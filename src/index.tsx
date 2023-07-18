@@ -30,9 +30,14 @@ const iv = process.env.INIT_VECTOR;
 const ErrorProvider = ({ children }) => {
   const navigate = useNavigate();
   const [networkError, setNetworkError] = useState(false);
-  const handleNetworkError = (message) => {
+  const handleNetworkError = (message, statusCode) => {
+    console.log(statusCode, message);
     if (message === "No connection established") {
       setNetworkError(true);
+    } else if (statusCode === 401) {
+      // Unauthorized error
+      window.localStorage.clear();
+      navigate("/"); // Redirect to login page
     } else {
       toast(
         <Snackbar open={true} autoHideDuration={3000} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
@@ -47,8 +52,10 @@ const ErrorProvider = ({ children }) => {
 
   const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach(({ message }) => {
-        handleNetworkError(message);
+      graphQLErrors.forEach(({ message, extensions }) => {
+        const statusCode =
+          (extensions as { response: { status?: number; statusCode?: number } })?.response?.status || (extensions as { response: { status?: number; statusCode?: number } })?.response?.statusCode;
+        handleNetworkError(message, statusCode);
       });
     }
     if (networkError) console.log(`[Network error]: ${networkError}`);
@@ -81,13 +88,13 @@ const ErrorProvider = ({ children }) => {
     try {
       const refreshToken = localStorage.getItem("refreshtoken");
 
-      const { data } = await client.query({
+      const { data, errors } = await client.query({
         query: REFRESH_TOKEN,
         variables: {
           input: { jwtToken: refreshToken },
         },
+        fetchPolicy: "no-cache",
       });
-
       const { jwtToken, expiresIn } = data.RefreshToken;
 
       const decryptedToken = await decryptMessage(jwtToken);
@@ -103,15 +110,22 @@ const ErrorProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    setInterval(() => {
+    const refreshTokenIfNeeded = () => {
       const expiresIn = localStorage.getItem("expiresIn");
       const expirationTimestamp = parseInt(expiresIn, 10) * 1000;
       const currentTimestamp = Date.now();
-      const difference = Number(expirationTimestamp) - Number(currentTimestamp);
+      const difference = expirationTimestamp - currentTimestamp;
+      console.log("test", difference < 300000, difference);
       if (difference < 300000) {
         refreshToken();
       }
-    }, 300000);
+    };
+
+    const intervalId = setInterval(refreshTokenIfNeeded, 180000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleCloseDialog = () => {
