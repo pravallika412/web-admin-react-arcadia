@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -100,6 +101,7 @@ interface CoreEntityFields {
     };
   };
 }
+
 const CoreEntity = () => {
   const classes = useStyles();
   const theme = useTheme();
@@ -124,6 +126,12 @@ const CoreEntity = () => {
   const [newFields, setNewFields] = useState([]);
   const fieldNamePattern = /^[A-Za-z]+$/;
   const [secOld, setSecOld] = useState({});
+  const dogActivityOptions = ["running", "walking", "sleeping"];
+  const statusOptions = ["active", "inactive"];
+  const [dogActivitySelectedOptions, setDogActivitySelectedOptions] = useState(dogActivityOptions);
+  const [statusSelectedOptions, setStatusSelectedOptions] = useState(statusOptions);
+  const [dogActivityInputValue, setDogActivityInputValue] = useState("");
+  const [statusInputValue, setStatusInputValue] = useState("");
 
   const defaultValues = isEditMode
     ? {
@@ -231,6 +239,7 @@ const CoreEntity = () => {
 
   useEffect(() => {
     if (updateEntityData) {
+      reset();
       setOpenEntity(true);
       refetch();
     }
@@ -271,12 +280,17 @@ const CoreEntity = () => {
   };
 
   const onSubmit = (data) => {
-    const initialFields = [
+    console.log(dogActivitySelectedOptions);
+    console.log(statusSelectedOptions);
+    const entityFields = [
       { fieldName: "name", dataType: 1, data: "" },
       { fieldName: "image", dataType: 7, data: "" },
-      { fieldName: "status", dataType: 5, data: ["active", "inactive"] },
+      { fieldName: "status", dataType: 5, data: statusSelectedOptions },
     ];
-    data.fields.unshift(...initialFields);
+    data.fields.unshift(...entityFields);
+
+    const initialBasicInfoFields = [{ fieldName: "dogactivity", dataType: 5, data: dogActivitySelectedOptions }];
+    data.basicinfo.unshift(...initialBasicInfoFields);
 
     const restructureDataField = (field) => {
       if (field.dataType === 5 && typeof field.data === "string") {
@@ -323,7 +337,7 @@ const CoreEntity = () => {
       collectionName: data.collectionName,
       fields: JSON.stringify(restructuredData),
     };
-
+    return;
     createEntity({ variables: { input: payload } });
   };
 
@@ -686,6 +700,36 @@ const CoreEntity = () => {
     </>
   );
 
+  const handleDogActivityChipDelete = (chipToDelete) => () => {
+    setDogActivitySelectedOptions((prevOptions) => prevOptions.filter((option) => option !== chipToDelete));
+  };
+
+  const handleStatusChipDelete = (chipToDelete) => () => {
+    setStatusSelectedOptions((prevOptions) => prevOptions.filter((option) => option !== chipToDelete));
+  };
+
+  const handleDogActivityInputChange = (event) => {
+    setDogActivityInputValue(event.target.value);
+  };
+
+  const handleStatusInputChange = (event) => {
+    setStatusInputValue(event.target.value);
+  };
+
+  const handleDogActivityInputKeyDown = (event) => {
+    if (event.key === "Enter" && dogActivityInputValue.trim() !== "") {
+      setDogActivitySelectedOptions((prevOptions) => [...prevOptions, dogActivityInputValue]);
+      setDogActivityInputValue("");
+    }
+  };
+
+  const handleStatusInputKeyDown = (event) => {
+    if (event.key === "Enter" && statusInputValue.trim() !== "") {
+      setStatusSelectedOptions((prevOptions) => [...prevOptions, statusInputValue]);
+      setStatusInputValue("");
+    }
+  };
+
   return (
     <>
       <Grid container justifyContent="end" alignItems="center" sx={{ ms: 2, mt: 2 }}>
@@ -759,11 +803,95 @@ const CoreEntity = () => {
                             <Grid item xs={6}>
                               <TextField label="Field Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
                             </Grid>
+                            <Grid item xs={12}>
+                              <Autocomplete
+                                multiple
+                                freeSolo
+                                options={statusSelectedOptions}
+                                value={statusSelectedOptions}
+                                onChange={(event, newOptions) => {
+                                  setStatusSelectedOptions(newOptions);
+                                }}
+                                onInputChange={handleStatusInputChange}
+                                renderTags={(tagValue, getTagProps) =>
+                                  tagValue.map((option, index) => {
+                                    const isDisabled = option === "active" || option === "inactive";
+                                    return (
+                                      <Chip
+                                        key={index}
+                                        variant="outlined"
+                                        label={option}
+                                        onDelete={isDisabled ? undefined : () => handleStatusChipDelete(option)}
+                                        {...getTagProps({ index })}
+                                        disabled={isDisabled}
+                                      />
+                                    );
+                                  })
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Options"
+                                    placeholder="Add more options"
+                                    fullWidth
+                                    value={statusInputValue}
+                                    onKeyDown={handleStatusInputKeyDown}
+                                    onChange={handleStatusInputChange}
+                                  />
+                                )}
+                              />
+                            </Grid>
                           </Grid>
                         </Box>
                         <Divider sx={{ my: 3 }} />
                         <Box>
                           <Typography variant="h3">Basic Information</Typography>
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <TextField label="Field Name" margin="normal" value="dogactivity" disabled fullWidth />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <TextField label="Field Type" name="type" margin="normal" value="Enum" InputLabelProps={{ shrink: true }} disabled fullWidth></TextField>
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Autocomplete
+                                multiple
+                                freeSolo
+                                options={dogActivitySelectedOptions}
+                                value={dogActivitySelectedOptions}
+                                onChange={(event, newOptions) => {
+                                  setDogActivitySelectedOptions(newOptions);
+                                }}
+                                onInputChange={handleDogActivityInputChange}
+                                renderTags={(tagValue, getTagProps) =>
+                                  tagValue.map((option, index) => {
+                                    const isDisabled = option === "running" || option === "walking" || option === "sleeping";
+                                    return (
+                                      <Chip
+                                        key={index}
+                                        variant="outlined"
+                                        label={option}
+                                        onDelete={isDisabled ? undefined : () => handleDogActivityChipDelete(option)}
+                                        {...getTagProps({ index })}
+                                        disabled={isDisabled}
+                                      />
+                                    );
+                                  })
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Options"
+                                    placeholder="Add more activities"
+                                    fullWidth
+                                    value={dogActivityInputValue}
+                                    onKeyDown={handleDogActivityInputKeyDown}
+                                    onChange={handleDogActivityInputChange}
+                                  />
+                                )}
+                              />
+                            </Grid>
+                          </Grid>
                           {basicinfoFields.map((field, index) => (
                             <div key={field.id}>
                               <Grid container spacing={2} my={1}>

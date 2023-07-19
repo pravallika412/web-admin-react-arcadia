@@ -70,10 +70,14 @@ const StepperForm = () => {
   const handleNext = (formData) => {
     setData((prevData) => ({ ...prevData, ...formData }));
     setActiveStep((prevStep) => prevStep + 1);
+    // Scroll to the top of the page
+    window.scrollTo(0, 0);
   };
 
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
+    // Scroll to the top of the page
+    window.scrollTo(0, 0);
   };
 
   const handleReset = () => {
