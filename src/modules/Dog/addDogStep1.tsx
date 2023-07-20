@@ -6,6 +6,7 @@ import {
   Card,
   CardMedia,
   Checkbox,
+  CircularProgress,
   Container,
   DialogContentText,
   FormControl,
@@ -34,9 +35,10 @@ const useStyles = makeStyles({
   card: {
     width: 300,
     height: 300,
-    marginLeft: "4rem",
+    marginLeft: "3rem",
     display: "flex",
     justifyContent: "center",
+    borderRadius: "none !important",
     alignItems: "center",
     position: "relative",
   },
@@ -67,6 +69,7 @@ const Step1 = ({ onNext, dogData, fields }) => {
   const [croppedImageUrl, setCroppedImageUrl] = useState(null);
   const [openCropModal, setCropModal] = useState(false);
   const [imageModal, setImageModal] = useState(false);
+  const [imageUploaded, setImageUploaded] = useState(false);
   const setCroppedImageUrlCallback = useCallback(
     (url) => {
       setLoadingImage(false);
@@ -92,6 +95,7 @@ const Step1 = ({ onNext, dogData, fields }) => {
 
   const handleFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
+      setImageUploaded(true);
       const reader = new FileReader();
       reader.addEventListener("load", () => {
         const img = new Image();
@@ -170,7 +174,65 @@ const Step1 = ({ onNext, dogData, fields }) => {
               </FormControl>
             </Grid>
             <Grid item xs={6} md={4}>
-              <Card className={classes.card}>
+              <Box
+                sx={{
+                  width: 300,
+                  height: 300,
+                  marginLeft: "3rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  boxShadow: "-0.2px 0.3px 1px 0.6px #cec9c9",
+                  borderRadius: 1,
+                }}
+              >
+                <Card>
+                  {
+                    <>
+                      {loadingImage ? <CircularProgress /> : <CardMedia component="img" className={classes.media} image={croppedImageUrl} />}
+                      <IconButton
+                        component="label"
+                        sx={{
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          transform: "translate(-50%, -50%)",
+                          backgroundColor: "rgba(255, 255, 255, 0.8)",
+                          "&:hover": {
+                            background: theme.colors.primary.lighter,
+                          },
+                        }}
+                        color="inherit"
+                        htmlFor="profileImageInput"
+                        size="large"
+                      >
+                        <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
+                        <input id="profileImageInput" type="file" accept="image/*" {...register("image", { onChange: (e) => handleFile(e) })} hidden />
+                      </IconButton>
+                      {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallback} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />}
+                      {imageModal && (
+                        <DialogComponent
+                          open={imageModal}
+                          width={324}
+                          height={240}
+                          handleClose={handleClose}
+                          content={
+                            <Box display="flex" flexDirection="column" alignItems="center">
+                              <ErrorOutlineIcon color="error" sx={{ fontSize: 72, mb: 4 }} />
+                              <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
+                                <strong>Please choose an image larger than 300x300</strong>
+                              </DialogContentText>
+                            </Box>
+                          }
+                          actions={undefined}
+                        />
+                      )}
+                    </>
+                  }
+                </Card>
+              </Box>
+              {/* <Card className={classes.card} variant="outlined">
                 {
                   <>
                     {loadingImage ? <SuspenseLoader /> : <CardMedia component="img" className={classes.media} image={croppedImageUrl} />}
@@ -213,11 +275,15 @@ const Step1 = ({ onNext, dogData, fields }) => {
                     )}
                   </>
                 }
-              </Card>
+              </Card> */}
             </Grid>
-            <Button type="submit" disabled={Object.keys(errors).length > 0}>
-              Next
-            </Button>
+            <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
+              <Grid item>
+                <Button type="submit" variant="contained" disabled={Object.keys(errors).length > 0}>
+                  Next
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
         </form>
       </Paper>

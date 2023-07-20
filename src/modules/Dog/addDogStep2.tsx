@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Container, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, TextareaAutosize, TextField, Typography } from "@mui/material";
+import { Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, TextareaAutosize, TextField, Typography, useTheme } from "@mui/material";
 import RenderField from "./RenderField";
 import { Box } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -9,13 +9,26 @@ import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
 import moment from "moment";
 import ClearIcon from "@mui/icons-material/Clear";
+import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
+import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 
 const Step2 = ({ onBack, onNext, dogData, fields }) => {
   console.log(fields);
+  const theme = useTheme();
   console.log("dogData", dogData);
+  const updatedSectionData = Object.keys(fields.section).reduce((acc, sectionKey) => {
+    const section = fields.section[sectionKey];
+    acc[sectionKey] = {
+      ...section,
+      section_details: [section.section_details],
+    };
+    return acc;
+  }, {});
+
+  console.log(updatedSectionData);
   const [basicInformation, setBasicInformation] = useState(fields.basicInformation);
   const [aboutMe, setAboutMe] = useState(fields.aboutMe);
-  const [sections, setSections] = useState(fields.section);
+  const [sections, setSections] = useState(updatedSectionData);
   const [fieldFiles, setFieldFiles] = useState({});
   const [basicInformationUpdated, setBasicInformationUpdated] = useState(false);
   const [aboutMeUpdated, setAboutMeUpdated] = useState(false);
@@ -65,7 +78,8 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         setAboutMeUpdated(true);
       }
       if (!sectionUpdated) {
-        const updatedSections = { ...sections };
+        // const updatedSections = { ...sections };
+        const updatedSections = JSON.parse(JSON.stringify(sections));
         Object.keys(updatedSections).forEach((sectionKey) => {
           if (sectionKey in dogData.section && Array.isArray(dogData.section[sectionKey].section_details)) {
             updatedSections[sectionKey].section_details = updatedSections[sectionKey].section_details.map((field) => {
@@ -89,7 +103,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     }
   }, [dogData, basicInformation, aboutMe, sections, basicInformationUpdated]);
 
-  const generatePresignedUrls = async (files, sectionKey, fieldIndex, datatype) => {
+  const generatePresignedUrls = async (files, sectionKey, fieldIndex, datatype, sectionDetailIndex) => {
     const updatedSections = { ...sections };
     const uploadPromises = files.map(async (file) => {
       const signedUrlDto = {
@@ -125,7 +139,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           updatedAboutMe[fieldIndex].data = imageurl;
           setAboutMe(updatedAboutMe);
         } else {
-          updatedSections[sectionKey].section_details[fieldIndex].data = imageurl;
+          updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = imageurl;
           setSections(updatedSections);
         }
       } else if (datatype === 8) {
@@ -140,7 +154,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           updatedAboutMe[fieldIndex].data = cleanedUrls;
           setAboutMe(updatedAboutMe);
         } else {
-          updatedSections[sectionKey].section_details[fieldIndex].data = cleanedUrls;
+          updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = cleanedUrls;
           setSections(updatedSections);
         }
       }
@@ -149,7 +163,8 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     }
   };
 
-  const handleChange = async (e, sectionKey, fieldIndex, dataType) => {
+  const handleChange = async (e, sectionKey, fieldIndex, dataType, sectionDetailIndex, data?) => {
+    console.log("data", data, e.target.value);
     const files = e.target.files;
     console.log(files);
     const updatedSections = { ...sections };
@@ -162,6 +177,10 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     } else if (dataType === 2 && value < 0) {
       error = "Invalid input. Only positive numbers are allowed.";
     }
+    // else if (dataType === 9) {
+    //   const newData = { [data]: value };
+    //   console.log("newData", newData);
+    // }
     if (dataType === 3) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // Regex pattern for dd/mm/yyyy format
       if (!dateRegex.test(value)) {
@@ -183,23 +202,25 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         },
       }));
       if (dataType === 7) {
-        generatePresignedUrls([files[0]], sectionKey, fieldIndex, dataType);
+        generatePresignedUrls([files[0]], sectionKey, fieldIndex, dataType, sectionDetailIndex);
       } else if (dataType === 8) {
         const newFiles = Array.from(files);
         console.log(newFiles);
-        generatePresignedUrls(newFiles, sectionKey, fieldIndex, dataType);
+        generatePresignedUrls(newFiles, sectionKey, fieldIndex, dataType, sectionDetailIndex);
       }
     } else {
       if (sectionKey === "basicInformation") {
         const updatedBasicInformation = [...basicInformation];
-        updatedBasicInformation[fieldIndex].data = e.target.value;
+        updatedBasicInformation[fieldIndex].data = value;
         setBasicInformation(updatedBasicInformation);
       } else if (sectionKey === "aboutMe") {
         const updatedAboutMe = [...aboutMe];
-        updatedAboutMe[fieldIndex].data = e.target.value;
+        updatedAboutMe[fieldIndex].data = value;
         setAboutMe(updatedAboutMe);
       } else {
-        updatedSections[sectionKey].section_details[fieldIndex].data = e.target.value;
+        console.log(sectionKey, sectionDetailIndex, fieldIndex);
+        updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = value;
+        console.log(updatedSections);
         setSections(updatedSections);
       }
     }
@@ -229,7 +250,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     }
   };
 
-  const handleFileDeselect = (fileIndex, sectionKey, fieldIndex) => {
+  const handleFileDeselect = (fileIndex, sectionKey, fieldIndex, sectionDetailIndex) => {
     const updatedFiles = [...fieldFiles[sectionKey][fieldIndex]];
     updatedFiles.splice(fileIndex, 1);
     console.log(updatedFiles);
@@ -240,17 +261,18 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         [fieldIndex]: updatedFiles.length > 0 ? updatedFiles : undefined,
       },
     }));
-    generatePresignedUrls(updatedFiles, sectionKey, fieldIndex, 8);
+    generatePresignedUrls(updatedFiles, sectionKey, fieldIndex, 8, sectionDetailIndex);
   };
 
-  const renderField = (field, fieldIndex, sectionKey) => {
+  const renderField = (field, fieldIndex, sectionKey, sectionDetailIndex?) => {
     const { fieldName, dataType, data } = field;
     let fieldComponent = null;
+
     const errorKey = `${sectionKey}-${fieldIndex}`;
     const errorMessage = fieldErrors[errorKey];
     const showError = errorMessage && errorMessage !== "";
+
     const errorColor = "#FF5E68";
-    const fieldBorderColor = showError ? errorColor : "";
     switch (dataType) {
       case 1:
         fieldComponent = (
@@ -259,7 +281,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
             margin="normal"
             fullWidth
             value={data}
-            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)}
             helperText={showError ? <span style={{ color: errorColor }}>{errorMessage}</span> : ""}
           />
         );
@@ -272,7 +294,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
             fullWidth
             type="number"
             value={data}
-            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)}
             helperText={showError ? <span style={{ color: errorColor }}>{errorMessage}</span> : ""}
           />
         );
@@ -286,7 +308,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
             fullWidth
             type="date"
             value={formattedDate ? formattedDate : ""}
-            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)}
             InputLabelProps={{ shrink: true }}
             helperText={showError ? <span style={{ color: errorColor }}>{errorMessage}</span> : ""}
           />
@@ -296,7 +318,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         fieldComponent = (
           <div>
             <label>
-              <input type="checkbox" checked={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />
+              <input type="checkbox" checked={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)} />
               {fieldName}
             </label>
           </div>
@@ -306,7 +328,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         fieldComponent = (
           <FormControl fullWidth variant="outlined" sx={{ mt: 1 }}>
             <InputLabel>{fieldName}</InputLabel>
-            <Select label={fieldName} value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} fullWidth>
+            <Select label={fieldName} value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)} fullWidth>
               {typeof data === "string" ? (
                 <MenuItem value={data}>{data}</MenuItem>
               ) : (
@@ -322,7 +344,16 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         break;
       case 6:
         fieldComponent = (
-          <TextField aria-label={fieldName} minRows={3} placeholder={fieldName} multiline margin="normal" fullWidth value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />
+          <TextField
+            aria-label={fieldName}
+            minRows={3}
+            placeholder={fieldName}
+            multiline
+            margin="normal"
+            fullWidth
+            value={data}
+            onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)}
+          />
         );
         break;
       case 7:
@@ -345,7 +376,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           >
             <IconButton component="label">
               <CloudUploadIcon fontSize="large" />
-              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} />
+              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)} />
             </IconButton>
             {fieldFiles[sectionKey]?.[fieldIndex]?.[0]?.name ? (
               <Typography variant="subtitle2" mt={1}>
@@ -379,7 +410,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           >
             <IconButton component="label">
               <CloudUploadIcon fontSize="large" />
-              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType)} multiple />
+              <input type="file" style={{ display: "none" }} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)} multiple />
             </IconButton>
             {fieldFiles[fieldName]?.length > 0 ? (
               fieldFiles[sectionKey]?.[fieldIndex]?.map((file, fileIndex) => (
@@ -387,7 +418,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
                   <Typography variant="subtitle2" mt={1} style={{ marginRight: "8px" }}>
                     {file.name}
                   </Typography>
-                  <IconButton size="small" onClick={() => handleFileDeselect(fileIndex, sectionKey, fieldIndex)} style={{ padding: "4px" }}>
+                  <IconButton size="small" onClick={() => handleFileDeselect(fileIndex, sectionKey, fieldIndex, sectionDetailIndex)} style={{ padding: "4px" }}>
                     <ClearIcon fontSize="small" />
                   </IconButton>
                 </div>
@@ -400,11 +431,93 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           </Box>
         );
         break;
+      case 9:
+        fieldComponent = (
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <TextField
+                aria-label={fieldName}
+                placeholder={fieldName}
+                value={data.value}
+                margin="normal"
+                type="number"
+                variant="outlined"
+                onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex, "value")}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={4}>
+              <Box sx={{ pt: 2 }}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="unit-label">Unit</InputLabel>
+                  <Select labelId="unit-label" label="Unit" value={data.key} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex, "key")}>
+                    <MenuItem value="cm">cm</MenuItem>
+                    <MenuItem value="cm">feet</MenuItem>
+                    <MenuItem value="inch">inch</MenuItem>
+                    <MenuItem value="lbs">lbs</MenuItem>
+                    <MenuItem value="kg">kg</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Grid>
+          </Grid>
+        );
+        break;
       default:
         break;
     }
 
     return <div key={fieldIndex}>{fieldComponent}</div>;
+  };
+
+  // const handleAddSectionDetail = (sectionKey) => {
+  //   setSections((prevSections) => {
+  //     const section = prevSections[sectionKey];
+  //     const newSectionDetails = [...section.section_details];
+  //     newSectionDetails.push([...section.section_details[0]]);
+  //     return {
+  //       ...prevSections,
+  //       [sectionKey]: {
+  //         ...section,
+  //         section_details: newSectionDetails,
+  //       },
+  //     };
+  //   });
+  //   console.log(sections);
+  // };
+  const handleAddSectionDetail = (sectionKey) => {
+    setSections((prevSections) => {
+      const section = prevSections[sectionKey];
+      const newSectionDetails = [...section.section_details];
+      const newSectionDetail = section.section_details[0].map((field) => ({
+        ...field,
+        data: "", // Reset the data when adding a new section detail
+      }));
+      newSectionDetails.push(newSectionDetail);
+      return {
+        ...prevSections,
+        [sectionKey]: {
+          ...section,
+          section_details: newSectionDetails,
+        },
+      };
+    });
+  };
+
+  const handleRemoveSectionDetail = (sectionKey, sectionDetailIndex) => {
+    setSections((prevSections) => {
+      const section = prevSections[sectionKey];
+      const newSectionDetails = [...section.section_details];
+      newSectionDetails.splice(sectionDetailIndex, 1);
+      return {
+        ...prevSections,
+        [sectionKey]: {
+          ...section,
+          section_details: newSectionDetails,
+        },
+      };
+    });
   };
 
   return (
@@ -419,15 +532,60 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
           {Object.keys(sections).map((sectionKey) => (
             <div key={sectionKey}>
-              <h3>{sections[sectionKey].section_name}</h3>
-              {sections[sectionKey].section_details.map((field, fieldIndex) => renderField(field, fieldIndex, sectionKey))}
+              <Grid container alignItems="center" spacing={1} justifyContent="space-between">
+                <Grid item>
+                  <Typography variant="h3">{sections[sectionKey].section_name}</Typography>
+                </Grid>
+                <Grid item>
+                  {/* <IconButton onClick={() => handleAddSectionDetail(sectionKey)}>
+                    <AddTwoToneIcon />
+                  </IconButton> */}
+                  <Button sx={{ mt: 2.5 }} onClick={() => handleAddSectionDetail(sectionKey)} startIcon={<AddTwoToneIcon fontSize="small" />}>
+                    Add
+                  </Button>
+                </Grid>
+              </Grid>
+              {sections[sectionKey].section_details.map((sectionDetail, sectionDetailIndex) => (
+                <div key={sectionDetailIndex}>
+                  <Grid container justifyContent="flex-end">
+                    {sectionDetailIndex > 0 && (
+                      // <IconButton onClick={() => handleRemoveSectionDetail(sectionKey, sectionDetailIndex)}>
+                      //   <DeleteTwoToneIcon />
+                      // </IconButton>
+                      <IconButton
+                        sx={{
+                          "&:hover": { background: theme.colors.error.lighter },
+                          color: theme.palette.error.main,
+                        }}
+                        color="inherit"
+                        size="small"
+                        onClick={() => handleRemoveSectionDetail(sectionKey, sectionDetailIndex)}
+                      >
+                        <DeleteTwoToneIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Grid>
+                  {sectionDetail.map((field, fieldIndex) => (
+                    <div key={fieldIndex}>{renderField(field, fieldIndex, sectionKey, sectionDetailIndex)}</div>
+                  ))}
+                </div>
+              ))}
             </div>
           ))}
 
-          <Button onClick={onBack}>Back</Button>
-          <Button type="submit" disabled={Object.keys(errors).length > 0}>
+          {/* <Button type="submit" disabled={Object.keys(errors).length > 0}>
             Next
-          </Button>
+          </Button> */}
+          <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
+            <Grid item>
+              <Button variant="outlined" onClick={onBack} sx={{ mr: 2 }}>
+                Back
+              </Button>
+              <Button type="submit" variant="contained" disabled={Object.keys(errors).length > 0}>
+                Next
+              </Button>
+            </Grid>
+          </Grid>
         </form>
       </Paper>
     </Container>

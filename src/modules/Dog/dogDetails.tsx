@@ -385,17 +385,21 @@ const DogDetails = () => {
             <Paper elevation={3} sx={{ padding: 1.5, mt: 2 }}>
               <Grid container spacing={2} gap={4}>
                 <Grid item xs={12} md={12} ml={3}>
-                  <Typography variant="h6" sx={{ fontWeight: "bold", my: 1, fontSize: 16 }}>
-                    About Me
-                  </Typography>
-                  {Object.entries(productData.aboutMe).map(([label, value], index) => (
-                    <Box sx={{ my: 1, display: "flex" }} key={label}>
-                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
-                        {label}:
+                  {productData.aboutMe && (
+                    <>
+                      <Typography variant="h6" sx={{ fontWeight: "bold", my: 1, fontSize: 16 }}>
+                        About Me
                       </Typography>
-                      <Typography variant="body1">{value}</Typography>
-                    </Box>
-                  ))}
+                      {Object.entries(productData.aboutMe).map(([label, value], index) => (
+                        <Box sx={{ my: 1, display: "flex" }} key={label}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
+                            {label}:
+                          </Typography>
+                          <Typography variant="body1">{value}</Typography>
+                        </Box>
+                      ))}
+                    </>
+                  )}
                   <Grid container spacing={2}>
                     {Object.values(productData.section).map((section: any, index) => (
                       <Grid item xs={12} key={index}>

@@ -337,7 +337,7 @@ const CoreEntity = () => {
       collectionName: data.collectionName,
       fields: JSON.stringify(restructuredData),
     };
-    return;
+
     createEntity({ variables: { input: payload } });
   };
 
