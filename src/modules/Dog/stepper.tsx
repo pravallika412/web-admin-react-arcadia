@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Stepper, Step, StepLabel, Button, DialogContentText } from "@mui/material";
+import { Stepper, Step, StepLabel, Button, DialogContentText, Typography } from "@mui/material";
 import Step1 from "./addDogStep1";
 import Step2 from "./addDogStep2";
 import Preview from "./addDogPreview";
@@ -131,13 +131,18 @@ const StepperForm = () => {
 
   return (
     <div>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+      <Box sx={{ m: 3 }}>
+        <Typography variant="h3" sx={{ color: "var(--primary-700, #00385F);" }}>
+          Add New Dog
+        </Typography>
+        <Stepper activeStep={activeStep}>
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
 
       {renderStepContent(activeStep)}
       <DialogComponent
