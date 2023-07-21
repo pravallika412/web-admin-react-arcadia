@@ -43,6 +43,7 @@ import "react-image-crop/dist/ReactCrop.css";
 import CropModal from "../../shared/components/CropModal";
 import DialogComponent from "../../shared/components/Dialog";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import TransactionHistory from "../sponsor/transactionhistory";
 
 const web3 = new Web3();
 interface TabPanelProps {
@@ -243,6 +244,7 @@ const Settings = () => {
                     <Tab label="Notifications" {...a11yProps(2)} />
                     <Tab label="Wallet" {...a11yProps(3)} />
                     <Tab label="Transaction History" {...a11yProps(4)} />
+                    <Tab label="Payouts" {...a11yProps(5)} />
                   </Tabs>
                   <TabPanel value={value} index={0}>
                     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -389,6 +391,9 @@ const Settings = () => {
                   </TabPanel>
                   <TabPanel value={value} index={4}>
                     <Transaction />
+                  </TabPanel>
+                  <TabPanel value={value} index={5}>
+                    <TransactionHistory id={null} />
                   </TabPanel>
                 </Box>
               </CardContent>

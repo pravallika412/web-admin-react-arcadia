@@ -71,8 +71,8 @@ const GET_SPONSORS_PRODUCT_DETAILS = gql`
 `;
 
 const GET_SPONSORS_STRIPE_DETAILS = gql`
-  query SponsorStripeTransactionList($input: SponsorSubscriptionDto!, $input1: PageDto!, $input2: SponsorTransactionFilterDto!) {
-    SponsorStripeTransactionList(sponsorSubscriptionDto: $input, pageDto: $input1, filterDto: $input2) {
+  query SponsorStripeTransactionList($input1: PageDto!, $input2: TransactionFilterDto!) {
+    SponsorStripeTransactionList(pageDto: $input1, filterDto: $input2) {
       transactions {
         _id
         sponsor
@@ -94,8 +94,8 @@ const GET_SPONSORS_STRIPE_DETAILS = gql`
 `;
 
 const GET_SPONSORS_CRYPTO_DETAILS = gql`
-  query SponsorCryptoTransactionList($input: SponsorSubscriptionDto!, $input1: PageDto!, $input2: SponsorTransactionFilterDto!) {
-    SponsorCryptoTransactionList(sponsorSubscriptionDto: $input, pageDto: $input1, filterDto: $input2) {
+  query SponsorCryptoTransactionList($input1: PageDto!, $input2: TransactionFilterDto!) {
+    SponsorCryptoTransactionList(pageDto: $input1, filterDto: $input2) {
       transactions {
         _id
         sponsor

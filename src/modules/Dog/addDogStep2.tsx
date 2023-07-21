@@ -44,11 +44,12 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
   useEffect(() => {
     if (dogData) {
-      if (!basicInformationUpdated) {
+      console.log(dogData);
+      if (!basicInformationUpdated && dogData.basicInformation) {
         const updatedBasicInformation = basicInformation.map((field) => {
+          console.log(field);
           const { fieldName } = field;
-          const key = fieldName.toLowerCase();
-
+          const key = fieldName?.toLowerCase();
           if (key in dogData.basicInformation) {
             return {
               ...field,
@@ -57,15 +58,13 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           }
           return field;
         });
-
         setBasicInformation(updatedBasicInformation);
         setBasicInformationUpdated(true);
       }
-      if (!aboutMeUpdated) {
+      if (!aboutMeUpdated && dogData.aboutMe) {
         const updatedAboutMe = aboutMe.map((field) => {
           const { fieldName } = field;
           const key = fieldName.toLowerCase();
-
           if (key in dogData.aboutMe) {
             return {
               ...field,
@@ -80,23 +79,40 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
       if (!sectionUpdated) {
         // const updatedSections = { ...sections };
         const updatedSections = JSON.parse(JSON.stringify(sections));
+        console.log(updatedSections);
+        // Object.keys(updatedSections).forEach((sectionKey) => {
+        //   if (sectionKey in dogData.section && Array.isArray(dogData.section[sectionKey].section_details)) {
+        //     updatedSections[sectionKey].section_details = updatedSections[sectionKey].section_details.map((field) => {
+        //       const { fieldName } = field;
+        //       const key = fieldName.toLowerCase();
+        //       if (dogData.section[sectionKey].section_details[0] && key in dogData.section[sectionKey].section_details[0]) {
+        //         return {
+        //           ...field,
+        //           data: dogData.section[sectionKey].section_details[0][key],
+        //         };
+        //       }
+        //       return field;
+        //     });
+        //   }
+        // });
         Object.keys(updatedSections).forEach((sectionKey) => {
           if (sectionKey in dogData.section && Array.isArray(dogData.section[sectionKey].section_details)) {
-            updatedSections[sectionKey].section_details = updatedSections[sectionKey].section_details.map((field) => {
-              const { fieldName } = field;
-              const key = fieldName.toLowerCase();
-
-              if (dogData.section[sectionKey].section_details[0] && key in dogData.section[sectionKey].section_details[0]) {
-                return {
-                  ...field,
-                  data: dogData.section[sectionKey].section_details[0][key],
-                };
-              }
-              return field;
+            updatedSections[sectionKey].section_details = dogData.section[sectionKey].section_details.map((detail) => {
+              return updatedSections[sectionKey].section_details[0].map((field) => {
+                const { fieldName } = field;
+                const key = fieldName.toLowerCase();
+                if (key in detail) {
+                  return {
+                    ...field,
+                    data: detail[key],
+                  };
+                }
+                return field;
+              });
             });
           }
         });
-
+        console.log(updatedSections);
         setSections(updatedSections);
         setSectionUpdated(true);
       }
@@ -164,9 +180,9 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   };
 
   const handleChange = async (e, sectionKey, fieldIndex, dataType, sectionDetailIndex, data?) => {
-    console.log("data", data, e.target.value);
+    console.log(dataType, e.target.value);
     const files = e.target.files;
-    console.log(files);
+    console.log("data", data);
     const updatedSections = { ...sections };
     const value = e.target.value;
     let error = "";
@@ -177,10 +193,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     } else if (dataType === 2 && value < 0) {
       error = "Invalid input. Only positive numbers are allowed.";
     }
-    // else if (dataType === 9) {
-    //   const newData = { [data]: value };
-    //   console.log("newData", newData);
-    // }
     if (dataType === 3) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // Regex pattern for dd/mm/yyyy format
       if (!dateRegex.test(value)) {
@@ -211,15 +223,45 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     } else {
       if (sectionKey === "basicInformation") {
         const updatedBasicInformation = [...basicInformation];
-        updatedBasicInformation[fieldIndex].data = value;
+        if (dataType === 9) {
+          const newData = { ...updatedBasicInformation[fieldIndex].data };
+          if (data === "value") {
+            newData.value = Number(e.target.value);
+          } else if (data === "unit") {
+            newData.unit = e.target.value;
+          }
+          updatedBasicInformation[fieldIndex].data = { ...newData };
+        } else {
+          updatedBasicInformation[fieldIndex].data = value;
+        }
         setBasicInformation(updatedBasicInformation);
       } else if (sectionKey === "aboutMe") {
         const updatedAboutMe = [...aboutMe];
-        updatedAboutMe[fieldIndex].data = value;
+        if (dataType === 9) {
+          const newData = { ...updatedAboutMe[fieldIndex].data };
+          if (data === "value") {
+            newData.value = e.target.value;
+          } else if (data === "unit") {
+            newData.unit = e.target.value;
+          }
+          updatedAboutMe[fieldIndex].data = { ...newData };
+        } else {
+          updatedAboutMe[fieldIndex].data = value;
+        }
         setAboutMe(updatedAboutMe);
       } else {
         console.log(sectionKey, sectionDetailIndex, fieldIndex);
-        updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = value;
+        if (dataType === 9) {
+          const newData = { ...updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data };
+          if (data === "value") {
+            newData.value = e.target.value;
+          } else if (data === "unit") {
+            newData.unit = e.target.value;
+          }
+          updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = { ...newData };
+        } else {
+          updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = value;
+        }
         console.log(updatedSections);
         setSections(updatedSections);
       }
@@ -229,7 +271,20 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   const onSubmit = () => {
     let hasErrors = false;
 
-    // Check if any field has an error
+    const updatedbasicInformation = basicInformation.map((field) => {
+      if (field.dataType === 5 && Array.isArray(field.data)) {
+        return { ...field, data: "" };
+      }
+      return field;
+    });
+
+    const updatedaboutMe = aboutMe.map((field) => {
+      if (field.dataType === 5 && Array.isArray(field.data)) {
+        return { ...field, data: "" };
+      }
+      return field;
+    });
+
     Object.values(fieldErrors).forEach((error) => {
       if (error && error !== "") {
         hasErrors = true;
@@ -238,8 +293,8 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
     if (!hasErrors) {
       const formData = {
-        basicInformation,
-        aboutMe,
+        basicInformation: updatedbasicInformation,
+        aboutMe: updatedaboutMe,
         section: sections,
       };
       console.log(formData);
@@ -451,7 +506,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
               <Box sx={{ pt: 2 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="unit-label">Unit</InputLabel>
-                  <Select labelId="unit-label" label="Unit" value={data.key} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex, "key")}>
+                  <Select labelId="unit-label" label="Unit" value={data.unit} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex, "unit")}>
                     <MenuItem value="cm">cm</MenuItem>
                     <MenuItem value="cm">feet</MenuItem>
                     <MenuItem value="inch">inch</MenuItem>

@@ -270,196 +270,294 @@ function Overview() {
   return (
     <OverviewWrapper>
       <Grid container spacing={2}>
-        <Grid item xs={6} sm={3}>
-          <StyledBox>
-            {userStats ? (
-              <>
-                <StyledHeader>
-                  <Typography variant="h4">Total Sponsors</Typography>
-                  <StyledIcon>
-                    <PeopleOutlineIcon />
-                  </StyledIcon>
-                </StyledHeader>
-                <StyledTotalCount align="left">{userStats.sponsorCount}</StyledTotalCount>{" "}
-              </>
-            ) : (
-              renderSkeleton()
-            )}
-          </StyledBox>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StyledBox>
-            {userStats ? (
-              <>
-                <StyledHeader>
-                  <Typography variant="h4">Total Handlers</Typography>
-                  <StyledIcon>
-                    <PersonOutlineIcon />
-                  </StyledIcon>
-                </StyledHeader>
-                <StyledTotalCount align="left">{userStats.handlerCount}</StyledTotalCount>{" "}
-              </>
-            ) : (
-              renderSkeleton()
-            )}
-          </StyledBox>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StyledBox>
-            {userStats ? (
-              <>
-                <StyledHeader>
-                  <Typography variant="h4">Total Dogs</Typography>
-                  <StyledIcon>
-                    <img src={PetsOutlinedIcon} alt="pet" />
-                  </StyledIcon>
-                </StyledHeader>
-                <StyledTotalCount align="left">{userStats.productCount}</StyledTotalCount>{" "}
-              </>
-            ) : (
-              renderSkeleton()
-            )}
-          </StyledBox>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StyledBox>
-            {userStats ? (
-              <>
-                <StyledHeader>
-                  <Typography variant="h4">Total Amount</Typography>
-                  <StyledIcon>
-                    <AccountBalanceWalletOutlinedIcon />
-                  </StyledIcon>
-                </StyledHeader>
-                <StyledTotalCount align="left">$ {userStats.totalAmount}</StyledTotalCount>
-              </>
-            ) : (
-              renderSkeleton()
-            )}
-          </StyledBox>
-        </Grid>
-        <Grid item xs={12} sm={8}>
-          <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
-            <Grid item xs={12}>
-              {chartData ? <h2>Subscription Plan - {getSelectedPlanName(plan)}</h2> : <Skeleton variant="text" width={100} />}
+        <Grid item xs={8} sm={8}>
+          <Grid container spacing={2}>
+            <Grid item xs={6} sm={4}>
+              <StyledBox>
+                {userStats ? (
+                  <>
+                    <StyledHeader>
+                      <Typography variant="h4">Total Sponsors</Typography>
+                      <StyledIcon>
+                        <PeopleOutlineIcon />
+                      </StyledIcon>
+                    </StyledHeader>
+                    <StyledTotalCount align="left">{userStats.sponsorCount}</StyledTotalCount>{" "}
+                  </>
+                ) : (
+                  renderSkeleton()
+                )}
+              </StyledBox>
             </Grid>
-            {chartData ? (
-              <Grid item xs={12} container justifyContent="flex-end">
-                {/* Select Dropdowns */}
-
-                <FormControl sx={{ m: 1, width: 100, mt: 3 }} size="small">
-                  <Select value={startYear} onChange={(event) => setStartYear(event.target.value)}>
-                    <MenuItem disabled value="">
-                      <span>Select</span>
-                    </MenuItem>
-                    {yearOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl sx={{ m: 1, width: 130, mt: 3 }} size="small">
-                  <Select value={month} onChange={(event) => setMonth(event.target.value)} displayEmpty>
-                    <MenuItem value="">
-                      <span>Select</span>
-                    </MenuItem>
-                    {monthOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl sx={{ m: 1, minWidth: 130, mt: 3 }} size="small">
-                  <Select value={plan} onChange={(event) => setPlan(event.target.value)} displayEmpty>
-                    <MenuItem value="">
-                      <span>Select</span>
-                    </MenuItem>
-                    {planList.map((plan) => (
-                      <MenuItem key={plan._id} value={plan._id}>
-                        {plan.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            ) : (
-              <Grid item xs={12} container justifyContent="flex-end">
-                <Skeleton variant="text" width={300} height={50} />
-              </Grid>
-            )}
-            <Grid item xs={12}>
-              {chartData ? <Line data={chartData} options={options} /> : <Skeleton variant="rectangular" height={300} />}
+            <Grid item xs={6} sm={4}>
+              <StyledBox>
+                {userStats ? (
+                  <>
+                    <StyledHeader>
+                      <Typography variant="h4">Total Handlers</Typography>
+                      <StyledIcon>
+                        <PersonOutlineIcon />
+                      </StyledIcon>
+                    </StyledHeader>
+                    <StyledTotalCount align="left">{userStats.handlerCount}</StyledTotalCount>{" "}
+                  </>
+                ) : (
+                  renderSkeleton()
+                )}
+              </StyledBox>
             </Grid>
-          </Box>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
-            {countLoading ? (
-              <Box sx={{ p: 1 }}>
-                <Skeleton variant="rectangular" height={40} />
-              </Box>
-            ) : (
-              <Box sx={{ display: "flex", justifyContent: "space-between", p: 1, alignItems: "center" }}>
-                <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Total Posts</Typography>
-                <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
-                  {totalCount}
-                </Typography>
-              </Box>
-            )}
+            <Grid item xs={6} sm={4}>
+              <StyledBox>
+                {userStats ? (
+                  <>
+                    <StyledHeader>
+                      <Typography variant="h4">Total Dogs</Typography>
+                      <StyledIcon>
+                        <img src={PetsOutlinedIcon} alt="pet" />
+                      </StyledIcon>
+                    </StyledHeader>
+                    <StyledTotalCount align="left">{userStats.productCount}</StyledTotalCount>{" "}
+                  </>
+                ) : (
+                  renderSkeleton()
+                )}
+              </StyledBox>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
+                <Grid item xs={12}>
+                  {chartData ? <h2>Subscription Plan - {getSelectedPlanName(plan)}</h2> : <Skeleton variant="text" width={100} />}
+                </Grid>
+                {chartData ? (
+                  <Grid item xs={12} container justifyContent="flex-end">
+                    {/* Select Dropdowns */}
 
-            <Grid container spacing={2}>
-              {countLoading ? (
-                // Show skeletons while loading
-                <>
-                  <Grid item xs={12} sm={12}>
-                    <Skeleton variant="rectangular" height={70} />
+                    <FormControl sx={{ m: 1, width: 100, mt: 3 }} size="small">
+                      <Select value={startYear} onChange={(event) => setStartYear(event.target.value)}>
+                        <MenuItem disabled value="">
+                          <span>Select</span>
+                        </MenuItem>
+                        {yearOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl sx={{ m: 1, width: 130, mt: 3 }} size="small">
+                      <Select value={month} onChange={(event) => setMonth(event.target.value)} displayEmpty>
+                        <MenuItem value="">
+                          <span>Select</span>
+                        </MenuItem>
+                        {monthOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl sx={{ m: 1, minWidth: 130, mt: 3 }} size="small">
+                      <Select value={plan} onChange={(event) => setPlan(event.target.value)} displayEmpty>
+                        <MenuItem value="">
+                          <span>Select</span>
+                        </MenuItem>
+                        {planList.map((plan) => (
+                          <MenuItem key={plan._id} value={plan._id}>
+                            {plan.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Grid>
-                  <Grid item xs={12} sm={12}>
-                    <Skeleton variant="rectangular" height={70} />
+                ) : (
+                  <Grid item xs={12} container justifyContent="flex-end">
+                    <Skeleton variant="text" width={300} height={50} />
                   </Grid>
-                  <Grid item xs={12} sm={12}>
-                    <Skeleton variant="rectangular" height={70} />
-                  </Grid>
-                </>
-              ) : (
-                postStatuses.map((status, index) => (
-                  <Grid item xs={12} sm={12} key={index}>
-                    <PostStyledBox style={{ background: status.borderColor }}>
-                      <Grid container alignItems="center">
-                        <Grid item xs={7}>
-                          <StatusTypography variant="h6" align="center">
-                            {status.status}
-                          </StatusTypography>
-                        </Grid>
-                        <Grid
-                          item
-                          xs={5}
-                          style={{
-                            padding: "1rem",
-                            borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
-                            borderRadius: " 0px 6px 6px 0px",
-                            background: status.bgCountcolor,
-                            height: "70px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <PostCount style={{ color: status.color }} align="right">
-                            {status.count}
-                          </PostCount>
-                        </Grid>
+                )}
+                <Grid item xs={12}>
+                  {chartData ? <Line data={chartData} options={options} /> : <Skeleton variant="rectangular" height={300} />}
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={4} sm={4}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={12}>
+              {/* <StyledBox>
+                {userStats ? (
+                  <>
+                    <StyledHeader>
+                      <Typography variant="h4">Total Amount</Typography>
+                      <StyledIcon>
+                        <AccountBalanceWalletOutlinedIcon />
+                      </StyledIcon>
+                    </StyledHeader>
+                    <StyledTotalCount align="left">$ {userStats.totalAmount}</StyledTotalCount>
+                  </>
+                ) : (
+                  renderSkeleton()
+                )}
+              </StyledBox> */}
+              <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
+                {countLoading ? (
+                  <Box sx={{ p: 1 }}>
+                    <Skeleton variant="rectangular" height={40} />
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "flex", justifyContent: "space-between", p: 0.5, alignItems: "center" }}>
+                    <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Total TVL</Typography>
+                    <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
+                      {totalCount}
+                    </Typography>
+                  </Box>
+                )}
+
+                <Grid container spacing={2}>
+                  {countLoading ? (
+                    // Show skeletons while loading
+                    <>
+                      <Grid item xs={12} sm={12}>
+                        <Skeleton variant="rectangular" height={70} />
                       </Grid>
-                    </PostStyledBox>
-                  </Grid>
-                ))
-              )}
+                      <Grid item xs={12} sm={12}>
+                        <Skeleton variant="rectangular" height={70} />
+                      </Grid>
+                    </>
+                  ) : (
+                    <>
+                      <Grid item xs={12} sm={12}>
+                        <PostStyledBox style={{ background: "rgba(250, 250, 250, 0.5)" }}>
+                          <Grid container alignItems="center">
+                            <Grid item xs={7}>
+                              <StatusTypography variant="h6" align="center">
+                                Fiat
+                              </StatusTypography>
+                            </Grid>
+                            <Grid
+                              item
+                              xs={5}
+                              style={{
+                                padding: "1rem",
+                                borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
+                                borderRadius: " 0px 6px 6px 0px",
+                                background: "#E6F4FF",
+                                height: "70px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                              }}
+                            >
+                              <PostCount style={{ color: "#00385F" }} align="right">
+                                10
+                              </PostCount>
+                            </Grid>
+                          </Grid>
+                        </PostStyledBox>
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <PostStyledBox style={{ background: "rgba(250, 250, 250, 0.5)" }}>
+                          <Grid container alignItems="center">
+                            <Grid item xs={7}>
+                              <StatusTypography variant="h6" align="center">
+                                Crypto
+                              </StatusTypography>
+                            </Grid>
+                            <Grid
+                              item
+                              xs={5}
+                              style={{
+                                padding: "1rem",
+                                borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
+                                borderRadius: " 0px 6px 6px 0px",
+                                background: "#E6F4FF",
+                                height: "70px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                              }}
+                            >
+                              <PostCount style={{ color: "#00385F" }} align="right">
+                                10
+                              </PostCount>
+                            </Grid>
+                          </Grid>
+                        </PostStyledBox>
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </Box>
             </Grid>
-          </Box>
+
+            <Grid item xs={12} sm={12}>
+              <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
+                {countLoading ? (
+                  <Box sx={{ p: 1 }}>
+                    <Skeleton variant="rectangular" height={40} />
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "flex", justifyContent: "space-between", p: 0.5, alignItems: "center" }}>
+                    <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Total Posts</Typography>
+                    <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
+                      $ {totalCount}
+                    </Typography>
+                  </Box>
+                )}
+
+                <Grid container spacing={2}>
+                  {countLoading ? (
+                    // Show skeletons while loading
+                    <>
+                      <Grid item xs={12} sm={12}>
+                        <Skeleton variant="rectangular" height={70} />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <Skeleton variant="rectangular" height={70} />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <Skeleton variant="rectangular" height={70} />
+                      </Grid>
+                    </>
+                  ) : (
+                    postStatuses.map((status, index) => (
+                      <Grid item xs={12} sm={12} key={index}>
+                        <PostStyledBox style={{ background: status.borderColor }}>
+                          <Grid container alignItems="center">
+                            <Grid item xs={7}>
+                              <StatusTypography variant="h6" align="center">
+                                {status.status}
+                              </StatusTypography>
+                            </Grid>
+                            <Grid
+                              item
+                              xs={5}
+                              style={{
+                                padding: "1rem",
+                                borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
+                                borderRadius: " 0px 6px 6px 0px",
+                                background: status.bgCountcolor,
+                                height: "70px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                              }}
+                            >
+                              <PostCount style={{ color: status.color }} align="right">
+                                {status.count}
+                              </PostCount>
+                            </Grid>
+                          </Grid>
+                        </PostStyledBox>
+                      </Grid>
+                    ))
+                  )}
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </OverviewWrapper>

@@ -105,7 +105,7 @@ const TransactionHistory = ({ id }) => {
   const [getSponsorCryptoDetails, { data: getSponsorCryptoDetailsData, loading: sponsorCryptoLoading }] = useLazyQuery(GET_SPONSORS_CRYPTO_DETAILS);
 
   useEffect(() => {
-    const variables = { input: { sponsorId: id }, input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.status } };
+    const variables = { input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.status, sponsorId: id } };
 
     if (filters.gateway === "stripe") {
       getSponsorStripeDetails({ variables });

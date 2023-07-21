@@ -1,5 +1,5 @@
 import { useFieldArray, useForm } from "react-hook-form";
-import { Grid, TextField, Button, Box, Card, CircularProgress, IconButton, useTheme, CardMedia, Skeleton, DialogContentText, Typography } from "@mui/material";
+import { Grid, TextField, Button, Box, Card, CircularProgress, IconButton, useTheme, CardMedia, Skeleton, DialogContentText, Typography, InputAdornment } from "@mui/material";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_COLLECTION } from "../../shared/graphQL/core-entity/queries";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import DialogComponent from "../../shared/components/Dialog";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { GET_ADMIN } from "../../shared/graphQL/settings/queries";
+import LaunchIcon from "@mui/icons-material/Launch";
 
 const useStyles = makeStyles({
   card: {
@@ -27,9 +28,12 @@ const useStyles = makeStyles({
     position: "relative",
   },
   media: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
+    height: "100%", // Set the height you want for the image
+    width: "100%", // Adjust the width to fit the card or container
+    backgroundSize: "cover", // Ensure the image covers the entire space
+    backgroundRepeat: "no-repeat", // Avoid image repetition
+    backgroundPosition: "center", // Center the image within the container
+    cursor: "pointer",
   },
   uploadButton: {
     position: "absolute",
@@ -226,6 +230,22 @@ const Collection = () => {
     refetch();
   };
 
+  const handleRedirectClick = () => {
+    const address = membershipCA;
+    if (address) {
+      const url = "https://mumbai.polygonscan.com/token/" + membershipCA;
+      window.open(url, "_blank"); // Open the URL in a new tab
+    }
+  };
+
+  const handleImageClick = () => {
+    const address = membershipCA;
+    if (address) {
+      const openseaUrl = `https://testnets.opensea.io/assets/mumbai/${address}`;
+      window.open(openseaUrl, "_blank"); // Open the URL in a new tab
+    }
+  };
+
   return (
     <>
       {brandDetailsData ? ( // Check if brand details exist
@@ -243,11 +263,29 @@ const Collection = () => {
                 </Grid>
               </Grid>
             ))}
+            <Grid>
+              <TextField
+                label="Membership Contract Address"
+                margin="normal"
+                value={membershipCA}
+                disabled
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleRedirectClick}>
+                        <LaunchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
           </Grid>
 
           <Grid item xs={3} md={3}>
             <Card className={classes.card}>
-              <CardMedia className={classes.media} image={brandDetailsData.image} />
+              <CardMedia className={classes.media} image={brandDetailsData.image} onClick={handleImageClick}></CardMedia>
             </Card>
           </Grid>
         </Grid>
