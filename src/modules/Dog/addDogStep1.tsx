@@ -123,7 +123,6 @@ const Step1 = ({ onNext, dogData, fields }) => {
 
   const onSubmit = (formData) => {
     formData.image = croppedImageUrl;
-
     if (Object.keys(errors).length > 0) {
       console.log("errors");
       return;
@@ -157,17 +156,18 @@ const Step1 = ({ onNext, dogData, fields }) => {
                   },
                   validate: (value) => value.length <= 20 || `Max length exceeded for name`,
                 })}
-                label="name"
+                label="Dog Name"
                 type="text"
                 margin="normal"
                 defaultValue={dogData ? dogData?.name : ""}
                 fullWidth
                 error={!!errors["name"]}
+                required
                 helperText={errors?.["name"]?.message}
               />
-              <FormControl fullWidth variant="outlined" sx={{ mt: 2 }}>
-                <InputLabel>status</InputLabel>
-                <Select {...register("status")} displayEmpty defaultValue={dogData ? dogData.status : ""} label="status" fullWidth>
+              <FormControl fullWidth variant="outlined" sx={{ mt: 2 }} required>
+                <InputLabel>Status</InputLabel>
+                <Select {...register("status", { required: `Please select status` })} displayEmpty defaultValue={dogData ? dogData.status : ""} label="status" fullWidth>
                   <MenuItem value="active">active</MenuItem>
                   <MenuItem value="inactive">inactive</MenuItem>
                 </Select>
@@ -232,50 +232,6 @@ const Step1 = ({ onNext, dogData, fields }) => {
                   }
                 </Card>
               </Box>
-              {/* <Card className={classes.card} variant="outlined">
-                {
-                  <>
-                    {loadingImage ? <SuspenseLoader /> : <CardMedia component="img" className={classes.media} image={croppedImageUrl} />}
-                    <IconButton
-                      component="label"
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
-                        "&:hover": {
-                          background: theme.colors.primary.lighter,
-                        },
-                      }}
-                      color="inherit"
-                      htmlFor="profileImageInput"
-                      size="large"
-                    >
-                      <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                      <input id="profileImageInput" type="file" accept="image/*" {...register("image", { onChange: (e) => handleFile(e) })} hidden />
-                    </IconButton>
-                    {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallback} openCropModal={openCropModal} setCropModal={setCropModal} setLoadingImage={setLoadingImage} />}
-                    {imageModal && (
-                      <DialogComponent
-                        open={imageModal}
-                        width={324}
-                        height={240}
-                        handleClose={handleClose}
-                        content={
-                          <Box display="flex" flexDirection="column" alignItems="center">
-                            <ErrorOutlineIcon color="error" sx={{ fontSize: 72, mb: 4 }} />
-                            <DialogContentText id="alert-dialog-description" sx={{ color: "black" }}>
-                              <strong>Please choose an image larger than 300x300</strong>
-                            </DialogContentText>
-                          </Box>
-                        }
-                        actions={undefined}
-                      />
-                    )}
-                  </>
-                }
-              </Card> */}
             </Grid>
             <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
               <Grid item>

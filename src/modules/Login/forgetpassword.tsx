@@ -91,7 +91,7 @@ export default function ForgetPassword() {
           <Typography component="h1" className={classes.font48} sx={{ color: "white" }}>
             Forget Password
           </Typography>
-          <Typography className={`${classes.font18} ${classes.tertiary200}`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</Typography>
+
           <Box component="form" onSubmit={handleSubmit(onSubmitData)} noValidate sx={{ mt: 1, width: 468 }}>
             <TextField
               margin="normal"

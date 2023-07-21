@@ -1,7 +1,24 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Button, DialogActions, DialogContent, DialogContentText, Grid, Icon, IconButton, InputLabel, List, ListItem, ListItemText, Paper, TextField, Typography, useTheme } from "@mui/material";
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Grid,
+  Icon,
+  IconButton,
+  InputLabel,
+  Link as MuiLink,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { Box } from "@mui/system";
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Label from "../../shared/components/Label";
 import { DELETE_PRODUCT, GET_PRODUCT_DETAILS, UPDATE_RFID } from "../../shared/graphQL/dog/queries";
@@ -193,6 +210,10 @@ const DogDetails = () => {
     const isDateUrl = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value);
     const isURL = /^(ftp|http|https):\/\/[^ "]+$/;
 
+    if (typeof value === "object" && value !== null) {
+      return Object.values(value).join("");
+    }
+
     if (isURL.test(value) && !Array.isArray(value)) {
       const fileName = value.substring(value.lastIndexOf("/") + 1);
       return (
@@ -243,6 +264,31 @@ const DogDetails = () => {
       </Typography>
     </li>
   );
+
+  const handleQRCodeClick = () => {
+    const qrCodeSvgElement = document.querySelector("#qrCode");
+    console.log(qrCodeSvgElement);
+    if (qrCodeSvgElement) {
+      const svgContent = new XMLSerializer().serializeToString(qrCodeSvgElement);
+      const dataUrl = `data:image/svg+xml;base64,${btoa(svgContent)}`;
+      const newWindow = window.open("", "_blank");
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>QR Code</title>
+            </head>
+            <body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+              <img src="${dataUrl}" width="500" height="500" />
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        alert("Popup blocked. Please allow pop-ups for this site and try again.");
+      }
+    }
+  };
 
   return (
     <Box sx={{ m: 2 }}>
@@ -319,28 +365,25 @@ const DogDetails = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    {Object.entries(productData.basicInformation).map(([label, value], index) => (
-                      <Grid item xs={12} md={6} key={label}>
-                        <Box sx={{ display: "flex", my: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
-                            {label}:
-                          </Typography>
-                          <Typography variant="body1" sx={{ fontSize: 16 }}>
-                            {value}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
+                    {productData.basicInformation &&
+                      Object.entries(productData.basicInformation).map(([label, value], index) => (
+                        <Grid item xs={12} md={6} key={label}>
+                          <Box sx={{ display: "flex", my: 1 }}>
+                            <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 16, minWidth: 150 }}>
+                              {label.charAt(0).toUpperCase() + label.slice(1)}:
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontSize: 16 }}>
+                              {formatValue(value)}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      ))}
                   </Grid>
                 </Grid>
                 <Grid item xs={3} md={3} sx={{ mt: 2 }}>
                   <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <Box sx={{ borderRadius: 0.5, border: "1px solid var(--font-400, #808080)", px: 1, pt: 1, pb: 0.5 }}>
-                      <QRCode
-                        value={productData.custom_id} // bind the QR code with dog id
-                        size={40} // size of the QR code, you can adjust based on your needs
-                        level="Q" // Error correction level of the QR Code, can be L, M, Q, H
-                      />
+                    <Box sx={{ borderRadius: 0.5, border: "1px solid var(--font-400, #808080)", px: 1, pt: 1, pb: 0.5 }} onClick={handleQRCodeClick} style={{ cursor: "pointer" }}>
+                      <QRCode id="qrCode" value={productData.custom_id} size={40} level="Q" />
                     </Box>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: 1 }}>
@@ -393,9 +436,9 @@ const DogDetails = () => {
                       {Object.entries(productData.aboutMe).map(([label, value], index) => (
                         <Box sx={{ my: 1, display: "flex" }} key={label}>
                           <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
-                            {label}:
+                            {label.charAt(0).toUpperCase() + label.slice(1)}:
                           </Typography>
-                          <Typography variant="body1">{value}</Typography>
+                          <Typography variant="body1">{formatValue(value)}</Typography>
                         </Box>
                       ))}
                     </>
@@ -415,7 +458,7 @@ const DogDetails = () => {
                                     <Grid item xs={12} sm={6} md={6} key={`${key}-${detailsIndex}`}>
                                       <Box sx={{ display: "flex" }}>
                                         <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 14, minWidth: 150 }}>
-                                          {key}:
+                                          {key.charAt(0).toUpperCase() + key.slice(1)}:
                                         </Typography>
                                         <Typography variant="body1" key={`${key}-${detailsIndex}`}>
                                           {formatValue(value)}
@@ -484,7 +527,7 @@ const DogDetails = () => {
         height={750}
         handleClose={handleCloseDialog}
         content={
-          <Box sx={{ maxHeight: "600px", overflowY: "auto" }}>
+          <Box sx={{ maxHeight: "500px", overflowY: "auto" }}>
             <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 18, textAlign: "center" }}>
               Instructions
             </Typography>
@@ -504,6 +547,30 @@ const DogDetails = () => {
               {verificationSteps.map((step, index) => (
                 <InstructionListItem key={index} text={step} />
               ))}
+            </ol>
+            <Typography variant="body1" sx={{ fontWeight: 700, fontSize: 18, marginBottom: "10px", mt: 1 }}>
+              Reference
+            </Typography>
+            <ol style={{ listStyleType: "unset" }}>
+              <Typography variant="body1" sx={{ fontWeight: 500, fontSize: 16 }}>
+                Here are some popular NFC tools mobile apps for Android and iOS:
+              </Typography>
+              <li>
+                <Typography variant="body1" sx={{ fontWeight: 500, fontSize: 16 }}>
+                  Android:{" "}
+                  <MuiLink href="https://play.google.com/store/apps/details?id=com.winningapps.nfctagreader" target="_blank" rel="noopener">
+                    https://play.google.com/store/apps/details?id=com.winningapps.nfctagreader
+                  </MuiLink>
+                </Typography>
+              </li>
+              <li>
+                <Typography variant="body1" sx={{ fontWeight: 500, fontSize: 16 }}>
+                  iOS:{" "}
+                  <MuiLink href="https://apps.apple.com/us/app/nfc-tools/id1252962749" target="_blank" rel="noopener">
+                    https://apps.apple.com/us/app/nfc-tools/id1252962749
+                  </MuiLink>
+                </Typography>
+              </li>
             </ol>
           </Box>
         }

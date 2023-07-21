@@ -135,10 +135,13 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
         acc[sectionKey] = {
           section_name: data.section[sectionKey].section_name,
           section_details: data.section[sectionKey].section_details.map((detailArray) =>
-            detailArray.map((field) => {
-              const fieldValue = field.dataType === 3 ? (field.data ? moment(field.data, "YYYY-MM-DD").utc().format() : "") : field.dataType === 2 ? parseInt(field.data) : field.data;
-              return { [field.fieldName]: fieldValue };
-            })
+            detailArray
+              .filter((field) => field.data !== "") // Exclude fields with empty data
+              .map((field) => {
+                const fieldValue = field.dataType === 3 ? (field.data ? moment(field.data, "YYYY-MM-DD").utc().format() : "") : field.dataType === 2 ? parseInt(field.data) : field.data;
+
+                return { [field.fieldName]: fieldValue };
+              })
           ),
         };
         return acc;
@@ -298,7 +301,16 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
         );
         break;
       case 9:
-        fieldComponent = <TextField label={fieldName} margin="normal" fullWidth type="number" InputLabelProps={{ shrink: true }} value={data} disabled />;
+        fieldComponent = (
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <TextField label="Value" margin="normal" fullWidth type="number" InputLabelProps={{ shrink: true }} value={data.value} disabled />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField label="Key" margin="normal" fullWidth type="text" InputLabelProps={{ shrink: true }} value={data.key} disabled />
+            </Grid>
+          </Grid>
+        );
         break;
       default:
         break;
