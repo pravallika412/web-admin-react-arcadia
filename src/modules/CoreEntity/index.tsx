@@ -233,6 +233,10 @@ const CoreEntity = () => {
   useEffect(() => {
     if (createEntityData) {
       setOpenEntity(true);
+      reset();
+      setValue("basicinfo", []);
+      setValue("aboutme", []);
+      setValue("test", []);
       refetch();
     }
   }, [createEntityData]);

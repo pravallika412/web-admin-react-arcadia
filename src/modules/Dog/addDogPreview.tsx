@@ -111,26 +111,7 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
         }
         return acc;
       }, []),
-      //   section: Object.keys(data.section).reduce((acc, sectionKey) => {
-      //     acc[sectionKey] = {
-      //       section_name: data.section[sectionKey].section_name,
-      //       section_details: [
-      //         data.section[sectionKey].section_details.reduce((detailsAcc, field) => {
-      //           if (field.data !== null && field.data != "") {
-      //             if (field.dataType === 3) {
-      //               const date = field.data ? moment(field.data, "YYYY-MM-DD").utc().format() : "";
-      //               detailsAcc.push({ [field.fieldName]: date });
-      //             } else {
-      //               detailsAcc.push({ [field.fieldName]: field.dataType === 2 ? parseInt(field.data) : field.data });
-      //             }
-      //           }
-      //           return detailsAcc;
-      //         }, []),
-      //       ],
-      //     };
-      //     return acc;
-      //   }, {}),
-      // };
+
       section: Object.keys(data.section).reduce((acc, sectionKey) => {
         acc[sectionKey] = {
           section_name: data.section[sectionKey].section_name,
@@ -307,7 +288,7 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
               <TextField label="Value" margin="normal" fullWidth type="number" InputLabelProps={{ shrink: true }} value={data.value} disabled />
             </Grid>
             <Grid item xs={4}>
-              <TextField label="Key" margin="normal" fullWidth type="text" InputLabelProps={{ shrink: true }} value={data.key} disabled />
+              <TextField label="Key" margin="normal" fullWidth type="text" InputLabelProps={{ shrink: true }} value={data.unit} disabled />
             </Grid>
           </Grid>
         );
@@ -364,11 +345,21 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
                 ))}
               </div>
             ))}
-
+            {/* 
             <Button onClick={onBack}>Back</Button>
             <Button type="submit" disabled={Object.keys(errors).length > 0}>
               Create
-            </Button>
+            </Button> */}
+            <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
+              <Grid item>
+                <Button variant="outlined" onClick={onBack} sx={{ mr: 2 }}>
+                  Back
+                </Button>
+                <Button type="submit" variant="contained">
+                  Submit
+                </Button>
+              </Grid>
+            </Grid>
           </form>
         </Paper>
       </Container>
