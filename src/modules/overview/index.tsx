@@ -1,4 +1,4 @@
-import { Box, CircularProgress, FormControl, Grid, MenuItem, OutlinedInput, Select, Skeleton, Typography } from "@mui/material";
+import { Box, CircularProgress, FormControl, Grid, MenuItem, OutlinedInput, Select, Skeleton, Typography, Tooltip as MUIToolTip } from "@mui/material";
 import { Helmet } from "react-helmet-async";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
@@ -13,6 +13,7 @@ import PetsOutlinedIcon from "../../assets/images/pets.svg";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { GET_POST_COUNT } from "../../shared/graphQL/post/queries";
+import Info from "@mui/icons-material/Info";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -402,21 +403,26 @@ function Overview() {
                 )}
               </StyledBox> */}
               <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
-                {countLoading ? (
+                {!userStats ? (
                   <Box sx={{ p: 1 }}>
                     <Skeleton variant="rectangular" height={40} />
                   </Box>
                 ) : (
                   <Box sx={{ display: "flex", justifyContent: "space-between", p: 0.5, alignItems: "center" }}>
-                    <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Total TVL</Typography>
+                    <Typography sx={{ fontSize: 20, fontWeight: 700, display: "flex", alignItems: "center" }}>
+                      Total TVL
+                      <MUIToolTip title="Doller amount from stripe and crypto">
+                        <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
+                      </MUIToolTip>
+                    </Typography>
                     <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
-                      {totalCount}
+                      {userStats.totalAmount ? "$" + Number(userStats.totalAmount).toFixed(2) : ""}
                     </Typography>
                   </Box>
                 )}
 
                 <Grid container spacing={2}>
-                  {countLoading ? (
+                  {!userStats ? (
                     // Show skeletons while loading
                     <>
                       <Grid item xs={12} sm={12}>
@@ -434,6 +440,9 @@ function Overview() {
                             <Grid item xs={7}>
                               <StatusTypography variant="h6" align="center">
                                 Fiat
+                                <MUIToolTip title="TVL of stripe transactions">
+                                  <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
+                                </MUIToolTip>
                               </StatusTypography>
                             </Grid>
                             <Grid
@@ -451,7 +460,7 @@ function Overview() {
                               }}
                             >
                               <PostCount style={{ color: "#00385F" }} align="right">
-                                10
+                                {userStats.fiatTvl[0] && userStats.fiatTvl[0].totalPrice ? "$" + Number(userStats.fiatTvl[0].totalPrice).toFixed(2) : ""}
                               </PostCount>
                             </Grid>
                           </Grid>
@@ -462,7 +471,27 @@ function Overview() {
                           <Grid container alignItems="center">
                             <Grid item xs={7}>
                               <StatusTypography variant="h6" align="center">
-                                Crypto
+                                Number of Crypto Tokens
+                                {/* <MUIToolTip title="DAI, USDC, USDT, MATIC">
+                                  <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
+                                </MUIToolTip> */}
+                                <MUIToolTip
+                                  title={
+                                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                                      {userStats.cryptoTvl && userStats.cryptoTvl.length > 0 ? (
+                                        userStats.cryptoTvl.map((item) => (
+                                          <Typography key={item.currency}>
+                                            {item.currency} - {item.totalPrice.toFixed(2)}
+                                          </Typography>
+                                        ))
+                                      ) : (
+                                        <Typography>No tokens available</Typography>
+                                      )}
+                                    </Box>
+                                  }
+                                >
+                                  <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
+                                </MUIToolTip>
                               </StatusTypography>
                             </Grid>
                             <Grid
@@ -480,7 +509,7 @@ function Overview() {
                               }}
                             >
                               <PostCount style={{ color: "#00385F" }} align="right">
-                                10
+                                {userStats.cryptoTvl ? (userStats.cryptoTvl.length > 0 ? userStats.cryptoTvl.length : 0) : 0}
                               </PostCount>
                             </Grid>
                           </Grid>

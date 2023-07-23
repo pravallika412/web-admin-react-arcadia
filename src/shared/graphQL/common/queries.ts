@@ -88,6 +88,13 @@ const GET_USER_COUNT = gql`
       handlerCount
       productCount
       totalAmount
+      cryptoTvl {
+        totalPrice
+        currency
+      }
+      fiatTvl {
+        totalPrice
+      }
     }
   }
 `;
