@@ -36,7 +36,7 @@ const ErrorProvider = ({ children }) => {
     console.log(message, statusCode);
     if (statusCode === "INTERNAL_SERVER_ERROR") {
       setNetworkError(true);
-    } else if (statusCode === 401) {
+    } else if (statusCode === 401 || statusCode === 403) {
       // Unauthorized error
       window.localStorage.clear();
       navigate("/");
@@ -119,6 +119,10 @@ const ErrorProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    const refreshTok = localStorage.getItem("refreshtoken");
+    if (!refreshTok) {
+      navigate("/");
+    }
     const refreshTokenIfNeeded = () => {
       const expiresIn = localStorage.getItem("expiresIn");
       const expirationTimestamp = parseInt(expiresIn, 10) * 1000;
