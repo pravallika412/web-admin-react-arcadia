@@ -7,15 +7,12 @@ import {
   CardHeader,
   CardMedia,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
   Divider,
   Grid,
   IconButton,
   Skeleton,
-  Snackbar,
   Tab,
   Tabs,
   TextField,
@@ -26,10 +23,8 @@ import {
 import { makeStyles } from "@mui/styles";
 import React, { SyntheticEvent, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { GET_ADMIN, UPDATE_PROFILE } from "../../shared/graphQL/settings/queries";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import Alert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ChangePassword from "./changePassword";
@@ -38,7 +33,7 @@ import Web3 from "web3";
 import Notifications from "./notifications";
 import Transaction from "./Transaction";
 import TokenList from "./wallet";
-import ReactCrop, { centerCrop, makeAspectCrop, Crop, PixelCrop } from "react-image-crop";
+import { centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import CropModal from "../../shared/components/CropModal";
 import DialogComponent from "../../shared/components/Dialog";

@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { TextField, Select, MenuItem, IconButton, Grid, Typography, Button, useTheme, FormControl, InputLabel, Box } from "@mui/material";
 
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
@@ -134,11 +133,8 @@ const SecEdit = ({ datatypesMap, sectionData, onSectionDataChange, isEditMode })
             ))}
             {isEditMode && (
               <Grid container spacing={2}>
-                <Grid item xs={11} /> {/* Empty grid item to push the AddCircle icon to the right */}
+                <Grid item xs={11} />
                 <Grid item xs={1}>
-                  {/* <IconButton onClick={() => handleAddRow(sectionKey)}>
-                    <AddTwoToneIcon />
-                  </IconButton> */}
                   <Button onClick={() => handleAddRow(sectionKey)} startIcon={<AddTwoToneIcon fontSize="small" />}>
                     Add
                   </Button>

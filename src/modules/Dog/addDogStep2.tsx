@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, TextareaAutosize, TextField, Typography, useTheme } from "@mui/material";
+import { Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, TextField, Typography, useTheme } from "@mui/material";
 
 import { Box } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { isEqual } from "lodash";
 import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
 import { useMutation } from "@apollo/client";
 import moment from "moment";

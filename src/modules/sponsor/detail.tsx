@@ -4,8 +4,7 @@ import Label from "../../shared/components/Label";
 import { IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useCallback } from "react";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 interface LocationState {
   page: any;

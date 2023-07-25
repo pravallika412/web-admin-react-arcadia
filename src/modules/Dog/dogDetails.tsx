@@ -1,35 +1,16 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  Grid,
-  Icon,
-  IconButton,
-  InputLabel,
-  Link as MuiLink,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  TextField,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogContentText, Grid, IconButton, InputLabel, Link as MuiLink, Paper, TextField, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Label from "../../shared/components/Label";
 import { DELETE_PRODUCT, GET_PRODUCT_DETAILS, UPDATE_RFID } from "../../shared/graphQL/dog/queries";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import QRCode from "react-qr-code";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import DialogComponent from "../../shared/components/Dialog";
 import { CloudDownload } from "@mui/icons-material";
 import JSZip from "jszip";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
-import { Link } from "react-router-dom";
 import InfoIcon from "@mui/icons-material/Info";
 import { useForm } from "react-hook-form";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -59,7 +40,6 @@ const DogDetails = () => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [openRfidg, setOpenRfid] = useState(false);
-  const [rfidData, setRfidData] = useState("");
   const [rfidError, setRfidError] = useState(false);
 
   const {

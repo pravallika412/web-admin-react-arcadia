@@ -1,33 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Box,
-  Button,
-  Card,
-  CardMedia,
-  Checkbox,
-  CircularProgress,
-  Container,
-  DialogContentText,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Box, Button, Card, CardMedia, CircularProgress, Container, DialogContentText, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, TextField, useTheme } from "@mui/material";
 import DialogComponent from "../../shared/components/Dialog";
 import CropModal from "../../shared/components/CropModal";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import "react-image-crop/dist/ReactCrop.css";
 import { makeStyles } from "@mui/styles";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 const useStyles = makeStyles({

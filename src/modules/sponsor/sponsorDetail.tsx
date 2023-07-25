@@ -2,7 +2,7 @@ import { useLazyQuery } from "@apollo/client";
 import { Box, Paper, Tab, Tabs, Typography } from "@mui/material";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { GET_SPONSORS_DETAILS, GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
+import { GET_SPONSORS_DETAILS } from "../../shared/graphQL/sponsor";
 import DetailComponent from "./detail";
 import SupportDogs from "./supportdogs";
 import TransactionHistory from "./transactionhistory";

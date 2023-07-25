@@ -14,13 +14,11 @@ import {
   FormControl,
   Grid,
   IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   Tab,
   Tabs,
-  TextareaAutosize,
   TextField,
   Typography,
   useTheme,
@@ -35,7 +33,6 @@ import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Collection from "./collection";
 import NestedArray from "./nestedArray";
-import EditIcon from "@mui/icons-material/Edit";
 import SecEdit from "./sectionEditArray";
 
 interface TabPanelProps {

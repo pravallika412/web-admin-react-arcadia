@@ -2,7 +2,6 @@ import { Button, DialogActions, DialogContent, DialogContentText, Grid, IconButt
 import { Box } from "@mui/system";
 import Label from "../../shared/components/Label";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
-import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import { useEffect, useState } from "react";
 import DialogComponent from "../../shared/components/Dialog";
 import { useMutation } from "@apollo/client";

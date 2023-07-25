@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Grid, Paper, Box, Typography, Skeleton, TextField, Button, DialogContentText, CircularProgress } from "@mui/material";
+import { Avatar, Grid, Paper, Box, Typography, Skeleton, TextField, Button, DialogContentText, CircularProgress } from "@mui/material";
 import Web3 from "web3";
 import { makeStyles } from "@mui/styles";
-import bitcoin from "../../assets/images/bitcoin.png";
+import defaultToken from "../../assets/images/defaulttoken.png";
 import BigNumber from "bignumber.js";
 import { useForm } from "react-hook-form";
 import { GET_ADMIN, UPDATE_PROFILE } from "../../shared/graphQL/settings/queries";
@@ -283,7 +283,7 @@ function TokenList({ address }) {
               <Paper className={classes.root}>
                 <Box display="flex" justifyContent="space-between" sx={{ py: 1, px: 2 }}>
                   <div className={classes.leftContent}>
-                    <Avatar alt={`Token ${token.symbol}`} src={token.logo ? token.logo : bitcoin} className={classes.avatar} />
+                    <Avatar alt={`Token ${token.symbol}`} src={token.logo ? token.logo : defaultToken} className={classes.avatar} />
                     <Typography variant="h5">{token.symbol}</Typography>
                   </div>
                   <Typography sx={{ color: "#0481D9", fontSize: 28, fontWeight: 700 }}>{token.balance}</Typography>

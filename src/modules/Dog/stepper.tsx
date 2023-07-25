@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Stepper, Step, StepLabel, Button, DialogContentText, Typography } from "@mui/material";
 import Step1 from "./addDogStep1";
 import Step2 from "./addDogStep2";
 import Preview from "./addDogPreview";
-import { CREATE_ENTITY, GET_COREENTITY } from "../../shared/graphQL/core-entity/queries";
+import { GET_COREENTITY } from "../../shared/graphQL/core-entity/queries";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_PRODUCT, UPDATE_PRODUCT } from "../../shared/graphQL/dog/queries";
 import { useLocation, useNavigate } from "react-router";
@@ -34,7 +34,6 @@ const StepperForm = () => {
   const [dogData, setDogData] = useState(row);
   const [coreEntityFieldsData, setCoreEntityFieldsData] = useState([]);
   const [otherInfo, setOtherInfo] = useState([]);
-  const [isSaveClicked, setIsSaveClicked] = useState(false);
   const [dialog, setDialog] = useState(false);
   const navigate = useNavigate();
   const [getCoreEntity, { data: getCoreEntityData }] = useLazyQuery(GET_COREENTITY);
@@ -142,16 +141,6 @@ const StepperForm = () => {
       default:
         return null;
     }
-  };
-
-  const handleEditDog = (dog) => {
-    setDogData(dog);
-    setActiveStep(0);
-  };
-
-  const handleAddDog = () => {
-    setDogData(null);
-    setActiveStep(0);
   };
 
   return (

@@ -2,9 +2,6 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  CardMedia,
   Container,
   Dialog,
   DialogActions,

@@ -1,30 +1,15 @@
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   MenuItem,
-  TextField,
   Button,
   Box,
   Container,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
   Select,
-  TableBody,
-  TablePagination,
   IconButton,
   DialogContentText,
-  TextareaAutosize,
-  FormControlLabel,
-  Checkbox,
-  Stepper,
-  Step,
-  StepLabel,
   Typography,
   Grid,
   useTheme,
@@ -35,19 +20,12 @@ import {
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
-import { makeStyles } from "@mui/styles";
-import EditIcon from "@mui/icons-material/Edit";
-import { CREATE_PRODUCT, DELETE_PRODUCT, GET_PRODUCTS, UPDATE_PRODUCT } from "../../shared/graphQL/dog/queries";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { DELETE_PRODUCT, GET_PRODUCTS } from "../../shared/graphQL/dog/queries";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { DogValidationSchema } from "../../shared/utilities/dogValidationSchema";
-import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
-import { DatePicker } from "@mui/lab";
-import { Link, Route, Routes, useNavigate } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 import Label from "../../shared/components/Label";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
-import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import SharedTable from "../../shared/components/Table";
 import QRCode from "react-qr-code";
