@@ -113,7 +113,7 @@ const StepperForm = () => {
       case 1:
         return <Step2 onBack={handleBack} onNext={handleNext} dogData={dogData} fields={otherInfo} />;
       case 2:
-        return <Preview data={data} onBack={handleBack} onReset={handleReset} onSave={handleSubmit} />;
+        return <Preview data={data} onBack={handleBack} onReset={handleReset} onSave={handleSubmit} dogData={dogData} />;
       default:
         return null;
     }
@@ -133,7 +133,7 @@ const StepperForm = () => {
     <div>
       <Box sx={{ m: 3 }}>
         <Typography variant="h3" sx={{ color: "var(--primary-700, #00385F);" }}>
-          Add New Dog
+          {dogData ? "Edit" : "Add"} New Dog
         </Typography>
         <Stepper activeStep={activeStep}>
           {steps.map((label, index) => (
