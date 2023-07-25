@@ -57,7 +57,7 @@ const useStyles = makeStyles({
   },
 });
 
-const Preview = ({ data, onBack, onReset, onSave }) => {
+const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
   console.log(data);
   const theme = useTheme();
   const classes = useStyles();
@@ -113,19 +113,34 @@ const Preview = ({ data, onBack, onReset, onSave }) => {
       }, []),
 
       section: Object.keys(data.section).reduce((acc, sectionKey) => {
-        acc[sectionKey] = {
-          section_name: data.section[sectionKey].section_name,
-          section_details: data.section[sectionKey].section_details.map((detailArray) =>
-            detailArray
-              .filter((field) => field.data !== "") // Exclude fields with empty data
-              .map((field) => {
-                const fieldValue = field.dataType === 3 ? (field.data ? moment(field.data, "YYYY-MM-DD").utc().format() : "") : field.dataType === 2 ? parseInt(field.data) : field.data;
+        if (dogData) {
+          acc[sectionKey] = {
+            section_details: data.section[sectionKey].section_details.map((detailArray) =>
+              detailArray
+                .filter((field) => field.data !== "") // Exclude fields with empty data
+                .map((field) => {
+                  const fieldValue = field.dataType === 3 ? (field.data ? moment(field.data, "YYYY-MM-DD").utc().format() : "") : field.dataType === 2 ? parseInt(field.data) : field.data;
 
-                return { [field.fieldName]: fieldValue };
-              })
-          ),
-        };
-        return acc;
+                  return { [field.fieldName]: fieldValue };
+                })
+            ),
+          };
+          return acc;
+        } else {
+          acc[sectionKey] = {
+            section_name: data.section[sectionKey].section_name,
+            section_details: data.section[sectionKey].section_details.map((detailArray) =>
+              detailArray
+                .filter((field) => field.data !== "") // Exclude fields with empty data
+                .map((field) => {
+                  const fieldValue = field.dataType === 3 ? (field.data ? moment(field.data, "YYYY-MM-DD").utc().format() : "") : field.dataType === 2 ? parseInt(field.data) : field.data;
+
+                  return { [field.fieldName]: fieldValue };
+                })
+            ),
+          };
+          return acc;
+        }
       }, {}),
     };
     console.log(updatedFormData);
