@@ -135,7 +135,6 @@ const Dog = () => {
   useEffect(() => {
     if (getAllProducts) {
       setProducts(JSON.parse(getAllProducts.retrieveProductsList.productsDataList));
-      console.log(JSON.parse(getAllProducts.retrieveProductsList.productsDataList));
       setTotalCount(getAllProducts.retrieveProductsList.totalCount);
     }
   }, [getAllProducts]);
@@ -339,7 +338,6 @@ const Dog = () => {
   };
 
   const handleClickOpen = (row) => {
-    console.log(row);
     navigate(`/dogdetails/${row.custom_id}`);
   };
 

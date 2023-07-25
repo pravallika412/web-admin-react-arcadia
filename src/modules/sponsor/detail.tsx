@@ -47,20 +47,9 @@ const DetailComponent = ({ sponsorData }) => {
     navigator.clipboard.writeText(text);
   }, []);
   const navigate = useNavigate();
-  // const location = useLocation();
-  // const state = location.state as LocationState;
-  // const row = state?.page;
-  const handleBack = () => {
-    // console.log(row);
-    navigate("/sponsors");
-    // navigate("/sponsors", { state: { page: row } });
-  };
 
   return (
     <Box>
-      <IconButton onClick={handleBack} sx={{ marginBottom: 1 }}>
-        <ArrowBackIcon />
-      </IconButton>
       <Typography variant="h6" style={{ fontSize: 30, fontWeight: 700 }}>
         Details of {sponsor.name}
       </Typography>

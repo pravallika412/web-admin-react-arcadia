@@ -77,7 +77,6 @@ const SupportDogs = ({ id }) => {
   useEffect(() => {
     if (getSponsorProductDetailsData) {
       const parsedProducts = JSON.parse(getSponsorProductDetailsData.SponsorProducts.products[0].products);
-      console.log(parsedProducts);
       setSponsorProductData(parsedProducts);
       setTotalCount(getSponsorProductDetailsData.SponsorProducts.totalCount);
     }
@@ -152,7 +151,6 @@ const SupportDogs = ({ id }) => {
   };
 
   const handleRowClick = (id) => {
-    console.log(id);
     navigate(`/dogdetails/${id}`);
   };
 

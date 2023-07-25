@@ -252,7 +252,6 @@ const CoreEntity = () => {
   useEffect(() => {
     if (getCoreEntityData) {
       if (getCoreEntityData.RetrieveCoreEntity.product_schema) {
-        console.log(JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema));
         const entityObject = JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema).entity;
         const statusData = entityObject.find((field) => field.fieldName === "status")?.data || [];
 
@@ -284,8 +283,6 @@ const CoreEntity = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(dogActivitySelectedOptions);
-    console.log(statusSelectedOptions);
     const entityFields = [
       { fieldName: "name", dataType: 1, data: "" },
       { fieldName: "image", dataType: 7, data: "" },
@@ -335,7 +332,6 @@ const CoreEntity = () => {
         };
       }
     });
-    console.log(restructuredData);
 
     const payload = {
       collectionName: data.collectionName,
@@ -433,7 +429,7 @@ const CoreEntity = () => {
     });
 
     restructuredData.section = removeEmptyKeys(restructuredData.section) as any;
-    console.log(restructuredData);
+
     setNewFields(newFields);
     const payload = {
       fields: JSON.stringify(restructuredData),

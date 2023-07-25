@@ -211,7 +211,6 @@ const Settings = () => {
 
           if (width < 300 || height < 300) {
             setImageModal(true);
-            console.log("Please upload an image larger than 300x300");
           } else {
             setSrc(reader.result as string);
             setCropModal(true);

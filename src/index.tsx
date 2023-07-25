@@ -33,7 +33,6 @@ const ErrorProvider = ({ children }) => {
   var intervalId: any;
 
   const handleNetworkError = (message, statusCode) => {
-    console.log(message, statusCode);
     if (statusCode === "INTERNAL_SERVER_ERROR") {
       setNetworkError(true);
     } else if (statusCode === 401 || statusCode === 403) {
@@ -55,13 +54,10 @@ const ErrorProvider = ({ children }) => {
 
   const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
-      console.log(graphQLErrors);
       graphQLErrors.forEach((data: any) => {
-        console.log(data, data?.statusCode);
         const statusCode = data?.statusCode;
         const message = data?.message;
         if (statusCode) {
-          console.log(statusCode);
           handleNetworkError(message, statusCode);
         }
       });
@@ -128,7 +124,6 @@ const ErrorProvider = ({ children }) => {
       const expirationTimestamp = parseInt(expiresIn, 10) * 1000;
       const currentTimestamp = Date.now();
       const difference = expirationTimestamp - currentTimestamp;
-      console.log("test", difference < 300000, difference);
       if (difference < 300000) {
         refreshToken();
       }

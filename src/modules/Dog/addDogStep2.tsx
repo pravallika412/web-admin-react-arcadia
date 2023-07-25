@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Container, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, TextareaAutosize, TextField, Typography, useTheme } from "@mui/material";
-import RenderField from "./RenderField";
+
 import { Box } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { isEqual } from "lodash";
@@ -13,9 +13,7 @@ import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 
 const Step2 = ({ onBack, onNext, dogData, fields }) => {
-  console.log(fields);
   const theme = useTheme();
-  console.log("dogData", dogData);
   const updatedSectionData = Object.keys(fields.section).reduce((acc, sectionKey) => {
     const section = fields.section[sectionKey];
     acc[sectionKey] = {
@@ -25,7 +23,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     return acc;
   }, {});
 
-  console.log(updatedSectionData);
   const [basicInformation, setBasicInformation] = useState(fields.basicInformation);
   const [aboutMe, setAboutMe] = useState(fields.aboutMe);
   const [sections, setSections] = useState(updatedSectionData);
@@ -44,10 +41,8 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
   useEffect(() => {
     if (dogData) {
-      console.log(dogData);
       if (!basicInformationUpdated && dogData.basicInformation) {
         const updatedBasicInformation = basicInformation.map((field) => {
-          console.log(field);
           const { fieldName } = field;
           const key = fieldName?.toLowerCase();
           if (key in dogData.basicInformation) {
@@ -77,24 +72,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         setAboutMeUpdated(true);
       }
       if (!sectionUpdated) {
-        // const updatedSections = { ...sections };
         const updatedSections = JSON.parse(JSON.stringify(sections));
-        console.log(updatedSections);
-        // Object.keys(updatedSections).forEach((sectionKey) => {
-        //   if (sectionKey in dogData.section && Array.isArray(dogData.section[sectionKey].section_details)) {
-        //     updatedSections[sectionKey].section_details = updatedSections[sectionKey].section_details.map((field) => {
-        //       const { fieldName } = field;
-        //       const key = fieldName.toLowerCase();
-        //       if (dogData.section[sectionKey].section_details[0] && key in dogData.section[sectionKey].section_details[0]) {
-        //         return {
-        //           ...field,
-        //           data: dogData.section[sectionKey].section_details[0][key],
-        //         };
-        //       }
-        //       return field;
-        //     });
-        //   }
-        // });
         Object.keys(updatedSections).forEach((sectionKey) => {
           if (sectionKey in dogData.section && Array.isArray(dogData.section[sectionKey].section_details)) {
             updatedSections[sectionKey].section_details = dogData.section[sectionKey].section_details.map((detail) => {
@@ -112,7 +90,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
             });
           }
         });
-        console.log(updatedSections);
         setSections(updatedSections);
         setSectionUpdated(true);
       }
@@ -180,9 +157,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   };
 
   const handleChange = async (e, sectionKey, fieldIndex, dataType, sectionDetailIndex, data?) => {
-    console.log(dataType, e.target.value);
     const files = e.target.files;
-    console.log("data", data);
     const updatedSections = { ...sections };
     const value = e.target.value;
     let error = "";
@@ -217,7 +192,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         generatePresignedUrls([files[0]], sectionKey, fieldIndex, dataType, sectionDetailIndex);
       } else if (dataType === 8) {
         const newFiles = Array.from(files);
-        console.log(newFiles);
         generatePresignedUrls(newFiles, sectionKey, fieldIndex, dataType, sectionDetailIndex);
       }
     } else {
@@ -250,7 +224,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         }
         setAboutMe(updatedAboutMe);
       } else {
-        console.log(sectionKey, sectionDetailIndex, fieldIndex);
         if (dataType === 9) {
           const newData = { ...updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data };
           if (data === "value") {
@@ -262,7 +235,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
         } else {
           updatedSections[sectionKey].section_details[sectionDetailIndex][fieldIndex].data = value;
         }
-        console.log(updatedSections);
         setSections(updatedSections);
       }
     }
@@ -270,20 +242,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
   const onSubmit = () => {
     let hasErrors = false;
-
-    const updatedbasicInformation = basicInformation.map((field) => {
-      if (field.dataType === 5 && Array.isArray(field.data)) {
-        return { ...field, data: "" };
-      }
-      return field;
-    });
-
-    const updatedaboutMe = aboutMe.map((field) => {
-      if (field.dataType === 5 && Array.isArray(field.data)) {
-        return { ...field, data: "" };
-      }
-      return field;
-    });
 
     Object.values(fieldErrors).forEach((error) => {
       if (error && error !== "") {
@@ -293,14 +251,12 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
 
     if (!hasErrors) {
       const formData = {
-        basicInformation: updatedbasicInformation,
-        aboutMe: updatedaboutMe,
+        basicInformation: basicInformation,
+        aboutMe: aboutMe,
         section: sections,
       };
-      console.log(formData);
       onNext(formData);
     } else {
-      console.log("Form has errors. Please fix the errors before submitting.");
       return;
     }
   };
@@ -308,7 +264,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   const handleFileDeselect = (fileIndex, sectionKey, fieldIndex, sectionDetailIndex) => {
     const updatedFiles = [...fieldFiles[sectionKey][fieldIndex]];
     updatedFiles.splice(fileIndex, 1);
-    console.log(updatedFiles);
     setFieldFiles((prevFieldFiles) => ({
       ...prevFieldFiles,
       [sectionKey]: {
@@ -320,7 +275,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
   };
 
   const renderField = (field, fieldIndex, sectionKey, sectionDetailIndex?) => {
-    const { fieldName, dataType, data } = field;
+    const { fieldName, dataType, data, options } = field;
     let fieldComponent = null;
 
     const errorKey = `${sectionKey}-${fieldIndex}`;
@@ -384,15 +339,11 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           <FormControl fullWidth variant="outlined" sx={{ mt: 1 }}>
             <InputLabel>{fieldName}</InputLabel>
             <Select label={fieldName} value={data} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex)} fullWidth>
-              {typeof data === "string" ? (
-                <MenuItem value={data}>{data}</MenuItem>
-              ) : (
-                data.map((option, optionIndex) => (
-                  <MenuItem key={optionIndex} value={option}>
-                    {option}
-                  </MenuItem>
-                ))
-              )}
+              {options.map((option, optionIndex) => (
+                <MenuItem key={optionIndex} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         );
@@ -491,7 +442,7 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <TextField
-                aria-label={fieldName}
+                label={fieldName}
                 placeholder={fieldName}
                 value={data.value}
                 margin="normal"
@@ -506,9 +457,10 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
               <Box sx={{ pt: 2 }}>
                 <FormControl fullWidth variant="outlined">
                   <InputLabel id="unit-label">Unit</InputLabel>
-                  <Select labelId="unit-label" label="Unit" value={data.unit} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex, "unit")}>
+                  <Select labelId="unit-label" label="Unit" value={data.unit || ""} onChange={(e) => handleChange(e, sectionKey, fieldIndex, dataType, sectionDetailIndex, "unit")}>
                     <MenuItem value="cm">cm</MenuItem>
-                    <MenuItem value="cm">feet</MenuItem>
+                    <MenuItem value="m">m</MenuItem>
+                    <MenuItem value="feet">feet</MenuItem>
                     <MenuItem value="inch">inch</MenuItem>
                     <MenuItem value="lbs">lbs</MenuItem>
                     <MenuItem value="kg">kg</MenuItem>
@@ -526,21 +478,6 @@ const Step2 = ({ onBack, onNext, dogData, fields }) => {
     return <div key={fieldIndex}>{fieldComponent}</div>;
   };
 
-  // const handleAddSectionDetail = (sectionKey) => {
-  //   setSections((prevSections) => {
-  //     const section = prevSections[sectionKey];
-  //     const newSectionDetails = [...section.section_details];
-  //     newSectionDetails.push([...section.section_details[0]]);
-  //     return {
-  //       ...prevSections,
-  //       [sectionKey]: {
-  //         ...section,
-  //         section_details: newSectionDetails,
-  //       },
-  //     };
-  //   });
-  //   console.log(sections);
-  // };
   const handleAddSectionDetail = (sectionKey) => {
     setSections((prevSections) => {
       const section = prevSections[sectionKey];

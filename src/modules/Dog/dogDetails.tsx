@@ -74,7 +74,6 @@ const DogDetails = () => {
 
   useEffect(() => {
     if (getProductDetailsData) {
-      console.log(JSON.parse(getProductDetailsData.retrieveProduct.productData));
       setProductData(JSON.parse(getProductDetailsData.retrieveProduct.productData));
     }
   }, [getProductDetailsData]);
@@ -153,7 +152,6 @@ const DogDetails = () => {
   };
 
   const handleEditClick = (row) => {
-    console.log(row);
     navigate("/dog/stepper", { state: { row } });
   };
 
@@ -162,7 +160,6 @@ const DogDetails = () => {
   };
 
   const downloadFile = (fileUrl, fileName) => {
-    console.log(fileUrl);
     fetch(fileUrl)
       .then((response) => response.blob())
       .then((blob) => {
@@ -206,7 +203,6 @@ const DogDetails = () => {
   };
 
   const formatValue = (value) => {
-    console.log(value);
     const isDateUrl = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value);
     const isURL = /^(ftp|http|https):\/\/[^ "]+$/;
 
@@ -232,7 +228,6 @@ const DogDetails = () => {
     }
 
     if (isDateUrl) {
-      console.log("date", value);
       const date = new Date(value);
       const formattedDate = `${date.getUTCDate()}-${date.getUTCMonth() + 1}-${date.getUTCFullYear()}`;
       return formattedDate;
@@ -245,7 +240,6 @@ const DogDetails = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
     updateRFID({ variables: { input: { productId: productData._id, rfidTag: data.rfidData } } });
   };
 
@@ -267,7 +261,6 @@ const DogDetails = () => {
 
   const handleQRCodeClick = () => {
     const qrCodeSvgElement = document.querySelector("#qrCode");
-    console.log(qrCodeSvgElement);
     if (qrCodeSvgElement) {
       const svgContent = new XMLSerializer().serializeToString(qrCodeSvgElement);
       const dataUrl = `data:image/svg+xml;base64,${btoa(svgContent)}`;

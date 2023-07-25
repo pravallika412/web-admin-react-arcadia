@@ -72,11 +72,7 @@ const Sponsor = () => {
   const [getPlans, { data: getAllPlans, loading: planLoader }] = useLazyQuery(GET_PLANS, { fetchPolicy: "no-cache" });
 
   const navigate = useNavigate();
-  // const location = useLocation();
-  // const state = location.state as LocationState;
-  // const row = state?.page;
   useEffect(() => {
-    // console.log(row);
     getPlans({ variables: { input: { pageDto: { page: 1, limit: 50 } } } });
   }, []);
 

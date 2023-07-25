@@ -58,7 +58,6 @@ const useStyles = makeStyles({
 });
 
 const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
-  console.log(data);
   const theme = useTheme();
   const classes = useStyles();
   const [entity, setEntity] = useState(data.entity);
@@ -90,7 +89,6 @@ const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
   } = useForm();
 
   const onSubmit = () => {
-    console.log("final", data);
     data.entity[1].data = croppedImageUrl;
     const updatedFormData = {
       entity: data.entity.reduce((acc, field) => {
@@ -143,12 +141,10 @@ const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
         }
       }, {}),
     };
-    console.log(updatedFormData);
     onSave(updatedFormData);
   };
 
   const downloadFile = (fileUrl, fileName) => {
-    console.log(fileUrl);
     fetch(fileUrl)
       .then((response) => response.blob())
       .then((blob) => {
