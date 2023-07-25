@@ -1,7 +1,7 @@
 {
-  "name": "lavabee-admin",
+  "name": "warrior-dog-foundation-admin",
   "version": "2.0.0",
-  "title": "Lavabee Admin",
+  "title": "Warrior Dog Foundation",
   "description": "This is admin panel for managing WDF sponsors and handlers",
   "private": false,
   "dependencies": {

@@ -74,7 +74,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "..", "./public/index.html"),
-      // favicon: "./public/logoAuth.svg", // your path to favicon
+      favicon: "./public/wdflogo.png", // your path to favicon
       filename: "index.html",
     }),
     new webpack.ProvidePlugin({
