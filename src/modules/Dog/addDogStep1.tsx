@@ -1,34 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Box,
-  Button,
-  Card,
-  CardMedia,
-  Checkbox,
-  CircularProgress,
-  Container,
-  DialogContentText,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import RenderField from "./RenderField";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Box, Button, Card, CardMedia, CircularProgress, Container, DialogContentText, FormControl, Grid, IconButton, InputLabel, MenuItem, Paper, Select, TextField, useTheme } from "@mui/material";
 import DialogComponent from "../../shared/components/Dialog";
 import CropModal from "../../shared/components/CropModal";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import "react-image-crop/dist/ReactCrop.css";
 import { makeStyles } from "@mui/styles";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 const useStyles = makeStyles({
@@ -70,6 +47,7 @@ const Step1 = ({ onNext, dogData, fields }) => {
   const [openCropModal, setCropModal] = useState(false);
   const [imageModal, setImageModal] = useState(false);
   const [imageUploaded, setImageUploaded] = useState(false);
+  const statusData: string[] = JSON.parse(localStorage.getItem("statusData") || "[]");
   const setCroppedImageUrlCallback = useCallback(
     (url) => {
       setLoadingImage(false);
@@ -124,7 +102,6 @@ const Step1 = ({ onNext, dogData, fields }) => {
   const onSubmit = (formData) => {
     formData.image = croppedImageUrl;
     if (Object.keys(errors).length > 0) {
-      console.log("errors");
       return;
     }
     const updatedFormData = {
@@ -168,8 +145,11 @@ const Step1 = ({ onNext, dogData, fields }) => {
               <FormControl fullWidth variant="outlined" sx={{ mt: 2 }} required>
                 <InputLabel>Status</InputLabel>
                 <Select {...register("status", { required: `Please select status` })} displayEmpty defaultValue={dogData ? dogData.status : ""} label="status" fullWidth>
-                  <MenuItem value="active">active</MenuItem>
-                  <MenuItem value="inactive">inactive</MenuItem>
+                  {statusData.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

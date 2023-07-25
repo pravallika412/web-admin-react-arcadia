@@ -1,5 +1,5 @@
 import { useLazyQuery } from "@apollo/client";
-import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Box, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useCallback, useEffect, useState } from "react";
 import Label from "../../shared/components/Label";

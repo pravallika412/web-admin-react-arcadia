@@ -1,22 +1,11 @@
-import { Box, Button, CircularProgress, Grid, TextField, Typography, useTheme } from "@mui/material";
-import { createRef, useEffect, useState, useRef } from "react";
+import { Box, Button, CircularProgress, Typography, useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
 import DialogComponent from "../../shared/components/Dialog";
-import { makeStyles } from "@mui/styles";
 import OtpInput from "react-otp-input";
 import { useMutation } from "@apollo/client";
 import { RESEND_OTP, VERIFY_OTP } from "../../shared/graphQL/common/queries";
 import { useNavigate } from "react-router";
 import useStyles from "../../styles/theme/styles";
-
-// const OTPDialogActions = ({ handleConfirm }) => {
-//   return (
-//     <Box sx={{ display: "flex", width: "100%", m: 2 }}>
-//       <Button color="primary" variant="contained" sx={{ width: "100%" }} onClick={handleConfirm}>
-//         Confirm
-//       </Button>
-//     </Box>
-//   );
-// };
 
 const OTPValidation = () => {
   const theme = useTheme();

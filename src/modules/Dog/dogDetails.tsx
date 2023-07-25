@@ -1,35 +1,16 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  Grid,
-  Icon,
-  IconButton,
-  InputLabel,
-  Link as MuiLink,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  TextField,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogContentText, Grid, IconButton, InputLabel, Link as MuiLink, Paper, TextField, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Label from "../../shared/components/Label";
 import { DELETE_PRODUCT, GET_PRODUCT_DETAILS, UPDATE_RFID } from "../../shared/graphQL/dog/queries";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import QRCode from "react-qr-code";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import DialogComponent from "../../shared/components/Dialog";
 import { CloudDownload } from "@mui/icons-material";
 import JSZip from "jszip";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
-import { Link } from "react-router-dom";
 import InfoIcon from "@mui/icons-material/Info";
 import { useForm } from "react-hook-form";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -59,7 +40,6 @@ const DogDetails = () => {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [openRfidg, setOpenRfid] = useState(false);
-  const [rfidData, setRfidData] = useState("");
   const [rfidError, setRfidError] = useState(false);
 
   const {
@@ -74,7 +54,6 @@ const DogDetails = () => {
 
   useEffect(() => {
     if (getProductDetailsData) {
-      console.log(JSON.parse(getProductDetailsData.retrieveProduct.productData));
       setProductData(JSON.parse(getProductDetailsData.retrieveProduct.productData));
     }
   }, [getProductDetailsData]);
@@ -153,7 +132,6 @@ const DogDetails = () => {
   };
 
   const handleEditClick = (row) => {
-    console.log(row);
     navigate("/dog/stepper", { state: { row } });
   };
 
@@ -162,7 +140,6 @@ const DogDetails = () => {
   };
 
   const downloadFile = (fileUrl, fileName) => {
-    console.log(fileUrl);
     fetch(fileUrl)
       .then((response) => response.blob())
       .then((blob) => {
@@ -206,7 +183,6 @@ const DogDetails = () => {
   };
 
   const formatValue = (value) => {
-    console.log(value);
     const isDateUrl = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value);
     const isURL = /^(ftp|http|https):\/\/[^ "]+$/;
 
@@ -232,7 +208,6 @@ const DogDetails = () => {
     }
 
     if (isDateUrl) {
-      console.log("date", value);
       const date = new Date(value);
       const formattedDate = `${date.getUTCDate()}-${date.getUTCMonth() + 1}-${date.getUTCFullYear()}`;
       return formattedDate;
@@ -245,7 +220,6 @@ const DogDetails = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
     updateRFID({ variables: { input: { productId: productData._id, rfidTag: data.rfidData } } });
   };
 
@@ -267,7 +241,6 @@ const DogDetails = () => {
 
   const handleQRCodeClick = () => {
     const qrCodeSvgElement = document.querySelector("#qrCode");
-    console.log(qrCodeSvgElement);
     if (qrCodeSvgElement) {
       const svgContent = new XMLSerializer().serializeToString(qrCodeSvgElement);
       const dataUrl = `data:image/svg+xml;base64,${btoa(svgContent)}`;

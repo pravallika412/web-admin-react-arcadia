@@ -1,10 +1,9 @@
 import { useLazyQuery } from "@apollo/client";
-import { Box, Paper, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs, Typography } from "@mui/material";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { RETRIEVE_HANDLERS } from "../../shared/graphQL/handler/queries";
-import { GET_SPONSORS_DETAILS, GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
 import HandlerPosts from "./handlerPost";
 import HandlerProfileComponent from "./handlerProfile";
 import UserActivities from "./userActivities";

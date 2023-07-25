@@ -1,36 +1,9 @@
 import { Controller, useForm } from "react-hook-form";
-import {
-  MenuItem,
-  TextField,
-  Button,
-  Box,
-  Container,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Paper,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TablePagination,
-  IconButton,
-  DialogContentText,
-  useTheme,
-  Grid,
-  Typography,
-  InputAdornment,
-  Skeleton,
-  CircularProgress,
-  Tooltip,
-} from "@mui/material";
+import { MenuItem, TextField, Button, Box, Container, DialogTitle, DialogContent, DialogActions, IconButton, DialogContentText, useTheme, Grid, Typography, Tooltip } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import { CREATE_HANDLER, GET_HANDLERS, UPDATE_HANDLER, DELETE_HANDLER } from "../../shared/graphQL/handler/queries";
-import { DatePicker } from "@mui/lab";
 import Label from "../../shared/components/Label";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";

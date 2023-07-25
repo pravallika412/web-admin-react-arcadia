@@ -1,16 +1,14 @@
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { ErrorMessage } from "@hookform/error-message";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
-import { LOGIN_ADMIN, RESET_PASSWORD } from "../../shared/graphQL/common/queries";
+import { RESET_PASSWORD } from "../../shared/graphQL/common/queries";
 import { CircularProgress, Dialog, DialogContent, DialogContentText, Grid, IconButton, InputAdornment, Paper, useTheme } from "@mui/material";
 import LoginDog from "../../assets/images/LoginDog.svg";
 import Visibility from "@mui/icons-material/Visibility";

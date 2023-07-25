@@ -1,25 +1,7 @@
-import { ApolloClient, InMemoryCache, useLazyQuery } from "@apollo/client";
-import {
-  Box,
-  Container,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { useLazyQuery } from "@apollo/client";
+import { Box, Container, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS } from "../../shared/graphQL/sponsor";
@@ -72,11 +54,7 @@ const Sponsor = () => {
   const [getPlans, { data: getAllPlans, loading: planLoader }] = useLazyQuery(GET_PLANS, { fetchPolicy: "no-cache" });
 
   const navigate = useNavigate();
-  // const location = useLocation();
-  // const state = location.state as LocationState;
-  // const row = state?.page;
   useEffect(() => {
-    // console.log(row);
     getPlans({ variables: { input: { pageDto: { page: 1, limit: 50 } } } });
   }, []);
 

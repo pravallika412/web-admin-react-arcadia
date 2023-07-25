@@ -1,28 +1,7 @@
-import React, { useCallback, useState } from "react";
-import {
-  Button,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Container,
-  Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Box,
-  IconButton,
-  Typography,
-  Grid,
-  Card,
-  CardMedia,
-  DialogContentText,
-  useTheme,
-} from "@mui/material";
+import { useState } from "react";
+import { Button, TextField, Container, Paper, Box, Typography, Grid, Card, CardMedia } from "@mui/material";
 import { useForm } from "react-hook-form";
 import moment from "moment";
-import { GENERATE_PRESIGNED_URL } from "../../shared/graphQL/common/queries";
-import { useMutation } from "@apollo/client";
 import "react-image-crop/dist/ReactCrop.css";
 import { makeStyles } from "@mui/styles";
 import { CloudDownload } from "@mui/icons-material";
@@ -58,29 +37,14 @@ const useStyles = makeStyles({
 });
 
 const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
-  console.log(data);
-  const theme = useTheme();
   const classes = useStyles();
   const [entity, setEntity] = useState(data.entity);
   const [basicInformation, setBasicInformation] = useState(data.basicInformation);
   const [aboutMe, setAboutMe] = useState(data.aboutMe);
   const [sections, setSections] = useState(data.section);
-  // const [formData, setFormData] = useState(data);
-  const [fieldFiles, setFieldFiles] = useState({});
-  const [generatePresignedUrl, { data: createPresignedUrl }] = useMutation(GENERATE_PRESIGNED_URL);
   const [fieldErrors, setFieldErrors] = useState({});
   const [loadingImage, setLoadingImage] = useState(false);
-  const [src, setSrc] = useState(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState(data.entity ? data.entity[1].data : null);
-  const [openCropModal, setCropModal] = useState(false);
-  const [imageModal, setImageModal] = useState(false);
-  const setCroppedImageUrlCallback = useCallback(
-    (url) => {
-      setLoadingImage(false);
-      setCroppedImageUrl(url);
-    },
-    [croppedImageUrl]
-  );
 
   const {
     register,
@@ -90,7 +54,6 @@ const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
   } = useForm();
 
   const onSubmit = () => {
-    console.log("final", data);
     data.entity[1].data = croppedImageUrl;
     const updatedFormData = {
       entity: data.entity.reduce((acc, field) => {
@@ -143,12 +106,10 @@ const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
         }
       }, {}),
     };
-    console.log(updatedFormData);
     onSave(updatedFormData);
   };
 
   const downloadFile = (fileUrl, fileName) => {
-    console.log(fileUrl);
     fetch(fileUrl)
       .then((response) => response.blob())
       .then((blob) => {
@@ -360,11 +321,6 @@ const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
                 ))}
               </div>
             ))}
-            {/* 
-            <Button onClick={onBack}>Back</Button>
-            <Button type="submit" disabled={Object.keys(errors).length > 0}>
-              Create
-            </Button> */}
             <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
               <Grid item>
                 <Button variant="outlined" onClick={onBack} sx={{ mr: 2 }}>

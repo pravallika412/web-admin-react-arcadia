@@ -1,5 +1,5 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Button, FormControlLabel, Grid, Skeleton, Typography } from "@mui/material";
+import { FormControlLabel, Grid, Skeleton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Switch, { SwitchProps } from "@mui/material/Switch";
 import { useEffect, useState } from "react";

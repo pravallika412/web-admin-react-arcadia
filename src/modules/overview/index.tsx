@@ -1,16 +1,13 @@
-import { Box, CircularProgress, FormControl, Grid, MenuItem, OutlinedInput, Select, Skeleton, Typography, Tooltip as MUIToolTip } from "@mui/material";
-import { Helmet } from "react-helmet-async";
+import { Box, FormControl, Grid, MenuItem, Select, Skeleton, Typography, Tooltip as MUIToolTip } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 import { styled } from "@mui/material/styles";
 import { GET_USER_COUNT, SPONSOR_STATS } from "../../shared/graphQL/common/queries";
 import { useLazyQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import SuspenseLoader from "../../shared/components/SuspenseLoader";
 import { GET_PLANS } from "../../shared/graphQL/subscription/queries";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import PetsOutlinedIcon from "../../assets/images/pets.svg";
-import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { GET_POST_COUNT } from "../../shared/graphQL/post/queries";
 import Info from "@mui/icons-material/Info";
@@ -387,21 +384,6 @@ function Overview() {
         <Grid item xs={4} sm={4}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={12}>
-              {/* <StyledBox>
-                {userStats ? (
-                  <>
-                    <StyledHeader>
-                      <Typography variant="h4">Total Amount</Typography>
-                      <StyledIcon>
-                        <AccountBalanceWalletOutlinedIcon />
-                      </StyledIcon>
-                    </StyledHeader>
-                    <StyledTotalCount align="left">$ {userStats.totalAmount}</StyledTotalCount>
-                  </>
-                ) : (
-                  renderSkeleton()
-                )}
-              </StyledBox> */}
               <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
                 {!userStats ? (
                   <Box sx={{ p: 1 }}>
@@ -472,9 +454,6 @@ function Overview() {
                             <Grid item xs={7}>
                               <StatusTypography variant="h6" align="center">
                                 Number of Crypto Tokens
-                                {/* <MUIToolTip title="DAI, USDC, USDT, MATIC">
-                                  <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
-                                </MUIToolTip> */}
                                 <MUIToolTip
                                   title={
                                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>

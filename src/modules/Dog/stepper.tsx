@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Stepper, Step, StepLabel, Button, DialogContentText, Typography } from "@mui/material";
 import Step1 from "./addDogStep1";
 import Step2 from "./addDogStep2";
 import Preview from "./addDogPreview";
-import { CREATE_ENTITY, GET_COREENTITY } from "../../shared/graphQL/core-entity/queries";
+import { GET_COREENTITY } from "../../shared/graphQL/core-entity/queries";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CREATE_PRODUCT, UPDATE_PRODUCT } from "../../shared/graphQL/dog/queries";
 import { useLocation, useNavigate } from "react-router";
@@ -29,13 +29,11 @@ const StepperForm = () => {
   const location = useLocation();
   const state = location.state as LocationState;
   const row = state?.row;
-  console.log(row);
   const [activeStep, setActiveStep] = useState(0);
   const [data, setData] = useState({});
   const [dogData, setDogData] = useState(row);
   const [coreEntityFieldsData, setCoreEntityFieldsData] = useState([]);
   const [otherInfo, setOtherInfo] = useState([]);
-  const [isSaveClicked, setIsSaveClicked] = useState(false);
   const [dialog, setDialog] = useState(false);
   const navigate = useNavigate();
   const [getCoreEntity, { data: getCoreEntityData }] = useLazyQuery(GET_COREENTITY);
@@ -58,12 +56,41 @@ const StepperForm = () => {
     }
   }, [updateProductData]);
 
+  const processDataRecursive = (data) => {
+    if (Array.isArray(data)) {
+      return data.map((field) => processDataRecursive(field));
+    } else if (typeof data === "object") {
+      if (Array.isArray(data.data)) {
+        return {
+          ...data,
+          options: data.data,
+          data: "",
+        };
+      } else {
+        return {
+          ...data,
+          section_details: processDataRecursive(data.section_details),
+        };
+      }
+    } else {
+      return data;
+    }
+  };
+
   useEffect(() => {
     if (getCoreEntityData && getCoreEntityData.RetrieveCoreEntity.product_schema) {
       const parsedData = JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema);
       const { entity, ...newData } = JSON.parse(getCoreEntityData.RetrieveCoreEntity.product_schema);
+      const updatedData: any = {
+        basicInformation: processDataRecursive(newData.basicInformation),
+        aboutMe: processDataRecursive(newData.aboutMe),
+        section: Object.keys(newData.section).reduce((acc, key) => {
+          acc[key] = processDataRecursive(newData.section[key]);
+          return acc;
+        }, {}),
+      };
       setCoreEntityFieldsData(parsedData.entity);
-      setOtherInfo(newData);
+      setOtherInfo(updatedData);
     }
   }, [getCoreEntityData]);
 
@@ -86,13 +113,11 @@ const StepperForm = () => {
   };
 
   const handleSubmit = (data) => {
-    console.log("stepper", data);
     for (const key in data) {
       if (typeof data[key] === "object" && data[key] !== null) {
         data[key] = JSON.stringify(data[key]);
       }
     }
-    console.log("finalstring", data);
     if (dogData) {
       updateProduct({ variables: { id: { id: dogData._id }, input: data } });
     } else {
@@ -106,7 +131,6 @@ const StepperForm = () => {
   };
 
   const renderStepContent = (step) => {
-    console.log(step);
     switch (step) {
       case 0:
         return <Step1 onNext={handleNext} dogData={dogData} fields={coreEntityFieldsData} />;
@@ -117,16 +141,6 @@ const StepperForm = () => {
       default:
         return null;
     }
-  };
-
-  const handleEditDog = (dog) => {
-    setDogData(dog);
-    setActiveStep(0);
-  };
-
-  const handleAddDog = () => {
-    setDogData(null);
-    setActiveStep(0);
   };
 
   return (

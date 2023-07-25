@@ -59,7 +59,6 @@ function HeaderNotifications() {
           console.log("userConnected", data);
         });
         socket.on("receivedNotification", (data) => {
-          console.log("receivedNotification", data);
           setUnReadCount((prevCount) => prevCount + 1);
         });
       });

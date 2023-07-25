@@ -101,7 +101,6 @@ const Subscription = () => {
 
   const setCroppedImageUrlCallbackPlan = useCallback(
     (url) => {
-      console.log(url);
       setLoadingImage(false);
       setCroppedImageUrl(url);
     },
@@ -395,7 +394,6 @@ const Subscription = () => {
   };
 
   const handleFile = async (e) => {
-    console.log(e);
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
       reader.addEventListener("load", () => {
@@ -406,7 +404,6 @@ const Subscription = () => {
 
           if (width < 300 || height < 300) {
             setImageModal(true);
-            console.log("Please upload an image larger than 300x300");
           } else {
             setSrc(reader.result as string);
             setCropModal(true);

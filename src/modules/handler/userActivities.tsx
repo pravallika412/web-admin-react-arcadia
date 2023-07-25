@@ -1,10 +1,8 @@
 import { useLazyQuery } from "@apollo/client";
-import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import Label from "../../shared/components/Label";
 import SharedTable from "../../shared/components/Table";
 import { HANDLER_ACTIVITIES } from "../../shared/graphQL/handler/queries";
-import { GET_SPONSORS_PRODUCT_DETAILS } from "../../shared/graphQL/sponsor";
 
 const columns = [
   { id: "dogName", label: "Dog Allotted", minWidth: 170 },
