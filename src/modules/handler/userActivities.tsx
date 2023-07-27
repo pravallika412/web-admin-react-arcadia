@@ -1,6 +1,7 @@
 import { useLazyQuery } from "@apollo/client";
 import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import SharedTable from "../../shared/components/Table";
 import { HANDLER_ACTIVITIES } from "../../shared/graphQL/handler/queries";
 
@@ -20,6 +21,7 @@ const UserActivities = ({ id }) => {
   const [filters, setFilters] = useState({
     dogStatus: null,
   });
+  const navigate = useNavigate();
 
   const [getHandlerActivities, { data: getHandlerActivitiesData, loading: handlerActivitytLoading }] = useLazyQuery(HANDLER_ACTIVITIES);
 
@@ -69,6 +71,11 @@ const UserActivities = ({ id }) => {
     }
   };
 
+  const handleRowClick = (id) => {
+    if (id != null) navigate(`/dogdetails/${id}`);
+    else return;
+  };
+
   const formattedData = handlerActivityData.map((row) => {
     let imageUrl = row.product.image || "";
 
@@ -77,6 +84,7 @@ const UserActivities = ({ id }) => {
     }
 
     return {
+      id: row?.product?.custom_id,
       dogName: (
         <>
           <div style={{ display: "flex" }}>
@@ -124,8 +132,8 @@ const UserActivities = ({ id }) => {
       onSearch={handleSearch}
       searchFilter={undefined}
       searchFilterVisible={true}
-      selectableRows={false}
-      onRowClick={undefined}
+      selectableRows={true}
+      onRowClick={handleRowClick}
     />
   );
 };
