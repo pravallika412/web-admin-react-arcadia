@@ -510,7 +510,7 @@ function Overview() {
                   <Box sx={{ display: "flex", justifyContent: "space-between", p: 0.5, alignItems: "center" }}>
                     <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Total Posts</Typography>
                     <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
-                      $ {totalCount}
+                      {totalCount}
                     </Typography>
                   </Box>
                 )}

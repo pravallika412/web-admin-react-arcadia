@@ -73,6 +73,7 @@ const HANDLER_ACTIVITIES = gql`
           _id
           name
           image
+          custom_id
         }
         post_count
         login_date
