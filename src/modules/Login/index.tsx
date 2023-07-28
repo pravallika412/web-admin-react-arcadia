@@ -144,6 +144,7 @@ export default function SignIn() {
               className={errors.email ? classes.textFieldError : classes.textFieldWhite}
               id="email"
               label="Email"
+              placeholder="Enter email"
               name="email"
               {...register("email", {
                 required: {
@@ -170,6 +171,7 @@ export default function SignIn() {
               fullWidth
               focused
               name="password"
+              placeholder="Enter password"
               className={errors.password ? classes.textFieldError : classes.textFieldWhite}
               label="Password"
               id="password"

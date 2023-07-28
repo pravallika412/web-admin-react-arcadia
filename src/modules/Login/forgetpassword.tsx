@@ -98,6 +98,7 @@ export default function ForgetPassword() {
               className={errors.email ? classes.textFieldError : classes.textFieldWhite}
               id="email"
               label="Email"
+              placeholder="Enter email"
               name="email"
               {...register("email", {
                 required: {

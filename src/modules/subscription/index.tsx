@@ -15,6 +15,10 @@ import {
   DialogContentText,
   CardMedia,
   Card,
+  FormControlLabel,
+  Checkbox,
+  RadioGroup,
+  Radio,
 } from "@mui/material";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
@@ -98,6 +102,7 @@ const Subscription = () => {
   const [croppedImageUrl, setCroppedImageUrl] = useState(null);
   const [openCropModal, setCropModal] = useState(false);
   const [imageModal, setImageModal] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("all");
 
   const setCroppedImageUrlCallbackPlan = useCallback(
     (url) => {
@@ -178,6 +183,9 @@ const Subscription = () => {
   };
 
   const onSubmit = async (data) => {
+    if (selectedOption === "all") {
+      data.supportableProductCount = "all";
+    }
     setIPFSLoader(true);
     let data1 = JSON.stringify({
       pinataContent: {
@@ -256,9 +264,9 @@ const Subscription = () => {
       name: editData.name,
       descriptions: [],
       price: editData.default_price.price,
-      supportableProductCount: editData.default_price.supportable_product_count,
+      supportableProductCount: editData.default_price.supportable_product_count === "all" ? "" : editData.default_price.supportable_product_count,
     };
-
+    setSelectedOption(editData.default_price.supportable_product_count === "all" ? "all" : "custom");
     let descriptions;
     try {
       descriptions = JSON.parse(editData.description);
@@ -350,7 +358,13 @@ const Subscription = () => {
         </>
       ),
       price: row?.default_price ? row.default_price?.price : "",
-      count: row?.default_price ? row.default_price?.supportable_product_count : "",
+      count: row?.default_price
+        ? row.default_price?.supportable_product_count
+          ? row.default_price?.supportable_product_count === "all"
+            ? "All"
+            : row.default_price?.supportable_product_count
+          : ""
+        : "",
       createdAt: formatDate(row?.createdAt),
       action: (
         <>
@@ -701,32 +715,45 @@ const Subscription = () => {
               </div>
 
               <div>
-                <Controller
-                  name="supportableProductCount"
-                  control={control}
-                  defaultValue=""
-                  rules={{
-                    required: "Supportable Product Count is required",
-                    pattern: {
-                      value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                      message: "Please enter a valid Product Count",
-                    },
-                    maxLength: {
-                      value: 3,
-                      message: "Max length exceeded",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Product Count (no. of items accessible)"
-                      margin="normal"
-                      fullWidth
-                      error={!!errors.supportableProductCount}
-                      helperText={errors?.supportableProductCount?.message}
-                    />
-                  )}
-                />
+                <label>Product Count</label>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <RadioGroup value={selectedOption} onChange={(e) => setSelectedOption(e.target.value)} style={{ flexDirection: "row" }}>
+                    <FormControlLabel value="all" control={<Radio />} label="All" />
+                    <FormControlLabel value="custom" control={<Radio />} label="Custom" />
+                  </RadioGroup>
+                </div>
+
+                {selectedOption === "custom" && (
+                  <Controller
+                    name="supportableProductCount"
+                    control={control}
+                    defaultValue=""
+                    rules={{
+                      required: "Supportable Product Count is required",
+                      pattern: {
+                        value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
+                        message: "Please enter a valid Product Count",
+                      },
+                      maxLength: {
+                        value: 3,
+                        message: "Max length exceeded",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <>
+                        <TextField
+                          {...field}
+                          label="Enter Product Count"
+                          margin="normal"
+                          fullWidth
+                          error={!!errors.supportableProductCount}
+                          helperText={errors?.supportableProductCount?.message}
+                          autoFocus
+                        />
+                      </>
+                    )}
+                  />
+                )}
               </div>
             </Box>
           </DialogContent>
