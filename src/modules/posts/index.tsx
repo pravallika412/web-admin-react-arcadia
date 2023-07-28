@@ -96,7 +96,7 @@ const useStyles = makeStyles({
 const GasFeeDialogContent = ({ gasFees }) => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
-      <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction History</Typography>
+      <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Please confirm the post submission</Typography>
       <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600, textAlign: "center" }}>
         <img src={Transaction} alt="GIF Image" />
         <Typography sx={{ fontSize: "18px", fontWeight: 500, color: "rgba(3, 96, 161, 1)" }}>Waiting for Confirmation.</Typography>
@@ -124,8 +124,8 @@ const TransactionDialogContent = () => {
     <Box display="flex" flexDirection="column" alignItems="center">
       <DialogContentText id="alert-dialog-description" sx={{ m: 2, fontWeight: 600, textAlign: "center" }}>
         <img src={TransactionSubmitted} alt="GIF Image" />
-        <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Transaction Submitted</Typography>
-        <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>Your transaction will be updated in a short period of time.</Typography>
+        <Typography sx={{ fontSize: "24px", fontWeight: 700 }}>Post Submitted Successfully</Typography>
+        <Typography sx={{ fontSize: "16px", fontWeight: 500 }}>Your post is successfully submitted and the blockchain transaction will update in a short period of time.</Typography>
       </DialogContentText>
     </Box>
   );
@@ -135,7 +135,7 @@ const TransactionDialogActions = ({ handleTransactionHash }) => {
   return (
     <Box sx={{ display: "flex", width: "100%", m: 2 }}>
       <Button onClick={handleTransactionHash} color="primary" variant="contained" sx={{ width: "100%" }}>
-        View Transaction
+        View Blockchain Transaction
       </Button>
     </Box>
   );

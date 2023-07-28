@@ -47,7 +47,7 @@ function HeaderNotifications() {
   const [totalCount, setTotalCount] = useState<number>(0);
   const socket_url = process.env.WEBSOCKET_URL;
   const socket = io(socket_url);
-  let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
+  const [allRead, setAllRead] = useState<boolean>(false);
 
   useEffect(() => {
     const id = localStorage.getItem("adminId");
@@ -57,6 +57,7 @@ function HeaderNotifications() {
         socket.on("userConnected", (data) => {});
         socket.on("receivedNotification", (data) => {
           refetch();
+          let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
           initialUnReadCount++;
           setUnReadCount(initialUnReadCount);
           localStorage.setItem("unReadCount", initialUnReadCount.toString());
@@ -65,9 +66,9 @@ function HeaderNotifications() {
     }
     socket.on("connect_error", (data) => {});
 
-    return () => {
-      socket.disconnect();
-    };
+    // return () => {
+    //   socket.disconnect();
+    // };
   }, [socket]);
 
   useEffect(() => {
@@ -84,7 +85,9 @@ function HeaderNotifications() {
 
   useEffect(() => {
     if (markReadData) {
+      let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
       initialUnReadCount--;
+      setUnReadCount(initialUnReadCount);
       localStorage.setItem("unReadCount", initialUnReadCount.toString());
       refetch();
     }
@@ -92,13 +95,15 @@ function HeaderNotifications() {
 
   useEffect(() => {
     if (markAllReadData) {
+      setAllRead(true);
+      refetch();
       localStorage.setItem("unReadCount", "0");
       setUnReadCount(0);
-      refetch();
     }
   }, [markAllReadData]);
 
   const handleOpen = (): void => {
+    refetch();
     setOpen(true);
   };
 
@@ -116,8 +121,8 @@ function HeaderNotifications() {
     }
   };
 
-  const handleMarkAllRead = () => {
-    markAllRead();
+  const handleMarkAllRead = async () => {
+    await markAllRead();
   };
 
   const rowRenderer = ({ index, style, key }) => {
@@ -136,9 +141,9 @@ function HeaderNotifications() {
           display: { xs: "block", sm: "flex" },
           cursor: "pointer",
           "&:hover": {
-            ...(notification.read === false && { background: "#E6F4FF" }),
+            ...(notification.read === false && !allRead && { background: "#E6F4FF" }),
           },
-          ...(notification.read === false && { background: "#E6F4FF" }),
+          ...(notification.read === false && !allRead && { background: "#E6F4FF" }),
         }}
         onClick={() => handleNotificationClick(notification)}
       >
@@ -204,8 +209,8 @@ function HeaderNotifications() {
               onClick={handleMarkAllRead}
               disabled={unReadCount === 0}
               sx={{
-                opacity: unReadCount === 0 ? 0.5 : 1,
-                cursor: unReadCount === 0 ? "unset" : "pointer",
+                opacity: unReadCount == 0 ? 0.5 : 1,
+                cursor: unReadCount == 0 ? "unset" : "pointer",
               }}
             >
               Mark All Read
