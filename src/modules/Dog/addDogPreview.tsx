@@ -261,10 +261,10 @@ const Preview = ({ data, onBack, onReset, onSave, dogData }) => {
         fieldComponent = (
           <Grid container spacing={2}>
             <Grid item xs={8}>
-              <TextField label="Value" margin="normal" fullWidth type="number" InputLabelProps={{ shrink: true }} value={data.value} disabled />
+              <TextField label={fieldName} margin="normal" fullWidth type="number" InputLabelProps={{ shrink: true }} value={data.value} disabled />
             </Grid>
             <Grid item xs={4}>
-              <TextField label="Key" margin="normal" fullWidth type="text" InputLabelProps={{ shrink: true }} value={data.unit} disabled />
+              <TextField label="Unit" margin="normal" fullWidth type="text" InputLabelProps={{ shrink: true }} value={data.unit} disabled />
             </Grid>
           </Grid>
         );

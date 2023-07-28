@@ -62,7 +62,9 @@ const ErrorProvider = ({ children }) => {
         }
       });
     }
-    if (networkError) console.log(`[Network error]: ${networkError}`);
+    if (networkError) {
+      setNetworkError(true);
+    }
   });
 
   const authLink = setContext((_, { headers }) => {
