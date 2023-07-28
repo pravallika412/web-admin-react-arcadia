@@ -39,7 +39,7 @@ function HeaderNotifications() {
   const ref = useRef<any>(null);
   const [isOpen, setOpen] = useState<boolean>(false);
   const [notificationData, setNotificationData] = useState([]);
-  const [unReadCount, setUnReadCount] = useState<number>(0);
+  const [unReadCount, setUnReadCount] = useState<number>(parseInt(localStorage.getItem("unReadCount") || "0"));
   const [markRead, { data: markReadData, loading: markReadLoader }] = useMutation(MARK_READ);
   const [markAllRead, { data: markAllReadData, loading: markAllReadLoader }] = useMutation(MARK_ALL_READ);
   const [showNotifications, { data: showNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(SHOW_ADMIN_NOTIFICATIONS, { fetchPolicy: "no-cache" });
@@ -47,29 +47,26 @@ function HeaderNotifications() {
   const [totalCount, setTotalCount] = useState<number>(0);
   const socket_url = process.env.WEBSOCKET_URL;
   const socket = io(socket_url);
+  let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
 
   useEffect(() => {
     const id = localStorage.getItem("adminId");
     if (socket && id) {
       socket.on("connect", () => {
-        socket.emit("userhandler", { userId: id, role: "admin" }, (response) => {
-          console.log("userHandler", response);
-        });
-        socket.on("userConnected", (data) => {
-          console.log("userConnected", data);
-        });
+        socket.emit("userhandler", { userId: id, role: "admin" }, (response) => {});
+        socket.on("userConnected", (data) => {});
         socket.on("receivedNotification", (data) => {
-          setUnReadCount((prevCount) => prevCount + 1);
+          refetch();
+          initialUnReadCount++;
+          setUnReadCount(initialUnReadCount);
+          localStorage.setItem("unReadCount", initialUnReadCount.toString());
         });
       });
     }
-    socket.on("connect_error", (data) => {
-      console.log("connect_error", data);
-    });
+    socket.on("connect_error", (data) => {});
 
     return () => {
       socket.disconnect();
-      console.log("disconnected");
     };
   }, [socket]);
 
@@ -87,18 +84,21 @@ function HeaderNotifications() {
 
   useEffect(() => {
     if (markReadData) {
+      initialUnReadCount--;
+      localStorage.setItem("unReadCount", initialUnReadCount.toString());
       refetch();
     }
   }, [markReadData]);
 
   useEffect(() => {
     if (markAllReadData) {
+      localStorage.setItem("unReadCount", "0");
+      setUnReadCount(0);
       refetch();
     }
   }, [markAllReadData]);
 
   const handleOpen = (): void => {
-    setUnReadCount(0);
     setOpen(true);
   };
 

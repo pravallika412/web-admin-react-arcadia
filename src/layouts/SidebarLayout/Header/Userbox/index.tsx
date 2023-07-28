@@ -56,9 +56,7 @@ function HeaderUserbox() {
       window.localStorage.clear();
       navigate("/");
     },
-    onError: (error) => {
-      console.log(error);
-    },
+    onError: (error) => {},
   });
   useEffect(() => {
     getAdmin();
