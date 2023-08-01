@@ -56,10 +56,6 @@ function HeaderNotifications() {
         socket.on("userConnected", (data) => {});
         socket.on("receivedNotification", (data) => {
           showNotifications({ variables: { input1: { page: 1, limit: 200 }, input2: {} } });
-          let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
-          initialUnReadCount++;
-          setUnReadCount(initialUnReadCount);
-          localStorage.setItem("unReadCount", initialUnReadCount.toString());
         });
       });
     }
@@ -75,12 +71,13 @@ function HeaderNotifications() {
   }, []);
 
   useEffect(() => {
-    if (showNotificationData) {
+    if (showNotificationData?.AdminInAppNotifications?.notifications.length > 0) {
       setNotificationData(showNotificationData.AdminInAppNotifications.notifications);
 
       setTotalCount(showNotificationData.AdminInAppNotifications.totalCount);
+      setUnReadCount(showNotificationData.AdminInAppNotifications.unread_count);
     }
-  }, [showNotificationData]);
+  }, [showNotificationData, unReadCount]);
 
   const handleOpen = (): void => {
     refetch();
@@ -96,10 +93,6 @@ function HeaderNotifications() {
       try {
         const { data } = await markRead({ variables: { input: { id: notification._id } } });
         if (data) {
-          let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
-          initialUnReadCount--;
-          setUnReadCount(initialUnReadCount);
-          localStorage.setItem("unReadCount", initialUnReadCount.toString());
           refetch();
         }
       } catch (error) {
@@ -117,7 +110,6 @@ function HeaderNotifications() {
       const { data } = await markAllRead();
       if (data) {
         refetch();
-        localStorage.setItem("unReadCount", "0");
         setUnReadCount(0);
       }
     } catch (error) {
