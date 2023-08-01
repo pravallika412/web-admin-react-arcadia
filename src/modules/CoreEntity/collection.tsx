@@ -190,7 +190,7 @@ const Collection = () => {
     let data1 = JSON.stringify({
       pinataContent: {
         description: data.description,
-        external_url: "https://dev.d50w243ncde5q.amplifyapp.com/",
+        external_url: process.env.API_BASE_URL.replace("/graphql", "/"),
         image: `https://gateway.pinata.cloud/ipfs/${collectionImage}`,
         name: data.name,
         attributes: [

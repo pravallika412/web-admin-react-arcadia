@@ -136,8 +136,7 @@ const CoreEntity = () => {
         fields: [],
         basicinfo: [],
         aboutme: [],
-        secEdit: [],
-        test: [],
+        sectionForm: [],
       }
     : {
         collectionName: "",
@@ -156,8 +155,7 @@ const CoreEntity = () => {
             data: "",
           },
         ],
-        secEdit: [],
-        test: [
+        sectionForm: [
           {
             secName: "",
             section: [
@@ -205,21 +203,12 @@ const CoreEntity = () => {
   });
 
   const {
-    fields: secEditFields,
-    append: appendSecEdit,
-    remove: removeSecEdit,
-  } = useFieldArray({
-    control,
-    name: "secEdit",
-  });
-
-  const {
     fields: secFields,
     append: appendSec,
     remove: removeSec,
   } = useFieldArray({
     control,
-    name: "test",
+    name: "sectionForm",
   });
 
   useEffect(() => {
@@ -233,7 +222,7 @@ const CoreEntity = () => {
       reset();
       setValue("basicinfo", []);
       setValue("aboutme", []);
-      setValue("test", []);
+      setValue("sectionForm", []);
       refetch();
     }
   }, [createEntityData]);
@@ -313,8 +302,8 @@ const CoreEntity = () => {
       section: {},
     };
 
-    // Map over the `test` array to transform the section details
-    data.test.forEach((section, index) => {
+    // Map over the `sectionForm` array to transform the section details
+    data.sectionForm.forEach((section, index) => {
       const sectionName = `section${index + 1}`;
       const sectionDetails = section.section.map((field) => ({
         fieldName: field.fieldName,
@@ -411,7 +400,7 @@ const CoreEntity = () => {
       section: updatedSection,
     };
 
-    formValues.test.forEach((section, index) => {
+    formValues.sectionForm.forEach((section, index) => {
       const sectionName = section.secName;
       const sectionDetails = section.section.map((field) => ({
         fieldName: field.fieldName,
@@ -458,7 +447,7 @@ const CoreEntity = () => {
     }));
   };
 
-  const MyComponent = () => (
+  const CoreEntityList = () => (
     <>
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button onClick={() => setIsEditMode(!isEditMode)}>{isEditMode ? "View" : "Edit"}</Button>
@@ -649,25 +638,6 @@ const CoreEntity = () => {
           </Grid>
         )}
         <SecEdit datatypesMap={datatypesMap} sectionData={coreEntityFields.section} onSectionDataChange={handleSectionDataChange} isEditMode={isEditMode} />
-
-        {/* {coreEntityFields.section &&
-          Object.entries(coreEntityFields.section).map(([sectionName, section], index1) => (
-            <>
-              <Grid item xs={12} key={sectionName}>
-                <Typography variant="h6">{section.section_name}</Typography>
-                {section.section_details.map((field, index) => (
-                  <Grid container spacing={2} key={index}>
-                    <Grid item xs={6}>
-                      <TextField label="Field Name" margin="normal" value={field.fieldName} disabled fullWidth />
-                    </Grid>
-                    <Grid item xs={isEditMode ? 5 : 6}>
-                      <TextField label="Field Type" name="type" margin="normal" value={datatypesMap[field.dataType].name} InputLabelProps={{ shrink: true }} disabled fullWidth />
-                    </Grid>
-                  </Grid>
-                ))}
-              </Grid>
-            </>
-          ))} */}
       </Grid>
 
       {isEditMode &&
@@ -675,7 +645,7 @@ const CoreEntity = () => {
           <Box key={field.id} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={10}>
-                <TextField label="Section Name" variant="outlined" fullWidth {...register(`test.${index}.secName`)} />
+                <TextField label="Section Name" variant="outlined" fullWidth {...register(`sectionForm.${index}.secName`)} />
               </Grid>
               <Grid item xs={2}>
                 <Button type="button" variant="outlined" onClick={() => removeSec(index)}>
@@ -1070,14 +1040,14 @@ const CoreEntity = () => {
                                     label="Section Name"
                                     variant="outlined"
                                     fullWidth
-                                    {...register(`test.${index}.secName`, {
+                                    {...register(`sectionForm.${index}.secName`, {
                                       pattern: {
                                         value: /^(?! )[A-Za-z ]*$/,
                                         message: "Section Name should only contain alphabets",
                                       },
                                     })}
-                                    error={Boolean(errors?.test?.[index]?.secName)}
-                                    helperText={errors?.test?.[index]?.secName?.message}
+                                    error={Boolean(errors?.sectionForm?.[index]?.secName)}
+                                    helperText={errors?.sectionForm?.[index]?.secName?.message}
                                   />
                                 </Grid>
                                 <Grid item xs={2}>
@@ -1099,7 +1069,7 @@ const CoreEntity = () => {
                         </Grid>
                       </Box>
                     ) : (
-                      <MyComponent />
+                      <CoreEntityList />
                     )}
                   </TabPanel>
                 </Box>

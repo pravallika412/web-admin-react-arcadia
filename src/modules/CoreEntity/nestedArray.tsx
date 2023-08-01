@@ -20,7 +20,7 @@ const NestedArray = ({ nestIndex, control, register, dataTypesEntity }) => {
     append: appendNestedSec,
   } = useFieldArray({
     control,
-    name: `test.${nestIndex}.section`,
+    name: `sectionForm.${nestIndex}.section`,
   });
 
   const handleDelete = (index) => {
@@ -53,24 +53,24 @@ const NestedArray = ({ nestIndex, control, register, dataTypesEntity }) => {
                   label="Field Name"
                   variant="outlined"
                   fullWidth
-                  {...register(`test.${nestIndex}.section.${index}.fieldName`, {
+                  {...register(`sectionForm.${nestIndex}.section.${index}.fieldName`, {
                     pattern: {
                       value: fieldNamePattern,
                       message: "Section Name should only contain alphabets",
                     },
                   })}
-                  error={Boolean(errors?.test?.[nestIndex]?.section?.[index]?.fieldName)}
-                  helperText={errors?.test?.[nestIndex]?.section?.[index]?.fieldName?.message || ""}
+                  error={Boolean(errors?.sectionForm?.[nestIndex]?.section?.[index]?.fieldName)}
+                  helperText={errors?.sectionForm?.[nestIndex]?.section?.[index]?.fieldName?.message || ""}
                 />
               </Grid>
               <Grid item xs={5}>
                 <Controller
-                  name={`test.${nestIndex}.section.${index}.dataType`}
+                  name={`sectionForm.${nestIndex}.section.${index}.dataType`}
                   control={control} // assuming you have `control` from useForm()
                   render={({ field }) => (
                     <FormControl variant="outlined" fullWidth>
-                      <InputLabel id={`test.${nestIndex}.section.${index}.dataType`}>Field Type</InputLabel>
-                      <Select labelId={`test.${nestIndex}.section.${index}.dataType`} label="Field Type" {...field}>
+                      <InputLabel id={`sectionForm.${nestIndex}.section.${index}.dataType`}>Field Type</InputLabel>
+                      <Select labelId={`sectionForm.${nestIndex}.section.${index}.dataType`} label="Field Type" {...field}>
                         {dataTypesEntity.map((option) => (
                           <MenuItem key={option.order} value={option.order}>
                             {option.name}
@@ -81,7 +81,7 @@ const NestedArray = ({ nestIndex, control, register, dataTypesEntity }) => {
                   )}
                 />
               </Grid>
-              {watch(`test.${nestIndex}.section.${index}.dataType`) === 5 && (
+              {watch(`sectionForm.${nestIndex}.section.${index}.dataType`) === 5 && (
                 <Grid item xs={11} md={11}>
                   <TextField
                     label="Enter text"

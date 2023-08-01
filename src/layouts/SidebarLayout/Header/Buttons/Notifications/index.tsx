@@ -40,14 +40,13 @@ function HeaderNotifications() {
   const [isOpen, setOpen] = useState<boolean>(false);
   const [notificationData, setNotificationData] = useState([]);
   const [unReadCount, setUnReadCount] = useState<number>(parseInt(localStorage.getItem("unReadCount") || "0"));
-  const [markRead, { data: markReadData, loading: markReadLoader }] = useMutation(MARK_READ);
-  const [markAllRead, { data: markAllReadData, loading: markAllReadLoader }] = useMutation(MARK_ALL_READ);
+  const [markRead, { loading: markReadLoader }] = useMutation(MARK_READ);
+  const [markAllRead, { loading: markAllReadLoader }] = useMutation(MARK_ALL_READ);
   const [showNotifications, { data: showNotificationData, loading: notificationLoader, refetch }] = useLazyQuery(SHOW_ADMIN_NOTIFICATIONS, { fetchPolicy: "no-cache" });
   const navigate = useNavigate();
   const [totalCount, setTotalCount] = useState<number>(0);
   const socket_url = process.env.WEBSOCKET_URL;
   const socket = io(socket_url);
-  const [allRead, setAllRead] = useState<boolean>(false);
 
   useEffect(() => {
     const id = localStorage.getItem("adminId");
@@ -56,11 +55,7 @@ function HeaderNotifications() {
         socket.emit("userhandler", { userId: id, role: "admin" }, (response) => {});
         socket.on("userConnected", (data) => {});
         socket.on("receivedNotification", (data) => {
-          refetch();
-          let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
-          initialUnReadCount++;
-          setUnReadCount(initialUnReadCount);
-          localStorage.setItem("unReadCount", initialUnReadCount.toString());
+          showNotifications({ variables: { input1: { page: 1, limit: 200 }, input2: {} } });
         });
       });
     }
@@ -76,31 +71,13 @@ function HeaderNotifications() {
   }, []);
 
   useEffect(() => {
-    if (showNotificationData) {
+    if (showNotificationData?.AdminInAppNotifications?.notifications.length > 0) {
       setNotificationData(showNotificationData.AdminInAppNotifications.notifications);
 
       setTotalCount(showNotificationData.AdminInAppNotifications.totalCount);
+      setUnReadCount(showNotificationData.AdminInAppNotifications.unread_count);
     }
-  }, [showNotificationData]);
-
-  useEffect(() => {
-    if (markReadData) {
-      let initialUnReadCount = parseInt(localStorage.getItem("unReadCount") || "0");
-      initialUnReadCount--;
-      setUnReadCount(initialUnReadCount);
-      localStorage.setItem("unReadCount", initialUnReadCount.toString());
-      refetch();
-    }
-  }, [markReadData]);
-
-  useEffect(() => {
-    if (markAllReadData) {
-      setAllRead(true);
-      refetch();
-      localStorage.setItem("unReadCount", "0");
-      setUnReadCount(0);
-    }
-  }, [markAllReadData]);
+  }, [showNotificationData, unReadCount]);
 
   const handleOpen = (): void => {
     refetch();
@@ -111,9 +88,16 @@ function HeaderNotifications() {
     setOpen(false);
   };
 
-  const handleNotificationClick = (notification) => {
+  const handleNotificationClick = async (notification) => {
     if (notification) {
-      markRead({ variables: { input: { id: notification._id } } });
+      try {
+        const { data } = await markRead({ variables: { input: { id: notification._id } } });
+        if (data) {
+          refetch();
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
       if (notification.notification_type === "post_created") {
         navigate("/posts");
         setOpen(false);
@@ -122,7 +106,15 @@ function HeaderNotifications() {
   };
 
   const handleMarkAllRead = async () => {
-    await markAllRead();
+    try {
+      const { data } = await markAllRead();
+      if (data) {
+        refetch();
+        setUnReadCount(0);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const rowRenderer = ({ index, style, key }) => {
@@ -141,9 +133,9 @@ function HeaderNotifications() {
           display: { xs: "block", sm: "flex" },
           cursor: "pointer",
           "&:hover": {
-            ...(notification.read === false && !allRead && { background: "#E6F4FF" }),
+            ...(notification.read === false && { background: "#E6F4FF" }),
           },
-          ...(notification.read === false && !allRead && { background: "#E6F4FF" }),
+          ...(notification.read === false && { background: "#E6F4FF" }),
         }}
         onClick={() => handleNotificationClick(notification)}
       >

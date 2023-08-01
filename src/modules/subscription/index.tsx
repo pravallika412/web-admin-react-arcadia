@@ -190,7 +190,7 @@ const Subscription = () => {
     let data1 = JSON.stringify({
       pinataContent: {
         description: data.mtdescription,
-        external_url: "https://dev.d50w243ncde5q.amplifyapp.com/",
+        external_url: process.env.API_BASE_URL.replace("/graphql", "/"),
         image: imageIpfs,
         name: data.name,
         attributes: [
@@ -537,10 +537,11 @@ const Subscription = () => {
                     />
                   </div>
                 ))}
-
-                <Button onClick={() => append({ description: "" })} sx={{ fontSize: 13, fontWeight: 400 }} color="secondary" startIcon={<AddTwoToneIcon fontSize="small" />}>
-                  Add New Item
-                </Button>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button onClick={() => append({ description: "" })} sx={{ fontSize: 13, fontWeight: 400 }} color="primary" startIcon={<AddTwoToneIcon fontSize="small" />}>
+                    Add New Item
+                  </Button>
+                </Box>
               </div>
 
               {/* <div>
