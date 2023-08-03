@@ -7,11 +7,6 @@ import SharedTable from "../../shared/components/Table";
 import { GET_SPONSORS_CRYPTO_DETAILS, GET_SPONSORS_STRIPE_DETAILS } from "../../shared/graphQL/sponsor";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-const paymentGateway = [
-  { id: 1, name: "Stripe", value: "stripe" },
-  { id: 2, name: "Crypto", value: "crypto" },
-];
-
 const paymentStatus = [
   {
     id: "all",
@@ -42,20 +37,6 @@ const SearchFilter = ({ handleStatusChange, selectedPayment }) => {
     <Grid display="flex">
       <Box width={160} sx={{ m: 1 }}>
         <FormControl variant="outlined" className={classes.formControl}>
-          <InputLabel className={classes.label} id="payment-gateway-label">
-            Payment Gateway
-          </InputLabel>
-          <Select labelId="payment-gateway-label" id="payment-gateway-select" value={selectedPayment.gateway} onChange={(e) => handleStatusChange(e, "gateway")} label="Payment Gateway">
-            {paymentGateway.map((statusOption) => (
-              <MenuItem key={statusOption.id} value={statusOption.value}>
-                {statusOption.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-      <Box width={160} sx={{ m: 1 }}>
-        <FormControl variant="outlined" className={classes.formControl}>
           <InputLabel className={classes.label} id="payment-status-label">
             Payment Status
           </InputLabel>
@@ -80,7 +61,6 @@ const TransactionHistory = ({ id }) => {
   const [sponsorCryptoData, setSponsorCryptoData] = useState([]);
   const [filters, setFilters] = useState({
     status: null,
-    gateway: paymentGateway[0].value,
   });
 
   const columnsStripe = [
@@ -91,38 +71,20 @@ const TransactionHistory = ({ id }) => {
     { id: "status", label: "Payment Status", minWidth: 170 },
   ];
 
-  const columnsCrypto = [
-    { id: "cryptoID", label: "Transaction Hash", minWidth: 170 },
-    { id: "amount", label: "Amount", minWidth: 170 },
-    { id: "transactionType", label: "Transaction Type", minWidth: 170 },
-    { id: "transactionDate", label: "Transaction Date", type: "date", minWidth: 170 },
-    { id: "status", label: "Status", minWidth: 170 },
-  ];
-
-  const columns = filters.gateway === "stripe" ? columnsStripe : columnsCrypto;
-
   const [getSponsorStripeDetails, { data: getSponsorStripeDetailsData, loading: sponsorStripeLoading }] = useLazyQuery(GET_SPONSORS_STRIPE_DETAILS);
-  const [getSponsorCryptoDetails, { data: getSponsorCryptoDetailsData, loading: sponsorCryptoLoading }] = useLazyQuery(GET_SPONSORS_CRYPTO_DETAILS);
 
   useEffect(() => {
     const variables = { input1: { page: page + 1, limit: rowsPerPage }, input2: { status: filters.status, sponsorId: id } };
 
-    if (filters.gateway === "stripe") {
-      getSponsorStripeDetails({ variables });
-    } else if (filters.gateway === "crypto") {
-      getSponsorCryptoDetails({ variables });
-    }
+    getSponsorStripeDetails({ variables });
   }, [page, rowsPerPage, filters]);
 
   useEffect(() => {
-    if (getSponsorStripeDetailsData && filters.gateway === "stripe") {
+    if (getSponsorStripeDetailsData) {
       setSponsorStripeData(getSponsorStripeDetailsData.SponsorStripeTransactionList.transactions);
       setTotalCount(getSponsorStripeDetailsData.SponsorStripeTransactionList.totalCount);
-    } else if (getSponsorCryptoDetailsData && filters.gateway === "crypto") {
-      setSponsorCryptoData(getSponsorCryptoDetailsData.SponsorCryptoTransactionList.transactions);
-      setTotalCount(getSponsorCryptoDetailsData.SponsorCryptoTransactionList.totalCount);
     }
-  }, [getSponsorStripeDetailsData, getSponsorCryptoDetailsData, filters.gateway]);
+  }, [getSponsorStripeDetailsData]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -191,47 +153,27 @@ const TransactionHistory = ({ id }) => {
   let formattedData: Array<any>;
   let isLoading: boolean;
 
-  if (filters.gateway === "stripe") {
-    isLoading = sponsorStripeLoading;
-    formattedData = sponsorStripeData.map((row) => ({
-      stripeID: (
-        <>
-          {row?.logs?.paymentIntent ? row.logs.paymentIntent : "N/A"}
-          {row.logs.paymentIntent && (
-            <IconButton onClick={() => copyToClipboard(row?.logs ? row.logs.paymentIntent : "")} size="small" style={{ marginLeft: 8 }}>
-              <ContentCopyIcon fontSize="small" />
-            </IconButton>
-          )}
-        </>
-      ),
-      amount: row?.amount_paid ? "$" + row.amount_paid : "N/A",
-      transactionType: row?.subscription_status ? row?.subscription_status : "",
-      transactionDate: formatDate(row?.createdAt),
-      status: getStatusLabel(row?.payment_status),
-    }));
-  } else {
-    isLoading = sponsorCryptoLoading;
-    formattedData = sponsorCryptoData.map((row) => ({
-      cryptoID: (
-        <>
-          {row?.transaction_hash ? row?.transaction_hash.slice(0, 3) + "*******" + row?.transaction_hash.slice(-4) : "N/A"}
-          {row?.transaction_hash && (
-            <IconButton onClick={() => copyToClipboard(row?.transaction_hash ? row.transaction_hash : "")} size="small" style={{ marginLeft: 8 }}>
-              <ContentCopyIcon fontSize="small" />
-            </IconButton>
-          )}
-        </>
-      ),
-      amount: row?.amount_paid ? parseFloat(row?.amount_paid).toFixed(2) : "" + " " + row?.currency == null ? "" : row?.currency,
-      transactionType: row?.subscription_status ? row?.subscription_status : "",
-      transactionDate: formatDate(row?.createdAt),
-      status: getStatusLabel(row?.payment_status),
-    }));
-  }
+  isLoading = sponsorStripeLoading;
+  formattedData = sponsorStripeData.map((row) => ({
+    stripeID: (
+      <>
+        {row?.logs?.paymentIntent ? row.logs.paymentIntent : "N/A"}
+        {row.logs.paymentIntent && (
+          <IconButton onClick={() => copyToClipboard(row?.logs ? row.logs.paymentIntent : "")} size="small" style={{ marginLeft: 8 }}>
+            <ContentCopyIcon fontSize="small" />
+          </IconButton>
+        )}
+      </>
+    ),
+    amount: row?.amount_paid ? "$" + row.amount_paid : "N/A",
+    transactionType: row?.subscription_status ? row?.subscription_status : "",
+    transactionDate: formatDate(row?.createdAt),
+    status: getStatusLabel(row?.payment_status),
+  }));
 
   return (
     <SharedTable
-      columns={columns}
+      columns={columnsStripe}
       data={formattedData}
       page={page}
       tableBodyLoader={isLoading}

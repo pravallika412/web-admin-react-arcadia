@@ -10,7 +10,6 @@ import { GET_PLANS } from "../../shared/graphQL/subscription/queries";
 const columns = [
   { id: "sponsor_name", label: "Sponsor Name", minWidth: "auto" },
   { id: "email", label: "Email address", minWidth: "auto" },
-  { id: "walletAddress", label: "Wallet address", minWidth: "auto" },
   { id: "status", label: "Sponsorship", minWidth: "auto" },
   { id: "plan_name", label: "Subscription Plan", minWidth: "auto" },
   { id: "createdAt", label: "Created On", type: "date", minWidth: "auto" },
@@ -191,7 +190,6 @@ const Sponsor = () => {
         </div>
       ),
       email: data.sponsor?.email ? data.sponsor.email : "N/A",
-      walletAddress: data.sponsor?.walletAddress ? data.sponsor?.walletAddress.slice(0, 3) + "*******" + data.sponsor.walletAddress.slice(-4) : "",
       status: getStatusLabel(data.status),
       plan_name: (
         <>

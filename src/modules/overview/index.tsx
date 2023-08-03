@@ -9,7 +9,6 @@ import { GET_PLANS } from "../../shared/graphQL/subscription/queries";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import PetsOutlinedIcon from "../../assets/images/pets.svg";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import { GET_POST_COUNT } from "../../shared/graphQL/post/queries";
 import Info from "@mui/icons-material/Info";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -117,7 +116,6 @@ function Overview() {
   const [getPlans, { data: getAllPlans, loading: planLoader, refetch }] = useLazyQuery(GET_PLANS, { fetchPolicy: "no-cache" });
   const [getUsers, { data: getUserCount, loading: userLoader }] = useLazyQuery(GET_USER_COUNT, { fetchPolicy: "no-cache" });
   const [sponsorStats, { data: sponsorStatsData, loading: statsLoader }] = useLazyQuery(SPONSOR_STATS, { fetchPolicy: "no-cache" });
-  const [getPostCount, { data: getPostCountData, loading: countLoading, refetch: refetchPostCount }] = useLazyQuery(GET_POST_COUNT, { fetchPolicy: "no-cache" });
 
   const yearOptions = [
     { label: 2023, value: 2023 },
@@ -149,7 +147,6 @@ function Overview() {
 
   useEffect(() => {
     getPlans({ variables: { input: { pageDto: { page: 1, limit: 50 } } } });
-    getPostCount();
     getUsers();
   }, []);
 
@@ -158,19 +155,6 @@ function Overview() {
       setUserStats(getUserCount.GetUsersCount);
     }
   }, [getUserCount]);
-
-  useEffect(() => {
-    if (getPostCountData) {
-      const { totalPosts, approvedPosts, pendingPosts, rejectedPosts } = getPostCountData.GetPostCounts;
-      setTotalCount(totalPosts);
-      const postStatuses = [
-        { status: "Approved Posts", count: approvedPosts, bgcolor: "rgba(250, 250, 250, 0.5)", color: "#2D9972", borderColor: "1px solid rgba(0, 0, 0, 0.15)", bgCountcolor: "#F6FFFC" },
-        { status: "Pending Posts", count: pendingPosts, bgcolor: "rgba(250, 250, 250, 0.5)", color: "#EE8212", borderColor: "1px solid rgba(0, 0, 0, 0.15)", bgCountcolor: "#FFF9EE" },
-        { status: "Rejected Posts", count: rejectedPosts, bgcolor: "rgba(250, 250, 250, 0.5)", color: "#E6313C", borderColor: "1px solid rgba(0, 0, 0, 0.15)", bgCountcolor: "#FFF5F5" },
-      ];
-      setPostStatuses(postStatuses);
-    }
-  }, [getPostCountData]);
 
   useEffect(() => {
     if (getAllPlans) {
@@ -268,14 +252,14 @@ function Overview() {
   return (
     <OverviewWrapper>
       <Grid container spacing={2}>
-        <Grid item xs={8} sm={8}>
+        <Grid item xs={12} sm={12}>
           <Grid container spacing={2}>
             <Grid item xs={6} sm={4}>
               <StyledBox>
                 {userStats ? (
                   <>
                     <StyledHeader>
-                      <Typography variant="h4">Total Sponsors</Typography>
+                      <Typography variant="h4">Total Subscribers</Typography>
                       <StyledIcon>
                         <PeopleOutlineIcon />
                       </StyledIcon>
@@ -292,12 +276,12 @@ function Overview() {
                 {userStats ? (
                   <>
                     <StyledHeader>
-                      <Typography variant="h4">Total Handlers</Typography>
+                      <Typography variant="h4">Active Subscribers</Typography>
                       <StyledIcon>
                         <PersonOutlineIcon />
                       </StyledIcon>
                     </StyledHeader>
-                    <StyledTotalCount align="left">{userStats.handlerCount}</StyledTotalCount>{" "}
+                    <StyledTotalCount align="left">{userStats.activeSponsorCount}</StyledTotalCount>{" "}
                   </>
                 ) : (
                   renderSkeleton()
@@ -309,19 +293,19 @@ function Overview() {
                 {userStats ? (
                   <>
                     <StyledHeader>
-                      <Typography variant="h4">Total Dogs</Typography>
+                      <Typography variant="h4">Total Value</Typography>
                       <StyledIcon>
                         <img src={PetsOutlinedIcon} alt="pet" />
                       </StyledIcon>
                     </StyledHeader>
-                    <StyledTotalCount align="left">{userStats.productCount}</StyledTotalCount>{" "}
+                    <StyledTotalCount align="left">{userStats.totalAmount}</StyledTotalCount>{" "}
                   </>
                 ) : (
                   renderSkeleton()
                 )}
               </StyledBox>
             </Grid>
-            <Grid item xs={12} sm={12}>
+            <Grid item xs={8} sm={8}>
               <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
                 <Grid item xs={12}>
                   {chartData ? <h2>Subscription Plan - {getSelectedPlanName(plan)}</h2> : <Skeleton variant="text" width={100} />}
@@ -376,192 +360,6 @@ function Overview() {
                 )}
                 <Grid item xs={12}>
                   {chartData ? <Line data={chartData} options={options} /> : <Skeleton variant="rectangular" height={300} />}
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={4} sm={4}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12}>
-              <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
-                {!userStats ? (
-                  <Box sx={{ p: 1 }}>
-                    <Skeleton variant="rectangular" height={40} />
-                  </Box>
-                ) : (
-                  <Box sx={{ display: "flex", justifyContent: "space-between", p: 0.5, alignItems: "center" }}>
-                    <Typography sx={{ fontSize: 20, fontWeight: 700, display: "flex", alignItems: "center" }}>
-                      Total TVL
-                      <MUIToolTip title="Doller amount from stripe and crypto">
-                        <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
-                      </MUIToolTip>
-                    </Typography>
-                    <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
-                      {userStats.totalAmount ? "$" + Number(userStats.totalAmount).toFixed(2) : ""}
-                    </Typography>
-                  </Box>
-                )}
-
-                <Grid container spacing={2}>
-                  {!userStats ? (
-                    // Show skeletons while loading
-                    <>
-                      <Grid item xs={12} sm={12}>
-                        <Skeleton variant="rectangular" height={70} />
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <Skeleton variant="rectangular" height={70} />
-                      </Grid>
-                    </>
-                  ) : (
-                    <>
-                      <Grid item xs={12} sm={12}>
-                        <PostStyledBox style={{ background: "rgba(250, 250, 250, 0.5)" }}>
-                          <Grid container alignItems="center">
-                            <Grid item xs={7}>
-                              <StatusTypography variant="h6" align="center">
-                                Fiat
-                                <MUIToolTip title="TVL of stripe transactions">
-                                  <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
-                                </MUIToolTip>
-                              </StatusTypography>
-                            </Grid>
-                            <Grid
-                              item
-                              xs={5}
-                              style={{
-                                padding: "1rem",
-                                borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
-                                borderRadius: " 0px 6px 6px 0px",
-                                background: "#E6F4FF",
-                                height: "70px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-end",
-                              }}
-                            >
-                              <PostCount style={{ color: "#00385F" }} align="right">
-                                {userStats.fiatTvl[0] && userStats.fiatTvl[0].totalPrice ? "$" + Number(userStats.fiatTvl[0].totalPrice).toFixed(2) : ""}
-                              </PostCount>
-                            </Grid>
-                          </Grid>
-                        </PostStyledBox>
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <PostStyledBox style={{ background: "rgba(250, 250, 250, 0.5)" }}>
-                          <Grid container alignItems="center">
-                            <Grid item xs={7}>
-                              <StatusTypography variant="h6" align="center">
-                                Number of Crypto Tokens
-                                <MUIToolTip
-                                  title={
-                                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                                      {userStats.cryptoTvl && userStats.cryptoTvl.length > 0 ? (
-                                        userStats.cryptoTvl.map((item) => (
-                                          <Typography key={item.currency}>
-                                            {item.currency} - {item.totalPrice.toFixed(2)}
-                                          </Typography>
-                                        ))
-                                      ) : (
-                                        <Typography>No tokens available</Typography>
-                                      )}
-                                    </Box>
-                                  }
-                                >
-                                  <Info style={{ marginLeft: "4px", verticalAlign: "middle" }} />
-                                </MUIToolTip>
-                              </StatusTypography>
-                            </Grid>
-                            <Grid
-                              item
-                              xs={5}
-                              style={{
-                                padding: "1rem",
-                                borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
-                                borderRadius: " 0px 6px 6px 0px",
-                                background: "#E6F4FF",
-                                height: "70px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-end",
-                              }}
-                            >
-                              <PostCount style={{ color: "#00385F" }} align="right">
-                                {userStats.cryptoTvl ? (userStats.cryptoTvl.length > 0 ? userStats.cryptoTvl.length : 0) : 0}
-                              </PostCount>
-                            </Grid>
-                          </Grid>
-                        </PostStyledBox>
-                      </Grid>
-                    </>
-                  )}
-                </Grid>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={12}>
-              <Box style={{ padding: "1rem", border: "1px solid #E6F4FF", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)", borderRadius: 12, background: "#FFFFFF" }}>
-                {countLoading ? (
-                  <Box sx={{ p: 1 }}>
-                    <Skeleton variant="rectangular" height={40} />
-                  </Box>
-                ) : (
-                  <Box sx={{ display: "flex", justifyContent: "space-between", p: 0.5, alignItems: "center" }}>
-                    <Typography sx={{ fontSize: 20, fontWeight: 700 }}>Total Posts</Typography>
-                    <Typography sx={{ fontSize: 36, fontWeight: 700 }} color="primary">
-                      {totalCount}
-                    </Typography>
-                  </Box>
-                )}
-
-                <Grid container spacing={2}>
-                  {countLoading ? (
-                    // Show skeletons while loading
-                    <>
-                      <Grid item xs={12} sm={12}>
-                        <Skeleton variant="rectangular" height={70} />
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <Skeleton variant="rectangular" height={70} />
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <Skeleton variant="rectangular" height={70} />
-                      </Grid>
-                    </>
-                  ) : (
-                    postStatuses.map((status, index) => (
-                      <Grid item xs={12} sm={12} key={index}>
-                        <PostStyledBox style={{ background: status.borderColor }}>
-                          <Grid container alignItems="center">
-                            <Grid item xs={7}>
-                              <StatusTypography variant="h6" align="center">
-                                {status.status}
-                              </StatusTypography>
-                            </Grid>
-                            <Grid
-                              item
-                              xs={5}
-                              style={{
-                                padding: "1rem",
-                                borderLeft: "1px solid rgba(0, 0, 0, 0.15)",
-                                borderRadius: " 0px 6px 6px 0px",
-                                background: status.bgCountcolor,
-                                height: "70px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-end",
-                              }}
-                            >
-                              <PostCount style={{ color: status.color }} align="right">
-                                {status.count}
-                              </PostCount>
-                            </Grid>
-                          </Grid>
-                        </PostStyledBox>
-                      </Grid>
-                    ))
-                  )}
                 </Grid>
               </Box>
             </Grid>

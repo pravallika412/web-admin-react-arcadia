@@ -102,9 +102,7 @@ const CropModal: React.FC<CropModalProps> = ({ openCropModal, setCropModal, src,
 
     const presignedUrl = await generatePresignedUrlAWS({ variables: { input: payload } });
     await uploadImage(presignedUrl?.data.GeneratePresignedUrl.presignedUrl, croppedImageFile);
-    const updatedUrl = presignedUrl?.data.GeneratePresignedUrl.presignedUrl.split("?")[0]
-      ? presignedUrl?.data.GeneratePresignedUrl.presignedUrl.split("?")[0].replace("https://wdf-dev.s3.amazonaws.com", wdfs3Url)
-      : "";
+    const updatedUrl = presignedUrl?.data.GeneratePresignedUrl.presignedUrl.split("?")[0] ? presignedUrl?.data.GeneratePresignedUrl.presignedUrl.split("?")[0] : "";
     setCroppedImageUrl(updatedUrl);
     setLoadingImage(false);
     setCompletedCrop(null);

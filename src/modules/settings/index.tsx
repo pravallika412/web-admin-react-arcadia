@@ -31,8 +31,6 @@ import ChangePassword from "./changePassword";
 import CircularProgress from "@mui/material/CircularProgress";
 import Web3 from "web3";
 import Notifications from "./notifications";
-import Transaction from "./Transaction";
-import TokenList from "./wallet";
 import { centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import CropModal from "../../shared/components/CropModal";
@@ -170,7 +168,6 @@ const Settings = () => {
         firstName: data.first_name,
         lastName: data.last_name,
         email: data.email,
-        walletAddress: data.matic_wallet.wallet_address,
         profileImage: data.profile_image,
       };
       reset(initial_values);
@@ -236,9 +233,7 @@ const Settings = () => {
                     <Tab label="My Profile" {...a11yProps(0)} />
                     <Tab label="Change Password" {...a11yProps(1)} />
                     <Tab label="Notifications" {...a11yProps(2)} />
-                    <Tab label="Wallet" {...a11yProps(3)} />
-                    <Tab label="Transaction History" {...a11yProps(4)} />
-                    <Tab label="Payouts" {...a11yProps(5)} />
+                    <Tab label="Payouts" {...a11yProps(3)} />
                   </Tabs>
                   <TabPanel value={value} index={0}>
                     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -303,13 +298,6 @@ const Settings = () => {
                                 <Skeleton variant="text" width="100%" height={70} />
                               ) : (
                                 <TextField label="Email Address" {...register("email")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
-                              )}
-                            </Grid>
-                            <Grid item xs={12} md={12}>
-                              {loading ? (
-                                <Skeleton variant="text" width="100%" height={70} />
-                              ) : (
-                                <TextField label="Wallet Address" {...register("walletAddress")} disabled margin="normal" InputLabelProps={{ shrink: true }} fullWidth />
                               )}
                             </Grid>
                           </>
@@ -381,12 +369,6 @@ const Settings = () => {
                     <Notifications />
                   </TabPanel>
                   <TabPanel value={value} index={3}>
-                    <TokenList address={getAdminData?.getAdmin.matic_wallet.wallet_address} />
-                  </TabPanel>
-                  <TabPanel value={value} index={4}>
-                    <Transaction />
-                  </TabPanel>
-                  <TabPanel value={value} index={5}>
                     <TransactionHistory id={null} />
                   </TabPanel>
                 </Box>

@@ -6,17 +6,10 @@ const GET_ADMIN = gql`
       _id
       email
       brand
-      matic_wallet {
-        wallet_address
-      }
       role
       first_name
       last_name
       profile_image
-      brandDetails {
-        membership_contract_address
-      }
-      merchant_address
     }
   }
 `;
