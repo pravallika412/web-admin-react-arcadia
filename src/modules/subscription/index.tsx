@@ -69,13 +69,10 @@ const columns = [
   { id: "name", label: "Name of Plan", minWidth: 170 },
   { id: "createdAt", label: "Created On", minWidth: 170 },
   { id: "price", label: "Price", minWidth: 170 },
-  { id: "count", label: "No. of Dogs", minWidth: 170 },
   { id: "action", label: "Action", minWidth: 170 },
 ];
 
 const Subscription = () => {
-  const pinata_api_key = process.env.PINATA_API_KEY;
-  const pinata_secret_api_key = process.env.PINATA_API_SECRET_KEY;
   const theme = useTheme();
   const classes = useStyles();
   const [open, setOpen] = useState(false);
@@ -102,7 +99,6 @@ const Subscription = () => {
   const [croppedImageUrl, setCroppedImageUrl] = useState(null);
   const [openCropModal, setCropModal] = useState(false);
   const [imageModal, setImageModal] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("all");
 
   const setCroppedImageUrlCallbackPlan = useCallback(
     (url) => {
@@ -125,8 +121,6 @@ const Subscription = () => {
       planImage: "",
       price: "",
       name: "",
-      supportableProductCount: "",
-      mtdescription: "",
     },
   });
 
@@ -183,40 +177,8 @@ const Subscription = () => {
   };
 
   const onSubmit = async (data) => {
-    if (selectedOption === "all") {
-      data.supportableProductCount = "all";
-    }
     setIPFSLoader(true);
-    let data1 = JSON.stringify({
-      pinataContent: {
-        description: data.mtdescription,
-        external_url: process.env.API_BASE_URL.replace("/graphql", "/"),
-        image: imageIpfs,
-        name: data.name,
-        attributes: [
-          {
-            trait_type: "price",
-            value: Number(data.price),
-          },
-          {
-            trait_type: "supportableProductCount",
-            value: data.supportableProductCount,
-          },
-        ],
-      },
-    });
-    let config = {
-      method: "post",
-      url: "https://api.pinata.cloud/pinning/pinJSONToIPFS",
-      headers: {
-        "Content-Type": "application/json",
-        pinata_api_key: pinata_api_key,
-        pinata_secret_api_key: pinata_secret_api_key,
-      },
-      data: data1,
-    };
 
-    const res = await axios(config);
     if (isEditing) {
       setIPFSLoader(false);
       let updatePayload = {
@@ -225,8 +187,6 @@ const Subscription = () => {
         name: data.name,
         price: Number(data.price),
         planImage: croppedImageUrl ? croppedImageUrl : "",
-        supportableProductCount: data.supportableProductCount,
-        tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };
       updateSubscription({ variables: { input: updatePayload } });
     } else {
@@ -239,8 +199,6 @@ const Subscription = () => {
         renewalPeriod: "month",
         price: Number(data.price),
         renewalNumber: 1,
-        supportableProductCount: data.supportableProductCount,
-        tokenUri: `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`,
       };
       createSubscription({ variables: { input: payload } });
     }
@@ -250,13 +208,6 @@ const Subscription = () => {
     let payload = {
       planId: row._id,
     };
-    fetch(row.nft_media_url)
-      .then((response) => response.json())
-      .then((data) => {
-        setValue("mtdescription", data.description);
-        setImageIpfs(data.image);
-      })
-      .catch((error) => console.error("Error:", error));
 
     let editData = getAllPlans.GetPlans.plans.filter((e) => e._id === row._id)[0];
     setCroppedImageUrl(editData.plan_image);
@@ -264,9 +215,7 @@ const Subscription = () => {
       name: editData.name,
       descriptions: [],
       price: editData.default_price.price,
-      supportableProductCount: editData.default_price.supportable_product_count === "all" ? "" : editData.default_price.supportable_product_count,
     };
-    setSelectedOption(editData.default_price.supportable_product_count === "all" ? "all" : "custom");
     let descriptions;
     try {
       descriptions = JSON.parse(editData.description);
@@ -358,13 +307,6 @@ const Subscription = () => {
         </>
       ),
       price: row?.default_price ? row.default_price?.price : "",
-      count: row?.default_price
-        ? row.default_price?.supportable_product_count
-          ? row.default_price?.supportable_product_count === "all"
-            ? "All"
-            : row.default_price?.supportable_product_count
-          : ""
-        : "",
       createdAt: formatDate(row?.createdAt),
       action: (
         <>
@@ -427,19 +369,6 @@ const Subscription = () => {
         img.src = reader.result as string;
       });
       reader.readAsDataURL(e.target.files[0]);
-      const formData = new FormData();
-      formData.append("file", e.target.files[0]);
-
-      const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          pinata_api_key: pinata_api_key,
-          pinata_secret_api_key: pinata_secret_api_key,
-        },
-      });
-
-      const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
-      setImageIpfs(ipfsUrl);
     }
   };
 
@@ -544,30 +473,6 @@ const Subscription = () => {
                 </Box>
               </div>
 
-              {/* <div>
-              <TextField
-                label="Plan Image"
-                name="planImage"
-                margin="normal"
-                fullWidth
-                {...register(
-                  "planImage",
-                  !isEditing
-                    ? {
-                        onChange: (e) => handleFileChange(e),
-                        required: {
-                          value: true,
-                          message: "This is required",
-                        },
-                      }
-                    : { onChange: (e) => handleFileChange(e) }
-                )}
-                type="file"
-                InputLabelProps={{ shrink: true }}
-                error={!!errors.planImage}
-                helperText={errors?.planImage?.message}
-              />
-            </div> */}
               <Card className={classes.card}>
                 {
                   <>
@@ -595,96 +500,6 @@ const Subscription = () => {
                   </>
                 }
               </Card>
-              {/* <div>
-              <Card className={classes.card}>
-                {croppedImageUrl && <CardMedia className={classes.media} image={croppedImageUrl} />}
-                <IconButton
-                  component="label"
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "450px",
-                    height: "131px",
-                    background: "#FFFFFF",
-                    border: "1px dashed #999999",
-                    borderRadius: "6px",
-                  }}
-                  color="inherit"
-                  htmlFor="profileImageInput"
-                  size="large"
-                >
-                  <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                  <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
-                </IconButton>
-                {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} />}
-
-                {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
-              </Card>
-            </div> */}
-              {/* <div>
-              <Controller
-                name="planImage"
-                control={control}
-                defaultValue=""
-                rules={
-                  !isEditing
-                    ? {
-                        required: {
-                          value: true,
-                          message: "This is required",
-                        },
-                      }
-                    : {}
-                }
-                render={({ field }) => (
-                  <>
-                    <Card className={classes.card}>
-                      {croppedImageUrl && <CardMedia className={classes.media} image={croppedImageUrl} />}
-                      <IconButton
-                        component="label"
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          width: "450px",
-                          height: "131px",
-                          background: "#FFFFFF",
-                          border: "1px dashed #999999",
-                          borderRadius: "6px",
-                        }}
-                        color="inherit"
-                        htmlFor="profileImageInput"
-                        size="large"
-                      >
-                        <PhotoCameraIcon fontSize="large" sx={{ color: "#0481D9" }} />
-                        <input id="profileImageInput" type="file" accept="image/*" {...register("planImage", { onChange: (e) => handleFile(e) })} hidden />
-                      </IconButton>
-                      {src && <CropModal src={src} setCroppedImageUrl={setCroppedImageUrlCallbackPlan} openCropModal={openCropModal} setCropModal={setCropModal} />}
-
-                      {errors.planImage && <Typography color="error">{errors.planImage.message}</Typography>}
-                    </Card>
-                  </>
-                )}
-              />
-            </div> */}
-              <Controller
-                name="mtdescription"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: "Description is required",
-                  pattern: {
-                    value: /^[^\s][\w\s!@#$%^&*()_+=[\]{}|\\;:'",.<>/?-]*$/,
-                    message: "Please enter a valid description",
-                  },
-                  maxLength: {
-                    value: 200,
-                    message: "Max length exceeded",
-                  },
-                }}
-                render={({ field }) => <TextField {...field} label="NFT Metadata Description" margin="normal" fullWidth error={!!errors.mtdescription} helperText={errors?.mtdescription?.message} />}
-              />
 
               <div>
                 <Controller
@@ -713,48 +528,6 @@ const Subscription = () => {
                     />
                   )}
                 />
-              </div>
-
-              <div>
-                <label>Product Count</label>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <RadioGroup value={selectedOption} onChange={(e) => setSelectedOption(e.target.value)} style={{ flexDirection: "row" }}>
-                    <FormControlLabel value="all" control={<Radio />} label="All" />
-                    <FormControlLabel value="custom" control={<Radio />} label="Custom" />
-                  </RadioGroup>
-                </div>
-
-                {selectedOption === "custom" && (
-                  <Controller
-                    name="supportableProductCount"
-                    control={control}
-                    defaultValue=""
-                    rules={{
-                      required: "Supportable Product Count is required",
-                      pattern: {
-                        value: /^[a-zA-Z0-9][a-zA-Z0-9\s]*$/,
-                        message: "Please enter a valid Product Count",
-                      },
-                      maxLength: {
-                        value: 3,
-                        message: "Max length exceeded",
-                      },
-                    }}
-                    render={({ field }) => (
-                      <>
-                        <TextField
-                          {...field}
-                          label="Enter Product Count"
-                          margin="normal"
-                          fullWidth
-                          error={!!errors.supportableProductCount}
-                          helperText={errors?.supportableProductCount?.message}
-                          autoFocus
-                        />
-                      </>
-                    )}
-                  />
-                )}
               </div>
             </Box>
           </DialogContent>

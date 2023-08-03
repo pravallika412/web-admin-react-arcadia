@@ -66,7 +66,6 @@ function HeaderUserbox() {
     if (getAdminData) {
       setUserData(getAdminData.getAdmin);
       localStorage.setItem("adminId", getAdminData.getAdmin._id);
-      localStorage.setItem("membership_address", getAdminData.getAdmin.brandDetails.membership_contract_address);
     }
   }, [getAdminData]);
 

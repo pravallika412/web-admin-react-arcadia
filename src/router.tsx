@@ -6,15 +6,10 @@ import SidebarLayout from "./layouts/SidebarLayout";
 import BaseLayout from "./layouts/BaseLayout";
 
 import SuspenseLoader from "./shared/components/SuspenseLoader";
-
-import SponsorDetailComponent from "./modules/sponsor/sponsorDetail";
-import HandlerDetailComponent from "./modules/handler/handlerDetail";
 import ForgetPassword from "./modules/Login/forgetpassword";
 import OTPValidation from "./modules/Login/otp-validate";
 import ResetPassword from "./modules/Login/reset-password";
-import DogDetails from "./modules/Dog/dogDetails";
-import { Stepper } from "@mui/material";
-import StepperForm from "./modules/Dog/stepper";
+import SponsorDetailComponent from "./modules/sponsor/sponsorDetail";
 
 const Loader = (Component) => (props) =>
   (
@@ -28,13 +23,9 @@ const Loader = (Component) => (props) =>
 const Login = Loader(lazy(() => import("./modules/Login")));
 
 const Overview = Loader(lazy(() => import("./modules/overview")));
-const Subscription = Loader(lazy(() => import("./modules/subscription")));
-const Handler = Loader(lazy(() => import("./modules/handler")));
-const Dog = Loader(lazy(() => import("./modules/Dog")));
-const CoreEntity = Loader(lazy(() => import("./modules/CoreEntity")));
 const Sponsors = Loader(lazy(() => import("./modules/sponsor")));
+const Subscription = Loader(lazy(() => import("./modules/subscription")));
 const Settings = Loader(lazy(() => import("./modules/settings")));
-const Posts = Loader(lazy(() => import("./modules/posts")));
 
 // Status
 
@@ -93,31 +84,6 @@ const routes: RouteObject[] = [
         element: <Overview />,
       },
       {
-        path: "subscription",
-        element: <Subscription />,
-      },
-      {
-        path: "handler",
-        element: <Handler />,
-      },
-      {
-        path: "/handlerdetails/:id",
-        element: <HandlerDetailComponent />,
-      },
-      {
-        path: "dog",
-        element: <Dog />,
-      },
-      { path: "/dog/stepper", element: <StepperForm /> },
-      {
-        path: "/dogdetails/:id",
-        element: <DogDetails />,
-      },
-      {
-        path: "core-entity",
-        element: <CoreEntity />,
-      },
-      {
         path: "sponsors",
         element: <Sponsors />,
       },
@@ -126,8 +92,8 @@ const routes: RouteObject[] = [
         element: <SponsorDetailComponent />,
       },
       {
-        path: "posts",
-        element: <Posts />,
+        path: "subscription",
+        element: <Subscription />,
       },
       {
         path: "settings",

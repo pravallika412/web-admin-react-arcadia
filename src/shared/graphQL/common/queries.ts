@@ -85,16 +85,8 @@ const GET_USER_COUNT = gql`
   query {
     GetUsersCount {
       sponsorCount
-      handlerCount
-      productCount
+      activeSponsorCount
       totalAmount
-      cryptoTvl {
-        totalPrice
-        currency
-      }
-      fiatTvl {
-        totalPrice
-      }
     }
   }
 `;

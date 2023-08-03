@@ -169,11 +169,6 @@ function SidebarMenu() {
                 </Button>
               </ListItem>
               <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/core-entity" startIcon={<DesignServicesTwoToneIcon />}>
-                  Core Entity
-                </Button>
-              </ListItem>
-              <ListItem component="div">
                 <Button
                   disableRipple
                   component={RouterLink}
@@ -182,37 +177,7 @@ function SidebarMenu() {
                   startIcon={<PeopleAltIcon />}
                   className={location.pathname.includes("sponsors") || location.pathname.includes("sponsordetails") ? "active" : ""}
                 >
-                  Sponsor
-                </Button>
-              </ListItem>
-
-              <ListItem component="div">
-                <Button
-                  disableRipple
-                  component={RouterLink}
-                  onClick={closeSidebar}
-                  to="/handler"
-                  startIcon={<PersonIcon />}
-                  className={location.pathname.includes("handler") || location.pathname.includes("handlerdetails") ? "active" : ""}
-                >
-                  Handler
-                </Button>
-              </ListItem>
-              <ListItem component="div">
-                <Button
-                  disableRipple
-                  component={RouterLink}
-                  onClick={closeSidebar}
-                  to="/dog"
-                  startIcon={<PetsIcon />}
-                  className={location.pathname.includes("dog") || location.pathname.includes("dogdetails") ? "active" : ""}
-                >
-                  Dog
-                </Button>
-              </ListItem>
-              <ListItem component="div">
-                <Button disableRipple component={RouterLink} onClick={closeSidebar} to="/posts" startIcon={<CallToActionIcon />}>
-                  Posts
+                  Subscribers
                 </Button>
               </ListItem>
               <ListItem component="div">

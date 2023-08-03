@@ -29,8 +29,6 @@ const GET_PLANS = gql`
         _id
         name
         description
-        contract_address
-        nft_media_url
         createdAt
         plan_image
         stripe_product_id
@@ -39,7 +37,6 @@ const GET_PLANS = gql`
           recurring
           renewal_period
           renewal_number
-          supportable_product_count
           stripe_price_id
         }
       }
