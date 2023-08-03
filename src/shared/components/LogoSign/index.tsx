@@ -1,6 +1,6 @@
 import { Box, styled, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
-import Logoo from "../../../assets/images/WDF.png";
+import Logoo from "../../../assets/images/arcadia-logo.png";
 
 const LogoWrapper = styled(Link)(
   ({ theme }) => `

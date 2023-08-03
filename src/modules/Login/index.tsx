@@ -10,7 +10,7 @@ import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { LOGIN_ADMIN } from "../../shared/graphQL/common/queries";
 import { Grid, IconButton, InputAdornment, Paper, useTheme } from "@mui/material";
-import LoginDog from "../../assets/images/LoginDog.svg";
+import Arcadia from "../../assets/images/arcadia.svg";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import useStyles from "../../styles/theme/styles";
@@ -103,9 +103,9 @@ export default function SignIn() {
         sm={4}
         md={6}
         sx={{
-          backgroundImage: `url(${LoginDog})`,
+          backgroundImage: `url(${Arcadia})`,
           backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+          backgroundSize: "contain",
           height: "1071px",
         }}
       />

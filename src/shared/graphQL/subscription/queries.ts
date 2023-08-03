@@ -6,8 +6,6 @@ const CREATE_SUBSCRIPTION = gql`
       _id
       name
       description
-      contract_address
-      nft_media_url
       plan_image
       stripe_product_id
       default_price {
@@ -15,7 +13,6 @@ const CREATE_SUBSCRIPTION = gql`
         recurring
         renewal_period
         renewal_number
-        supportable_product_count
         stripe_price_id
       }
     }
@@ -51,8 +48,6 @@ const GET_PLAN = gql`
       _id
       name
       description
-      contract_address
-      nft_media_url
       plan_image
       stripe_product_id
       default_price {
@@ -60,7 +55,6 @@ const GET_PLAN = gql`
         recurring
         renewal_period
         renewal_number
-        supportable_product_count
         stripe_price_id
       }
     }

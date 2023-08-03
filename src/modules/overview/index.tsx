@@ -9,6 +9,7 @@ import { GET_PLANS } from "../../shared/graphQL/subscription/queries";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import PetsOutlinedIcon from "../../assets/images/pets.svg";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import Info from "@mui/icons-material/Info";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -295,7 +296,7 @@ function Overview() {
                     <StyledHeader>
                       <Typography variant="h4">Total Value</Typography>
                       <StyledIcon>
-                        <img src={PetsOutlinedIcon} alt="pet" />
+                        <AccountBalanceWalletOutlinedIcon />
                       </StyledIcon>
                     </StyledHeader>
                     <StyledTotalCount align="left">{userStats.totalAmount}</StyledTotalCount>{" "}
